@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "332250589415",
+    "project_id": "hoopsbets",
+    "storage_bucket": "hoopsbets.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332250589415:android:f17e59cb47f4f09aa6da42",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPikQb5BSxMMyQv7fqc1THzMlCFRXhD4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
