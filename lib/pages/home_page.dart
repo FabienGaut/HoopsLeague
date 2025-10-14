@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/sign_in_page.dart';
+import 'package:flutter_application_1/pages/sign_up_page.dart';
+
+
+class HomePage extends StatelessWidget {
+  const HomePage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children:  [
+
+          Image.asset("assets/images/logo.jpeg"),
+          const Text(
+              "Welcome to HoopsBets !",
+              style: TextStyle(fontSize: 32, fontFamily: 'Helvetica-Bold')),
+          Padding(padding: EdgeInsets.all(10)),
+          ElevatedButton.icon(
+            style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll(Colors.grey)
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                      pageBuilder: (_,__,___) => SignInPage()
+                  )
+              );
+            },
+            label: Text("Sign in",
+              style: TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            icon: Icon(Icons.account_box) ,
+          ),
+          Padding(padding: EdgeInsets.all(5)),
+          ElevatedButton.icon(
+            style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll(Colors.grey)
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                      pageBuilder: (_,__,___) => SignUpPage()
+                  )
+              );
+            },
+            label: Text("Sign up",
+              style: TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            icon: Icon(Icons.account_box),
+          )
+        ],
+      ),
+    );
+  }
+}
