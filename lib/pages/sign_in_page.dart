@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/sign_up_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'games_page.dart';
 import 'home_page.dart';
@@ -15,12 +17,57 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  String? errorMessage;
+  bool isLoading = false;
+
   final _formKey = GlobalKey<FormState>();
+
+
 @override
   void dispose() {
     super.dispose();
     passwordController.dispose();
     emailController.dispose();
+  }
+
+  Future<void> signIn() async {
+    setState(() {
+      errorMessage = null;
+      isLoading = true;
+    });
+
+    try {
+      // ✅ Authentification Firebase
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      // ✅ Si tout est OK → navigation
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => GamesPage(uid: userCredential.user!.uid)),
+      );
+    } on FirebaseAuthException catch (e) {
+      // ⚠️ Gestion des erreurs courantes
+      setState(() {
+        if (e.code == 'user-not-found') {
+          errorMessage = 'Aucun compte trouvé pour cet email.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Mot de passe incorrect.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'Adresse e-mail invalide.';
+        } else {
+          errorMessage = 'Erreur : ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Erreur inattendue : $e';
+      });
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -87,30 +134,19 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   const SizedBox(height: 20),
                   Padding(padding: EdgeInsets.all(5)),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
                   // Bouton Sign In
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final email = emailController.text;
-                        final password = passwordController.text;
-
-                        // 🔹 Ici, tu pourrais vérifier l’authentification (Firebase, API, etc.)
-                        print('Connexion : $email / $password');
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Connection successful !'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-
-                        // 🔹 Redirection vers la page d’accueil
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const GamesPage()),
-                        );
-                      }
-                    },
+                    onPressed: signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
