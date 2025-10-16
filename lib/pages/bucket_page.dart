@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/pages/games_page.dart';
 import 'package:flutter_application_1/pages/sign_in_page.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
@@ -53,7 +54,7 @@ class _BucketPageState extends State<BucketPage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('User data not found in Firestore.'),
+            content: Text('User data not found !'),
             backgroundColor: Colors.red,
           ),
         );
@@ -113,7 +114,8 @@ class _BucketPageState extends State<BucketPage> {
 
   double get totalPayout {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
-    return amount * combinedOdd;
+    final payout = amount * combinedOdd;
+    return double.parse(payout.toStringAsFixed(2));
   }
 
   Future<void> _sendBetToFirebase() async {
@@ -122,7 +124,7 @@ class _BucketPageState extends State<BucketPage> {
       if (widget.uid.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("❌ Erreur : UID utilisateur manquant."),
+            content: Text("❌ UID Error !"),
             backgroundColor: Colors.red,
           ),
         );
@@ -156,14 +158,14 @@ class _BucketPageState extends State<BucketPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(
-          content: Text("Pari enregistré dans la base ✅ "),
+          content: Text(AppLocalizations.of(context)!.successfulBet),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Erreur d’envoi à Firestore uid : $widget.uid , error : $e"),
+          content: Text("UID Error ! , error : $e"),
           backgroundColor: Colors.red,
         ),
       );
@@ -227,17 +229,13 @@ class _BucketPageState extends State<BucketPage> {
               title: Text('Points : ${userData?['points'] ?? 0}'),
             ),
             ListTile(
-              leading: const Icon(Icons.workspaces_outline),
-              title: Text('Role : ${userData?['role'] ?? 'user'}'),
-            ),
-            ListTile(
               leading: const Icon(Icons.access_time),
               title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.refresh),
-              title: const Text('Recharger mes infos'),
+              title:  Text(AppLocalizations.of(context)!.reloadData),
               onTap: () {
                 Navigator.pop(context); // ferme le drawer
                 _loadUserData();
@@ -245,7 +243,7 @@ class _BucketPageState extends State<BucketPage> {
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Déconnexion', style: TextStyle(color: Colors.red)),
+              title: Text(AppLocalizations.of(context)!.logout, style: const TextStyle(color: Colors.red)),
               onTap: _logout,
             ),
           ],
@@ -258,8 +256,7 @@ class _BucketPageState extends State<BucketPage> {
                 ? Center(
               child: Column (children: [
 
-                Text(
-                  "No bets for now",
+                Text(AppLocalizations.of(context)!.noBetsSelected,
                   style: TextStyle(fontSize: 26, color: Colors.grey[700]),
                 ),
                 Icon(Icons.shopping_cart, color: Colors.grey, size: 36),
@@ -299,7 +296,10 @@ class _BucketPageState extends State<BucketPage> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              "Odd: $odd  |  Starts at: ${bet['start_time']}",
+                              AppLocalizations.of(context)!.oddAndStartTime(
+                                odd,  // passe le double directement
+                                bet['start_time'].toString(), // string
+                              ),
                               style: const TextStyle(
                                   fontSize: 13, color: Colors.black54),
                             ),
@@ -340,15 +340,20 @@ class _BucketPageState extends State<BucketPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
-                        "Cote combinée : ${combinedOdd.toStringAsFixed(2)}",
+                        AppLocalizations.of(context)!.combinedOdd(
+                          combinedOdd.toStringAsFixed(2),
+                        ),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   TextField(
                     controller: _amountController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
-                      labelText: "Total amount",
+                      labelText: AppLocalizations.of(context)!.totalAmount,
                       labelStyle: const TextStyle(color: Colors.blueAccent),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -379,7 +384,9 @@ class _BucketPageState extends State<BucketPage> {
                         elevation: 5,
                       ),
                       child: Text(
-                        "Payout : ${totalPayout.toStringAsFixed(2)}",
+                        AppLocalizations.of(context)!.payout(
+                          totalPayout,
+                        ),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/sign_in_page.dart';
 import 'package:flutter_application_1/pages/sign_up_page.dart';
 
+import '../l10n/app_localizations.dart';
+
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -32,7 +34,7 @@ class HomePage extends StatelessWidget {
                   )
               );
             },
-            label: Text("Sign in",
+            label: Text(AppLocalizations.of(context)!.signIn,
               style: TextStyle(
                   color: Colors.white
               ),
@@ -52,7 +54,7 @@ class HomePage extends StatelessWidget {
                   )
               );
             },
-            label: Text("Sign up",
+            label: Text(AppLocalizations.of(context)!.signUP,
               style: TextStyle(
                   color: Colors.white
               ),

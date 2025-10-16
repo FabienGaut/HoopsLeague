@@ -4,6 +4,8 @@ import 'package:flutter_application_1/pages/sign_in_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import '../l10n/app_localizations.dart';
+
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -67,8 +69,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
         // 3️⃣ Message et navigation
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account created successfully!'),
+           SnackBar(
+            content: Text(AppLocalizations.of(context)!.accountCreated),
             backgroundColor: Colors.green,
           ),
         );
@@ -80,10 +82,10 @@ class _SignUpPageState extends State<SignUpPage> {
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
-        if (e.code == 'email-already-in-use') errorMessage = 'Email déjà utilisé';
-        else if (e.code == 'weak-password') errorMessage = 'Mot de passe trop faible';
-        else if (e.code == 'invalid-email') errorMessage = 'Email invalide';
-        else errorMessage = 'Erreur: ${e.code}';
+        if (e.code == 'email-already-in-use') errorMessage =  AppLocalizations.of(context)!.mailAlreadyUsed;
+        else if (e.code == 'weak-password') errorMessage =  AppLocalizations.of(context)!.weakPassword;
+        else if (e.code == 'invalid-email') errorMessage =  AppLocalizations.of(context)!.wrongEmail;
+        else errorMessage = 'Error: ${e.code}';
       });
     } finally {
       setState(() => isLoading = false);
@@ -123,10 +125,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your e-mail';
+                        return  AppLocalizations.of(context)!.enterEmail;
                       }
                       if (!value.contains('@') || !value.contains('.')) {
-                        return 'Email incorrect';
+                        return  AppLocalizations.of(context)!.wrongEmail;
                       }
                       return null;
                     },
@@ -135,18 +137,18 @@ class _SignUpPageState extends State<SignUpPage> {
                   // 🧩 Champ Mot de passe
                   TextFormField(
                     controller: passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
+                    decoration:  InputDecoration(
+                      labelText:  AppLocalizations.of(context)!.password,
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please type your password';
+                        return  AppLocalizations.of(context)!.enterPassword;
                       }
                       if (value.length < 6) {
-                        return 'The password must be longer than 6 characters';
+                        return  AppLocalizations.of(context)!.passwordTooShort;
                       }
                       return null;
                     },
@@ -155,15 +157,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   // 🧩 Champ Confirmation
                   TextFormField(
                     controller: confirmController,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm your password',
+                    decoration:  InputDecoration(
+                      labelText:  AppLocalizations.of(context)!.confirmPassword,
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value != passwordController.text) {
-                        return "The passwords aren't the same";
+                        return  AppLocalizations.of(context)!.confirmPasswordError;
                       }
                       return null;
                     },
@@ -193,8 +195,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       elevation: 5,
                     ),
-                    child: const Text(
-                      'Sign Up',
+                    child:  Text(
+                      AppLocalizations.of(context)!.signUP,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),

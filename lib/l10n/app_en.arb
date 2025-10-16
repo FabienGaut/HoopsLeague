@@ -1,17 +1,64 @@
 {
-"@@locale": "en",
+  "@@locale": "en",
   "title": "HoopsBets",
-  "noBetsSelected": "Aucun pari",
-  "totalAmount": "Montant total",
-  "reloadData" : "Refraîchir mes données",
-  "logout" : "Déconnexion",
-  "signIn" : "Connecter",
-  "signUP" : "Créer un compte",
-  "combinatedOdd" : "Côte combinée",
-  "odd" : "Cote",
-  "startsAt" : "Commence à",
-  "payout" : "Gains",
-  "password" : "Mot de passe",
-  "confirmPassword" : "Confirmer le mot de passe",
-  "createAccount" : "Créer un compte"
+  "noData" : "No data",
+  "noBetsSelected": "No bets selected",
+  "totalAmount": "Total amount",
+  "reloadData": "Refresh my data",
+  "logout": "Logout",
+  "signIn": "Sign in",
+  "signUP": "Sign up",
+  "combinedOdd": "Total odds: {value}",
+    "@combinedOdd": {
+      "description": "Displays the combined odd of selected bets",
+      "placeholders": {
+        "value": {}
+      }
+    },
+  "odd": "Odd",
+  "startsAt": "Starts at {startTime}",
+  "@startsAt": {
+      "description": "Indicates when the game starts",
+      "placeholders": {
+        "startTime": {}
+      }
+   },
+  "payout": "Payout: {amount}",
+  "@payout": {
+      "description": "Display the total payout",
+      "placeholders": {
+        "amount": {
+          "type": "double",
+          "example": "123.45"
+        }
+      }
+  },
+  "password": "Password",
+  "confirmPassword": "Confirm your password",
+  "createAccount": "Create an account",
+  "oddAndStartTime": "Odd: {odd} | Starts at: {startTime}",
+  "@oddAndStartTime": {
+    "description": "Display the odd value and the start time of a bet",
+    "placeholders": {
+      "odd": {
+        "type": "double",
+        "example": "1.75"
+      },
+      "startTime": {
+        "type": "String",
+        "example": "20:30"
+      }
+    }
+  },
+   "successfulBet" : " Bet placed successfully ! ✅ ",
+    "passwordTooShort" : "Password too short! Must be at least 6 characters.",
+    "enterPassword" : "Please type your password",
+    "wrongEmail" : "Wrong mail format",
+    "enterEmail" : "Please type your mail address",
+    "wrongPassword" : "Wrong password",
+    "noAccountForTheseId" : "Incorrect email or password",
+    "confirmPasswordError" : "Passwords do not match",
+    "mailAlreadyUsed" : "This email is already registered",
+    "weakPassword" : "This password is too weak",
+    "accountCreated" : "Account created successfully! ✅ "
 }

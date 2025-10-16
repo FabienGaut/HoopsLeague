@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/sign_up_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import '../l10n/app_localizations.dart';
 import 'games_page.dart';
 import 'home_page.dart';
 
@@ -52,18 +53,18 @@ class _SignInPageState extends State<SignInPage> {
       // ⚠️ Gestion des erreurs courantes
       setState(() {
         if (e.code == 'user-not-found') {
-          errorMessage = 'Aucun compte trouvé pour cet email.';
+          errorMessage =  AppLocalizations.of(context)!.noAccountForTheseId;
         } else if (e.code == 'wrong-password') {
-          errorMessage = 'Mot de passe incorrect.';
+          errorMessage =  AppLocalizations.of(context)!.wrongPassword;
         } else if (e.code == 'invalid-email') {
-          errorMessage = 'Adresse e-mail invalide.';
+          errorMessage =  AppLocalizations.of(context)!.wrongEmail;
         } else {
-          errorMessage = 'Erreur : ${e.message}';
+          errorMessage = 'Error : ${e.message}';
         }
       });
     } catch (e) {
       setState(() {
-        errorMessage = 'Erreur inattendue : $e';
+        errorMessage = 'Error : $e';
       });
     } finally {
       setState(() => isLoading = false);
@@ -103,10 +104,10 @@ class _SignInPageState extends State<SignInPage> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your e-mail';
+                        return  AppLocalizations.of(context)!.enterEmail;
                       }
                       if (!value.contains('@') || !value.contains('.')) {
-                        return 'Email incorrect';
+                        return  AppLocalizations.of(context)!.wrongEmail;
                       }
                       return null;
                     },
@@ -116,18 +117,18 @@ class _SignInPageState extends State<SignInPage> {
                   // Mot de passe
                   TextFormField(
                     controller: passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
+                    decoration:  InputDecoration(
+                      labelText: AppLocalizations.of(context)!.password,
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please type your password';
+                        return  AppLocalizations.of(context)!.enterPassword;
                       }
                       if (value.length < 6) {
-                        return 'Password too short !';
+                        return  AppLocalizations.of(context)!.passwordTooShort;
                       }
                       return null;
                     },
@@ -157,8 +158,8 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       elevation: 5,
                     ),
-                    child: const Text(
-                      'Sign In',
+                    child:  Text(
+                      AppLocalizations.of(context)!.signIn,
                       style:
                       TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -176,8 +177,8 @@ class _SignInPageState extends State<SignInPage> {
                       );
                       FocusScope.of(context).requestFocus((FocusNode()));
                     },
-                    child: const Text(
-                      "Create an account",
+                    child:  Text(
+                      AppLocalizations.of(context)!.createAccount,
                       style: TextStyle(color: Colors.blue),
                     ),
 

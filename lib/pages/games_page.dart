@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/bucket_page.dart';
+import 'package:flutter_application_1/pages/passed_bets.dart';
 import 'package:flutter_application_1/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
+
+import '../l10n/app_localizations.dart';
 
 class GamesPage extends StatefulWidget {
   final String uid;
@@ -133,9 +136,16 @@ class _GamesPageState extends State<GamesPage> {
               title: Text('Points : ${userData?['points'] ?? 0}'),
             ),
             ListTile(
-              leading: const Icon(Icons.workspaces_outline),
-              title: Text('Role : ${userData?['role'] ?? 'user'}'),
+              leading: const Icon(Icons.history),
+              title: const Text("My bets"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MyBetsPage(uid: widget.uid)),
+                );
+              },
             ),
+
             ListTile(
               leading: const Icon(Icons.access_time),
               title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
@@ -143,15 +153,22 @@ class _GamesPageState extends State<GamesPage> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.refresh),
-              title: const Text('Recharger mes infos'),
+              title:  Text(AppLocalizations.of(context)!.reloadData),
               onTap: () {
                 Navigator.pop(context); // ferme le drawer
                 _loadUserData();
+                setState(() {
+                  bets.clear();
+                  betsNotifier.value = [];
+                });
+
               },
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Déconnexion', style: TextStyle(color: Colors.red)),
+              title: Text(
+                  AppLocalizations.of(context)!.logout,
+                  style: const TextStyle(color: Colors.red)),
               onTap: _logout,
             ),
           ],
@@ -168,7 +185,7 @@ class _GamesPageState extends State<GamesPage> {
               return CircularProgressIndicator();
             }
             if(!snapshot.hasData){
-              return Text("no data");
+              return Text(AppLocalizations.of(context)!.noData);
             }
             List<dynamic> games = [];
             snapshot.data!.docs.forEach((element) {
@@ -222,7 +239,7 @@ class _GamesPageState extends State<GamesPage> {
                     bets.add(betToAdd);
                     betsNotifier.value = [...betsNotifier.value, betToAdd]; // ajoute le pari
 
-                    print("Pari sur : $selectedTeam");
+
 
                     // Retourne true pour supprimer la Card
                     return true;
@@ -277,7 +294,11 @@ class _GamesPageState extends State<GamesPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "Starts at ${DateFormat.yMd().add_jm().format(DateTime.parse(game['start_time']).toLocal())}",
+                            AppLocalizations.of(context)!.startsAt(
+                              DateFormat.yMd()
+                                  .add_jm()
+                                  .format(DateTime.parse(game['start_time']).toLocal()),
+                            ),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 13, color: Colors.grey),
                           ),
