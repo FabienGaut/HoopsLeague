@@ -1,0 +1,17 @@
+{
+"@@locale": "fr",
+  "title": "HoopsBets",
+  "noBetsSelected": "No bets selected",
+  "totalAmount": "Total amount",
+  "reloadData" : "Reload my data",
+  "logout" : "Logout",
+  "signIn" : "Sign in",
+  "signUP" : "Sign up",
+  "combinatedOdd" : "Combinated odd",
+  "odd" : "Odd",
+  "startsAt" : "Starts at",
+  "payout" : "Payout",
+  "password" : "Password",
+  "confirmPassword" : "Confirme your password",
+  "createAccount" : "Create an account"
+}

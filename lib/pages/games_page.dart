@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/bucket_page.dart';
+import 'package:flutter_application_1/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
 
 class GamesPage extends StatefulWidget {
-  const GamesPage({super.key});
+  final String uid;
+
+  const GamesPage({super.key, required this.uid});
 
   @override
   State<GamesPage> createState() => _GamesPageState();
@@ -13,27 +17,148 @@ class GamesPage extends StatefulWidget {
 class _GamesPageState extends State<GamesPage> {
   final List<Map<String, dynamic>> bets = [];
   final ValueNotifier<List<Map<String, dynamic>>> betsNotifier = ValueNotifier([]);
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('UserData')
+          .doc(widget.uid)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          userData = doc.data();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User data not found in Firestore.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading user data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const SignInPage()),
+            (route) => false,
+      );
+    }
+  }
+
+  Future<void> _addPoints(int points) async {
+    if (userData == null) return;
+
+    final newPoints = (userData!['points'] ?? 0) + points;
+
+    await FirebaseFirestore.instance
+        .collection('UserData')
+        .doc(widget.uid)
+        .update({'points': newPoints});
+
+    setState(() {
+      userData!['points'] = newPoints;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You earned $points points!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/logo.jpeg',
-                height: 30,
-              ),
-              const SizedBox(width: 8),
-              const Text("HoopsBets")
-            ],
-          ),
-
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/logo.jpeg',
+              height: 30,
+            ),
+            const SizedBox(width: 8),
+             Text("HoopsBets"),
+          ],
         ),
-        body:
+        iconTheme: const IconThemeData(color: Colors.black), // couleur du menu
+      ),
+      drawer: Drawer(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(userData?['user_name'] ?? 'No name'),
+              accountEmail: Text(userData?['email'] ?? 'No email'),
+
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, color: Colors.blue, size: 40),
+              ),
+              decoration: const BoxDecoration(color: Colors.blueAccent),
+            ),
+            ListTile(
+              leading: const Icon(Icons.stars),
+              title: Text('Points : ${userData?['points'] ?? 0}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspaces_outline),
+              title: Text('Role : ${userData?['role'] ?? 'user'}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.access_time),
+              title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.refresh),
+              title: const Text('Recharger mes infos'),
+              onTap: () {
+                Navigator.pop(context); // ferme le drawer
+                _loadUserData();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Déconnexion', style: TextStyle(color: Colors.red)),
+              onTap: _logout,
+            ),
+          ],
+        ),
+      ),
+
+      body:
 
         StreamBuilder(
 
@@ -166,16 +291,34 @@ class _GamesPageState extends State<GamesPage> {
 
           } ,
       ),
+
       // Bouton de panier
       floatingActionButton: ValueListenableBuilder<List<Map<String, dynamic>>>(
         valueListenable: betsNotifier,
         builder: (context, bets, _) {
           return ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              if (widget.uid.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("❌ Erreur : UID utilisateur manquant."),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BucketPage(bets: bets)),
+                MaterialPageRoute(builder: (context) => BucketPage(bets: bets, uid: widget.uid,)),
               );
+              if (result == 'refresh') {
+                _loadUserData();
+                setState(() {
+                  bets.clear();
+                  betsNotifier.value = [];
+                });
+              }
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 36),
             label: Text("(${bets.length})"),

@@ -1,0 +1,17 @@
+{
+"@@locale": "en",
+  "title": "HoopsBets",
+  "noBetsSelected": "Aucun pari",
+  "totalAmount": "Montant total",
+  "reloadData" : "Refraîchir mes données",
+  "logout" : "Déconnexion",
+  "signIn" : "Connecter",
+  "signUP" : "Créer un compte",
+  "combinatedOdd" : "Côte combinée",
+  "odd" : "Cote",
+  "startsAt" : "Commence à",
+  "payout" : "Gains",
+  "password" : "Mot de passe",
+  "confirmPassword" : "Confirmer le mot de passe",
+  "createAccount" : "Créer un compte"
+}

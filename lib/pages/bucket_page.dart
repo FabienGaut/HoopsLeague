@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/games_page.dart';
+import 'package:flutter_application_1/pages/sign_in_page.dart';
+import 'package:flutter_application_1/l10n/app_localizations.dart';
+
 
 class BucketPage extends StatefulWidget {
   final List<Map<String, dynamic>> bets;
+  final String uid;
 
-  const BucketPage({super.key, required this.bets});
+  const BucketPage({super.key, required this.bets,  required this.uid});
 
   @override
   State<BucketPage> createState() => _BucketPageState();
@@ -12,11 +18,88 @@ class BucketPage extends StatefulWidget {
 
 class _BucketPageState extends State<BucketPage> {
   final TextEditingController _amountController = TextEditingController();
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+  late final userPoints;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
 
   @override
   void dispose() {
     _amountController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('UserData')
+          .doc(widget.uid)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          userData = doc.data();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User data not found in Firestore.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading user data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const SignInPage()),
+            (route) => false,
+      );
+    }
+  }
+
+  Future<void> _addPoints(int points) async {
+    if (userData == null) return;
+
+    final newPoints = (userData!['points'] ?? 0) + points;
+
+    await FirebaseFirestore.instance
+        .collection('UserData')
+        .doc(widget.uid)
+        .update({'points': newPoints});
+
+    setState(() {
+      userData!['points'] = newPoints;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You earned $points points!'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   double get combinedOdd {
@@ -36,8 +119,18 @@ class _BucketPageState extends State<BucketPage> {
   Future<void> _sendBetToFirebase() async {
     final gameIds = widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
     try {
+      if (widget.uid.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("❌ Erreur : UID utilisateur manquant."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       await FirebaseFirestore.instance.collection("Bets").add({
-        'user_id': '',
+        'user_id': widget.uid,
         'games_id': gameIds,
         'odd': combinedOdd.toDouble(),
         'points_betted':
@@ -46,6 +139,19 @@ class _BucketPageState extends State<BucketPage> {
         widget.bets.map((bet) => bet['pickedTeam'] as String? ?? '').toList(),
         'timestamp': FieldValue.serverTimestamp(),
       });
+      final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+      final currentPoints = (userData?['points'] ?? 0).toDouble();
+
+      userPoints = currentPoints - parsedAmount;
+
+
+      await FirebaseFirestore.instance
+
+          .collection('UserData')
+          .doc(widget.uid)
+          .update({'points': userPoints}
+      );
+
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,12 +163,21 @@ class _BucketPageState extends State<BucketPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Erreur d’envoi à Firestore : $e"),
+          content: Text("Erreur d’envoi à Firestore uid : $widget.uid , error : $e"),
           backgroundColor: Colors.red,
         ),
       );
     }
+
+    setState(() {
+      widget.bets.clear();
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GamesPage(uid: widget.uid,)),
+    );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,12 +197,79 @@ class _BucketPageState extends State<BucketPage> {
             const Text("HoopsBets")
           ],
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
 
+              Navigator.pop(context);
+
+          },
+        ),
+      ),
+
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            if (isLoading)
+              const LinearProgressIndicator(), // petit indicateur
+            UserAccountsDrawerHeader(
+              accountName: Text(userData?['user_name'] ?? 'No name'),
+              accountEmail: Text(userData?['email'] ?? 'No email'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, color: Colors.blue, size: 40),
+              ),
+              decoration: const BoxDecoration(color: Colors.blueAccent),
+            ),
+            ListTile(
+              leading: const Icon(Icons.stars),
+              title: Text('Points : ${userData?['points'] ?? 0}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspaces_outline),
+              title: Text('Role : ${userData?['role'] ?? 'user'}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.access_time),
+              title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.refresh),
+              title: const Text('Recharger mes infos'),
+              onTap: () {
+                Navigator.pop(context); // ferme le drawer
+                _loadUserData();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Déconnexion', style: TextStyle(color: Colors.red)),
+              onTap: _logout,
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: widget.bets.isEmpty
+                ? Center(
+              child: Column (children: [
+
+                Text(
+                  "No bets for now",
+                  style: TextStyle(fontSize: 26, color: Colors.grey[700]),
+                ),
+                Icon(Icons.shopping_cart, color: Colors.grey, size: 36),
+          ]
+
+              )
+
+            )
+                :
+            ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: widget.bets.length,
               itemBuilder: (context, index) {
@@ -154,11 +336,19 @@ class _BucketPageState extends State<BucketPage> {
               ),
               child: Column(
                 children: [
+                  if (widget.bets.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        "Cote combinée : ${combinedOdd.toStringAsFixed(2)}",
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
                   TextField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: "Montant total",
+                      labelText: "Total amount",
                       labelStyle: const TextStyle(color: Colors.blueAccent),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -189,7 +379,7 @@ class _BucketPageState extends State<BucketPage> {
                         elevation: 5,
                       ),
                       child: Text(
-                        "Gain potentiel: ${totalPayout.toStringAsFixed(2)}",
+                        "Payout : ${totalPayout.toStringAsFixed(2)}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
