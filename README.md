@@ -42,6 +42,18 @@ Mini spec, this application must be able to :
 - logging of the app to monitore it  💤
 - CI/CD  ⏳
 - Data protection, password protection, data base protection  ⏳
+-Cote format US aussi, switch bouton  pour langue et cote a la page home ⏳
+- Avoir une vraie DA ⏳
+- Page de classement - page sociale ⏳
+- Rules firebase a tester analyser et ajouter pour la cyber ⏳
+- Tester sur un tel android ⏳
+- Rediger CGU, Mentions legales disclaimer nba et regles playstore a voir ⏳
+- pouvoir rester connecté (cookies?) voir comment ca marche ⏳
+- Pouvoir changer le mot de passe ⏳
+- Check les todo android studio ⏳
+- changer le nom du projet ⏳
+- unifier les git sur 2 branches diff ⏳
+- Dashboard evolution points ⏳
 
 ### TODO/TBD
 
