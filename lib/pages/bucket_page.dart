@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/pages/games_page.dart';
-import 'package:flutter_application_1/pages/sign_in_page.dart';
-import 'package:flutter_application_1/l10n/app_localizations.dart';
+import 'package:HoopsBets/pages/games_page.dart';
+import 'package:HoopsBets/pages/sign_in_page.dart';
+import 'package:HoopsBets/l10n/app_localizations.dart';
 
 
 class BucketPage extends StatefulWidget {

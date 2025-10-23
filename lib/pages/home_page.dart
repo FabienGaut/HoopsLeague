@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/sign_in_page.dart';
-import 'package:flutter_application_1/pages/sign_up_page.dart';
+import 'package:HoopsBets/pages/sign_in_page.dart';
+import 'package:HoopsBets/pages/sign_up_page.dart';
 
 import '../l10n/app_localizations.dart';
 

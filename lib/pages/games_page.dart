@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/bucket_page.dart';
-import 'package:flutter_application_1/pages/passed_bets.dart';
-import 'package:flutter_application_1/pages/sign_in_page.dart';
+import 'package:HoopsBets/pages/bucket_page.dart';
+import 'package:HoopsBets/pages/passed_bets.dart';
+import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
