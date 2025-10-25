@@ -1,20 +1,29 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:HoopsBets/pages/home_page.dart';
-import 'firebase_options.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
+  final envPath = File('${Directory.current.path}/.env').path;
+  await dotenv.load(fileName: envPath); // chemin complet
+  final supabaseUrl = dotenv.env['SUPABASE_URL'];
+  final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
+  // ✅ Initialisation Supabase
+  if (supabaseUrl == null || supabaseKey == null) {
+    throw Exception("Supabase URL ou ANON KEY manquante dans le .env");
+  }
 
-    options: DefaultFirebaseOptions.currentPlatform,
-
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
   );
+
   runApp(const MyApp());
 }
 
@@ -27,11 +36,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
-  setCurrentIndex(int index){
+
+  void setCurrentIndex(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,21 +52,15 @@ class _MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
       supportedLocales: const [
-        Locale('en', ''), // Anglais
-        Locale('fr', ''), // Français
+        Locale('en', ''),
+        Locale('fr', ''),
       ],
-
-      // 👇 Optionnel : définir une langue par défaut
       locale: const Locale('fr'),
-
-      home: Scaffold(
+      home: const Scaffold(
         backgroundColor: Colors.white,
-
         body: HomePage(),
       ),
-
     );
   }
 }

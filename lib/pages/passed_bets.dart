@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+
+final supabase = Supabase.instance.client;
 
 class MyBetsPage extends StatefulWidget {
   final String uid;
@@ -14,34 +16,47 @@ class MyBetsPage extends StatefulWidget {
 
 class _MyBetsPageState extends State<MyBetsPage> {
   Map<String, dynamic>? userData;
+  List<Map<String, dynamic>> bets = [];
   bool isLoadingUser = true;
+  bool isLoadingBets = true;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _listenToBets();
   }
 
   Future<void> _loadUserData() async {
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('UserData')
-          .doc(widget.uid)
-          .get();
+      final response = await supabase
+          .from('UserData')
+          .select()
+          .eq('id', widget.uid)
+          .single();
 
-      if (doc.exists) {
-        setState(() {
-          userData = doc.data();
-          isLoadingUser = false;
-        });
-      } else {
-        setState(() {
-          isLoadingUser = false;
-        });
-      }
+      setState(() {
+        userData = response;
+        isLoadingUser = false;
+      });
     } catch (e) {
       setState(() => isLoadingUser = false);
     }
+  }
+
+  void _listenToBets() {
+    final stream = supabase
+        .from('bets')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', widget.uid)
+        .order('timestamp', ascending: false);
+
+    stream.listen((data) {
+      setState(() {
+        bets = List<Map<String, dynamic>>.from(data);
+        isLoadingBets = false;
+      });
+    });
   }
 
   double parseDouble(dynamic value) {
@@ -67,7 +82,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
       ),
       body: Column(
         children: [
-          // Header avec les points
+          // Header avec le solde utilisateur
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -129,217 +144,165 @@ class _MyBetsPageState extends State<MyBetsPage> {
 
           // Liste des paris
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('Bets')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sports_basketball,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)?.noBetsSelected ??
-                              "No bets found",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+            child: isLoadingBets
+                ? const Center(child: CircularProgressIndicator())
+                : bets.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.sports_basketball,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)?.noBetsSelected ??
+                        "No bets found",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
                     ),
-                  );
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: bets.length,
+              itemBuilder: (context, index) {
+                final bet = bets[index];
+                final amount = parseDouble(bet['points_betted']);
+                final odd = parseDouble(bet['odd']);
+                final payout = (amount * odd).toStringAsFixed(2);
+
+                final startTime = DateTime.tryParse(
+                    bet['timestamp']?.toString() ?? '') ??
+                    DateTime.now();
+
+                final status = bet['status'] ?? 'pending';
+                Color statusColor;
+                IconData statusIcon;
+
+                switch (status) {
+                  case 'won':
+                    statusColor = Colors.green;
+                    statusIcon = Icons.check_circle;
+                    break;
+                  case 'lost':
+                    statusColor = Colors.red;
+                    statusIcon = Icons.cancel;
+                    break;
+                  default:
+                    statusColor = Colors.orange;
+                    statusIcon = Icons.access_time;
                 }
 
-                // Filtrer les paris par uid côté client
-                final allBets = snapshot.data!.docs;
-                final bets = allBets.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final betUid = data['user_id']?.toString().trim() ?? '';
-                  final currentUid = widget.uid.trim();
-                  return betUid == currentUid;
-                }).toList();
-
-                // Trier par timestamp décroissant
-                bets.sort((a, b) {
-                  final aTime = (a.data() as Map<String, dynamic>)['timestamp'] as Timestamp?;
-                  final bTime = (b.data() as Map<String, dynamic>)['timestamp'] as Timestamp?;
-                  if (aTime == null || bTime == null) return 0;
-                  return bTime.compareTo(aTime);
-                });
-
-                if (bets.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sports_basketball,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)?.noBetsSelected ??
-                              "No bets found",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: bets.length,
-                  itemBuilder: (context, index) {
-                    final bet = bets[index].data() as Map<String, dynamic>;
-
-                    final amount = parseDouble(bet['points_betted']);
-                    final odd = parseDouble(bet['odd']);
-                    final payout = (amount * odd).toStringAsFixed(2);
-
-                    final startTime =
-                        (bet['timestamp'] as Timestamp?)?.toDate() ??
-                            DateTime.now();
-
-                    final status = bet['status'] ?? 'pending';
-                    Color statusColor;
-                    IconData statusIcon;
-
-                    switch (status) {
-                      case 'won':
-                        statusColor = Colors.green;
-                        statusIcon = Icons.check_circle;
-                        break;
-                      case 'lost':
-                        statusColor = Colors.red;
-                        statusIcon = Icons.cancel;
-                        break;
-                      default:
-                        statusColor = Colors.orange;
-                        statusIcon = Icons.access_time;
-                    }
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    statusIcon,
-                                    color: statusColor,
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        bet['pickedTeam'] ?? "",
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        DateFormat.yMd()
-                                            .add_jm()
-                                            .format(startTime),
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(8),
+                                color: statusColor.withOpacity(0.1),
+                                borderRadius:
+                                BorderRadius.circular(8),
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
+                              child: Icon(
+                                statusIcon,
+                                color: statusColor,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  _buildStatItem(
-                                    "Odd",
-                                    odd.toStringAsFixed(2),
-                                    Colors.blue,
+                                  Text(
+                                    bet['pickedTeam'] ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  Container(
-                                    height: 40,
-                                    width: 1,
-                                    color: Colors.grey[300],
-                                  ),
-                                  _buildStatItem(
-                                    "Bet",
-                                    amount.toStringAsFixed(0),
-                                    Colors.orange,
-                                  ),
-                                  Container(
-                                    height: 40,
-                                    width: 1,
-                                    color: Colors.grey[300],
-                                  ),
-                                  _buildStatItem(
-                                    "Payout",
-                                    payout,
-                                    Colors.green,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat.yMd()
+                                        .add_jm()
+                                        .format(startTime),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem(
+                                "Odd",
+                                odd.toStringAsFixed(2),
+                                Colors.blue,
+                              ),
+                              Container(
+                                height: 40,
+                                width: 1,
+                                color: Colors.grey[300],
+                              ),
+                              _buildStatItem(
+                                "Bet",
+                                amount.toStringAsFixed(0),
+                                Colors.orange,
+                              ),
+                              Container(
+                                height: 40,
+                                width: 1,
+                                color: Colors.grey[300],
+                              ),
+                              _buildStatItem(
+                                "Payout",
+                                payout,
+                                Colors.green,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),

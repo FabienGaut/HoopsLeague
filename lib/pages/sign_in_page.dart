@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/sign_up_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-
 import '../l10n/app_localizations.dart';
 import 'games_page.dart';
-import 'home_page.dart';
+
+final supabase = Supabase.instance.client;
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -14,50 +13,56 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-
 class _SignInPageState extends State<SignInPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   String? errorMessage;
   bool isLoading = false;
-
   final _formKey = GlobalKey<FormState>();
 
-
-@override
+  @override
   void dispose() {
-    super.dispose();
-    passwordController.dispose();
     emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   Future<void> signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       errorMessage = null;
       isLoading = true;
     });
 
     try {
-      // ✅ Authentification Firebase
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // ✅ Authentification Supabase
+      final response = await supabase.auth.signInWithPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      // ✅ Si tout est OK → navigation
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => GamesPage(uid: userCredential.user!.uid)),
-      );
-    } on FirebaseAuthException catch (e) {
-      // ⚠️ Gestion des erreurs courantes
+      if (response.user != null) {
+        // ✅ Connexion réussie → navigation
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GamesPage(uid: response.user!.id),
+          ),
+        );
+      } else {
+        setState(() {
+          errorMessage = AppLocalizations.of(context)!.noAccountForTheseId;
+        });
+      }
+    } on AuthException catch (e) {
+      // ⚠️ Gestion des erreurs Supabase
       setState(() {
-        if (e.code == 'user-not-found') {
-          errorMessage =  AppLocalizations.of(context)!.noAccountForTheseId;
-        } else if (e.code == 'wrong-password') {
-          errorMessage =  AppLocalizations.of(context)!.wrongPassword;
-        } else if (e.code == 'invalid-email') {
-          errorMessage =  AppLocalizations.of(context)!.wrongEmail;
+        if (e.message.contains('Invalid login credentials')) {
+          errorMessage = AppLocalizations.of(context)!.wrongPassword;
+        } else if (e.message.contains('email')) {
+          errorMessage = AppLocalizations.of(context)!.wrongEmail;
         } else {
           errorMessage = 'Error : ${e.message}';
         }
@@ -85,7 +90,6 @@ class _SignInPageState extends State<SignInPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
                   Transform.scale(
                     scale: 0.5,
                     child: Image.asset("assets/images/logo.jpeg"),
@@ -104,10 +108,10 @@ class _SignInPageState extends State<SignInPage> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return  AppLocalizations.of(context)!.enterEmail;
+                        return AppLocalizations.of(context)!.enterEmail;
                       }
                       if (!value.contains('@') || !value.contains('.')) {
-                        return  AppLocalizations.of(context)!.wrongEmail;
+                        return AppLocalizations.of(context)!.wrongEmail;
                       }
                       return null;
                     },
@@ -117,24 +121,24 @@ class _SignInPageState extends State<SignInPage> {
                   // Mot de passe
                   TextFormField(
                     controller: passwordController,
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.password,
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return  AppLocalizations.of(context)!.enterPassword;
+                        return AppLocalizations.of(context)!.enterPassword;
                       }
                       if (value.length < 6) {
-                        return  AppLocalizations.of(context)!.passwordTooShort;
+                        return AppLocalizations.of(context)!.passwordTooShort;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
-                  Padding(padding: EdgeInsets.all(5)),
+
                   if (errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -145,29 +149,33 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                     ),
 
-                  // Bouton Sign In
+                  // Bouton connexion
                   ElevatedButton(
-                    onPressed: signIn,
+                    onPressed: isLoading ? null : signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 5,
                     ),
-                    child:  Text(
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
                       AppLocalizations.of(context)!.signIn,
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // 🔸 Lien vers la page d’inscription
+                  // 🔸 Lien vers inscription
                   TextButton(
                     onPressed: () {
                       Navigator.push(
@@ -175,13 +183,12 @@ class _SignInPageState extends State<SignInPage> {
                         MaterialPageRoute(
                             builder: (context) => const SignUpPage()),
                       );
-                      FocusScope.of(context).requestFocus((FocusNode()));
+                      FocusScope.of(context).unfocus();
                     },
-                    child:  Text(
+                    child: Text(
                       AppLocalizations.of(context)!.createAccount,
-                      style: TextStyle(color: Colors.blue),
+                      style: const TextStyle(color: Colors.blue),
                     ),
-
                   ),
                 ],
               ),

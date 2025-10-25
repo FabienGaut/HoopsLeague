@@ -3,6 +3,7 @@ import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:HoopsBets/pages/sign_up_page.dart';
 
 import '../l10n/app_localizations.dart';
+import 'games_page.dart';
 
 
 class HomePage extends StatelessWidget {
@@ -55,6 +56,25 @@ class HomePage extends StatelessWidget {
               );
             },
             label: Text(AppLocalizations.of(context)!.signUP,
+              style: TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            icon: Icon(Icons.account_box),
+          ),
+          ElevatedButton.icon(
+            style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll(Colors.grey)
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                      pageBuilder: (_,__,___) => GamesPage(uid: "dc0cdb29-10be-4eb4-a888-36ae671c53f9")
+                  )
+              );
+            },
+            label: Text("byPassTemp",
               style: TextStyle(
                   color: Colors.white
               ),

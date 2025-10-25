@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-
 import '../l10n/app_localizations.dart';
+import 'dart:io' show Platform;
+
+final supabase = Supabase.instance.client;
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,98 +14,101 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  // 🔹 Les contrôleurs pour récupérer les valeurs des champs
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
   String? errorMessage;
   bool isLoading = false;
 
-  // 🔹 Clé du formulaire pour valider
-  final _formKey = GlobalKey<FormState>();
-
   @override
   void dispose() {
-
-    super.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmController.dispose();
-
+    super.dispose();
   }
 
   Future<void> signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => errorMessage = null); // si tu veux afficher les erreurs
-    setState(() => isLoading = true);
+    setState(() {
+      errorMessage = null;
+      isLoading = true;
+    });
 
     try {
-      // 1️⃣ Créer l’utilisateur avec Firebase Auth
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim());
+      final redirectUrl = Platform.isAndroid || Platform.isIOS
+          ? 'io.hoopsbets.app://login-callback/'
+          : 'http://localhost:3000';
 
-      User? user = userCredential.user;
+      final AuthResponse res = await supabase.auth.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        emailRedirectTo: redirectUrl,
+      );
 
+
+      final user = res.user;
       if (user != null) {
-        // 2️⃣ Ajouter les infos dans Firestore
-        await FirebaseFirestore.instance
-            .collection('UserData')
-            .doc(user.uid)
-            .set({
+        // insertion dans usersdata
+        final insertRes = await supabase
+            .from('usersdata')
+            .insert({
+          'id': user.id,
           'user_name': '',
           'email': user.email,
           'role': 'user',
           'points': 100,
           'timezone': 'Paris',
-          'subscription_date': DateTime.now(),
+          'subscription_date': DateTime.now().toIso8601String(),
           'status': 'active',
           'passed_bets': [],
           'daily_points_used': false,
-          'current_bets': []
+          'current_bets': [],
         });
 
-        // 3️⃣ Message et navigation
-        ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-            content: Text(AppLocalizations.of(context)!.accountCreated),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ✅ 3. Succès → navigation vers SignIn
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.accountCreated),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const SignInPage()),
-        );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const SignInPage()),
+      );
       }
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       setState(() {
-        if (e.code == 'email-already-in-use') errorMessage =  AppLocalizations.of(context)!.mailAlreadyUsed;
-        else if (e.code == 'weak-password') errorMessage =  AppLocalizations.of(context)!.weakPassword;
-        else if (e.code == 'invalid-email') errorMessage =  AppLocalizations.of(context)!.wrongEmail;
-        else errorMessage = 'Error: ${e.code}';
+        if (e.message.contains('already registered')) {
+          errorMessage = AppLocalizations.of(context)!.mailAlreadyUsed;
+
+        } else {
+          errorMessage = 'Error: ${e.message}';
+        }
       });
+    } catch (e) {
+      setState(() => errorMessage = 'Unexpected error: $e');
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-
-      ),
+      appBar: AppBar(),
       body: Center(
-        child: SingleChildScrollView( // 👈 permet de scroller si le clavier dépasse
+        child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Form(
-              key: _formKey, // lie le formulaire à la clé
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -113,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     scale: 0.5,
                     child: Image.asset("assets/images/logo.jpeg"),
                   ),
-                  // 🧩 Champ Email
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: emailController,
                     decoration: const InputDecoration(
@@ -125,53 +128,50 @@ class _SignUpPageState extends State<SignUpPage> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return  AppLocalizations.of(context)!.enterEmail;
+                        return AppLocalizations.of(context)!.enterEmail;
                       }
                       if (!value.contains('@') || !value.contains('.')) {
-                        return  AppLocalizations.of(context)!.wrongEmail;
+                        return AppLocalizations.of(context)!.wrongEmail;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  // 🧩 Champ Mot de passe
                   TextFormField(
                     controller: passwordController,
-                    decoration:  InputDecoration(
-                      labelText:  AppLocalizations.of(context)!.password,
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.password,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return  AppLocalizations.of(context)!.enterPassword;
+                        return AppLocalizations.of(context)!.enterPassword;
                       }
                       if (value.length < 6) {
-                        return  AppLocalizations.of(context)!.passwordTooShort;
+                        return AppLocalizations.of(context)!.passwordTooShort;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  // 🧩 Champ Confirmation
                   TextFormField(
                     controller: confirmController,
-                    decoration:  InputDecoration(
-                      labelText:  AppLocalizations.of(context)!.confirmPassword,
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.confirmPassword,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
                     ),
                     obscureText: true,
                     validator: (value) {
                       if (value != passwordController.text) {
-                        return  AppLocalizations.of(context)!.confirmPasswordError;
+                        return AppLocalizations.of(context)!.confirmPasswordError;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
-
                   if (errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -181,10 +181,8 @@ class _SignUpPageState extends State<SignUpPage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-
-                  // 🧠 Bouton d’inscription
                   ElevatedButton(
-                    onPressed: signUp,
+                    onPressed: isLoading ? null : signUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
@@ -195,9 +193,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       elevation: 5,
                     ),
-                    child:  Text(
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
                       AppLocalizations.of(context)!.signUP,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -208,4 +209,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+}
+
+extension on PostgrestResponse {
+  get error => null;
 }
