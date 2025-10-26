@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import '../l10n/app_localizations.dart';
-import 'dart:io' show Platform;
 
 final supabase = Supabase.instance.client;
 
@@ -43,56 +43,42 @@ class _SignUpPageState extends State<SignUpPage> {
           ? 'io.hoopsbets.app://login-callback/'
           : 'http://localhost:3000';
 
+      // ✅ Création du compte (le trigger SQL créera la ligne dans usersdata)
       final AuthResponse res = await supabase.auth.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
         emailRedirectTo: redirectUrl,
       );
 
-
       final user = res.user;
       if (user != null) {
-        // insertion dans usersdata
-        final insertRes = await supabase
-            .from('usersdata')
-            .insert({
-          'id': user.id,
-          'user_name': '',
-          'email': user.email,
-          'role': 'user',
-          'points': 100,
-          'timezone': 'Paris',
-          'subscription_date': DateTime.now().toIso8601String(),
-          'status': 'active',
-          'passed_bets': [],
-          'daily_points_used': false,
-          'current_bets': [],
-        });
+        if (!mounted) return;
 
-        // ✅ 3. Succès → navigation vers SignIn
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.accountCreated),
-          backgroundColor: Colors.green,
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.accountCreated),
+            backgroundColor: Colors.green,
+          ),
+        );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInPage()),
-      );
+        // Redirection vers la page de connexion
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const SignInPage()),
+        );
       }
     } on AuthException catch (e) {
       setState(() {
         if (e.message.contains('already registered')) {
           errorMessage = AppLocalizations.of(context)!.mailAlreadyUsed;
-
         } else {
-          errorMessage = 'Error: ${e.message}';
+          errorMessage = 'Erreur: ${e.message}';
         }
       });
     } catch (e) {
-      setState(() => errorMessage = 'Unexpected error: $e');
+      setState(() {
+        errorMessage = 'Erreur inattendue: $e';
+      });
     } finally {
       setState(() => isLoading = false);
     }
@@ -187,7 +173,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 14),
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -198,7 +186,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         : Text(
                       AppLocalizations.of(context)!.signUP,
                       style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -209,8 +199,4 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-}
-
-extension on PostgrestResponse {
-  get error => null;
 }
