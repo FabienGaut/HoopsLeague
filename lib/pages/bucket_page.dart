@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:HoopsBets/pages/games_page.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:HoopsBets/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,7 +21,6 @@ class _BucketPageState extends State<BucketPage> {
   final TextEditingController _amountController = TextEditingController();
   Map<String, dynamic>? userData;
   bool isLoading = true;
-  late double userPoints;
 
   @override
   void initState() {
@@ -46,7 +44,6 @@ class _BucketPageState extends State<BucketPage> {
 
       setState(() {
         userData = data;
-        userPoints = (data['points'] ?? 0).toDouble();
         isLoading = false;
       });
     } catch (e) {
@@ -68,22 +65,12 @@ class _BucketPageState extends State<BucketPage> {
     }
   }
 
-  Future<void> _addPoints(int points) async {
-    if (userData == null) return;
-    final newPoints = ((userData!['points'] ?? 0) + points).toInt();
-    await supabase.from('UserData').update({'points': newPoints}).eq('id', widget.uid);
-
-    setState(() => userData!['points'] = newPoints);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('You earned $points points!')),
-    );
-  }
-
   double get combinedOdd {
     double prod = 1.0;
     for (var bet in widget.bets) {
-      final odd = bet['odd'] is int ? (bet['odd'] as int).toDouble() : bet['odd'] as double;
+      final odd = bet['odd'] is int
+          ? (bet['odd'] as int).toDouble()
+          : bet['odd'] as double;
       prod *= odd;
     }
     return prod;
@@ -91,8 +78,7 @@ class _BucketPageState extends State<BucketPage> {
 
   double get totalPayout {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
-    final payout = amount * combinedOdd;
-    return double.parse(payout.toStringAsFixed(2));
+    return double.parse((amount * combinedOdd).toStringAsFixed(2));
   }
 
   Future<void> _sendBetToSupabase() async {
@@ -101,20 +87,14 @@ class _BucketPageState extends State<BucketPage> {
 
     if (widget.uid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("❌ UID Error !"),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text("❌ UID Error !"), backgroundColor: Colors.red),
       );
       return;
     }
 
     if (parsedAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("❌ Invalid amount."),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text("❌ Invalid amount."), backgroundColor: Colors.red),
       );
       return;
     }
@@ -144,22 +124,23 @@ class _BucketPageState extends State<BucketPage> {
         ),
       );
 
-      setState(() {
-        widget.bets.clear();
-      });
-
+      setState(() => widget.bets.clear());
       Navigator.pop(context);
     } catch (e) {
-      if (kDebugMode) {
-        print('Erreur envoi pari: $e');
-      }
+      if (kDebugMode) print('Erreur envoi pari: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur envoi pari: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Erreur envoi pari: $e'), backgroundColor: Colors.red),
       );
     }
+  }
+
+  void _removeBet(int index) {
+    setState(() {
+      widget.bets.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Pari supprimé du panier.")),
+    );
   }
 
   @override
@@ -179,7 +160,7 @@ class _BucketPageState extends State<BucketPage> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, widget.bets),
         ),
       ),
 
@@ -249,7 +230,8 @@ class _BucketPageState extends State<BucketPage> {
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   elevation: 4,
                   shadowColor: Colors.black26,
                   child: Padding(
@@ -257,35 +239,49 @@ class _BucketPageState extends State<BucketPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                pickedTeam,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                AppLocalizations.of(context)!.oddAndStartTime(
+                                  odd,
+                                  bet['start_time'].toString(),
+                                ),
+                                style: const TextStyle(
+                                    fontSize: 13, color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
                           children: [
-                            Text(
-                              pickedTeam,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.black87,
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.blueAccent,
+                              child: Text(
+                                odd.toStringAsFixed(2),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              AppLocalizations.of(context)!.oddAndStartTime(
-                                odd,
-                                bet['start_time'].toString(),
-                              ),
-                              style: const TextStyle(fontSize: 13, color: Colors.black54),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline,
+                                  color: Colors.red),
+                              onPressed: () => _removeBet(index),
                             ),
                           ],
-                        ),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.blueAccent,
-                          child: Text(
-                            odd.toStringAsFixed(2),
-                            style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
                         ),
                       ],
                     ),
@@ -313,30 +309,27 @@ class _BucketPageState extends State<BucketPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
-                      AppLocalizations.of(context)!.combinedOdd(
-                        combinedOdd.toStringAsFixed(2),
-                      ),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      AppLocalizations.of(context)!
+                          .combinedOdd(combinedOdd.toStringAsFixed(2)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
                   TextField(
                     controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.totalAmount,
-                      labelStyle: const TextStyle(color: Colors.blueAccent),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.blueAccent),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blueAccent),
-                      ),
-                      fillColor: Colors.grey[100],
+                      prefixIcon:
+                      const Icon(Icons.attach_money, color: Colors.blueAccent),
                       filled: true,
-                      prefixIcon: const Icon(Icons.attach_money, color: Colors.blueAccent),
+                      fillColor: Colors.grey[100],
                     ),
                     onChanged: (_) => setState(() {}),
                   ),

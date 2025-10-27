@@ -175,11 +175,24 @@ class _GamesPageState extends State<GamesPage> {
           }
 
           final games = snapshot.data!;
+          final filteredGames = games.where((game) {
+            final gameId = game['id'];
+            // On vérifie que ce gameId n’apparaît dans aucun bet
+            return !betsNotifier.value.any((b) {
+              final betGameIds = b['game_id'];
+              if (betGameIds is List) {
+                return betGameIds.contains(gameId);
+              } else {
+                return betGameIds == gameId;
+              }
+            });
+          }).toList();
+
 
           return ListView.builder(
-            itemCount: games.length,
+            itemCount: filteredGames.length,
             itemBuilder: (context, index) {
-              final game = games[index];
+              final game = filteredGames[index];
               final homeTeam = game['home_team'];
               final awayTeam = game['away_team'];
 
@@ -306,27 +319,20 @@ class _GamesPageState extends State<GamesPage> {
         builder: (context, bets, _) {
           return ElevatedButton.icon(
             onPressed: () async {
-              if (widget.uid.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("❌ Erreur : UID utilisateur manquant."),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
               final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BucketPage(bets: bets, uid: widget.uid),
+                  builder: (_) => BucketPage(
+                    bets: List<Map<String, dynamic>>.from(bets),
+                    uid: widget.uid,
+                  ),
                 ),
               );
-              if (result == 'refresh') {
-                _loadUserData();
+
+              // Le résultat renvoyé par BucketPage au retour
+              if (result != null && result is List<Map<String, dynamic>>) {
                 setState(() {
-                  bets.clear();
-                  betsNotifier.value = [];
+                  betsNotifier.value = result;
                 });
               }
             },
@@ -343,6 +349,7 @@ class _GamesPageState extends State<GamesPage> {
           );
         },
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
