@@ -7,7 +7,6 @@ final supabase = Supabase.instance.client;
 
 class MyBetsPage extends StatefulWidget {
   final String uid;
-
   const MyBetsPage({super.key, required this.uid});
 
   @override
@@ -20,6 +19,15 @@ class _MyBetsPageState extends State<MyBetsPage> {
   bool isLoadingUser = true;
   bool isLoadingBets = true;
 
+  static const Color darkBg = Color(0xFF0D0D0D);
+  static const Color cardBg = Color(0xFF1A1A1A);
+  static const Color cardBorder = Color(0xFF2A2A2A);
+  static const Color accentPrimary = Color(0xFF547D85);
+  static const Color accentGold = Color(0xFFFFD700);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9E9E9E);
+  static const Color successGreen = Color(0xFF4CAF50);
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +38,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
   Future<void> _loadUserData() async {
     try {
       final response = await supabase
-          .from('UserData')
+          .from('usersdata')
           .select()
           .eq('id', widget.uid)
           .single();
@@ -70,61 +78,48 @@ class _MyBetsPageState extends State<MyBetsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: darkBg,
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)?.title ?? "My Bets",
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         centerTitle: true,
-        elevation: 0,
+        title: const Text(
+          "My Bets",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
-          // Header avec le solde utilisateur
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blueAccent, Colors.blue[700]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            decoration: const BoxDecoration(
+              color: cardBg,
+              border: Border(
+                bottom: BorderSide(color: cardBorder, width: 1),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
             child: isLoadingUser
                 ? const Center(
-                child: CircularProgressIndicator(color: Colors.white))
+                child: CircularProgressIndicator(color: accentPrimary))
                 : Column(
               children: [
-                const Icon(
-                  Icons.account_balance_wallet,
-                  color: Colors.white,
-                  size: 48,
-                ),
+                const Icon(Icons.account_balance_wallet,
+                    color: accentPrimary, size: 40),
                 const SizedBox(height: 12),
                 const Text(
                   "Your Balance",
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      color: textSecondary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "${userData?['points'] ?? 0}",
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 56,
+                    color: accentGold,
+                    fontSize: 48,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
                   ),
@@ -132,39 +127,33 @@ class _MyBetsPageState extends State<MyBetsPage> {
                 const Text(
                   "POINTS",
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 3,
+                    color: textSecondary,
+                    fontSize: 14,
+                    letterSpacing: 2,
                   ),
                 ),
               ],
             ),
           ),
-
-          // Liste des paris
           Expanded(
             child: isLoadingBets
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                child: CircularProgressIndicator(color: accentPrimary))
                 : bets.isEmpty
                 ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.sports_basketball,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
+                  Icon(Icons.sports_basketball,
+                      size: 80, color: Colors.grey[700]),
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context)?.noBetsSelected ??
                         "No bets found",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: const TextStyle(
+                        fontSize: 16,
+                        color: textSecondary,
+                        fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -177,10 +166,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                 final amount = parseDouble(bet['points_betted']);
                 final odd = parseDouble(bet['odd']);
                 final payout = (amount * odd).toStringAsFixed(2);
-
-                final startTime = DateTime.tryParse(
-                    bet['timestamp']?.toString() ?? '') ??
-                    DateTime.now();
+                final startTime =
+                    DateTime.tryParse(bet['timestamp']?.toString() ?? '') ??
+                        DateTime.now();
 
                 final status = bet['status'] ?? 'pending';
                 Color statusColor;
@@ -188,27 +176,31 @@ class _MyBetsPageState extends State<MyBetsPage> {
 
                 switch (status) {
                   case 'won':
-                    statusColor = Colors.green;
+                    statusColor = successGreen;
                     statusIcon = Icons.check_circle;
                     break;
                   case 'lost':
-                    statusColor = Colors.red;
+                    statusColor = Colors.redAccent;
                     statusIcon = Icons.cancel;
                     break;
                   default:
-                    statusColor = Colors.orange;
+                    statusColor = Colors.orangeAccent;
                     statusIcon = Icons.access_time;
                 }
+
+                final List<dynamic> selections =
+                (bet['selection'] ?? []) as List<dynamic>;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: cardBorder, width: 1),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
                     ],
@@ -223,14 +215,14 @@ class _MyBetsPageState extends State<MyBetsPage> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
+                                color: statusColor.withOpacity(0.2),
                                 borderRadius:
                                 BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 statusIcon,
                                 color: statusColor,
-                                size: 24,
+                                size: 26,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -240,8 +232,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                 CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    bet['pickedTeam'] ?? "",
+                                    bet['pickedTeam'] ?? "Multiple Bet",
                                     style: const TextStyle(
+                                      color: textPrimary,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -251,9 +244,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                     DateFormat.yMd()
                                         .add_jm()
                                         .format(startTime),
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[600],
+                                    style: const TextStyle(
+                                      color: textSecondary,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ],
@@ -262,41 +255,54 @@ class _MyBetsPageState extends State<MyBetsPage> {
                           ],
                         ),
                         const SizedBox(height: 16),
+
+                        // Liste des équipes sélectionnées
+                        if (selections.isNotEmpty)
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: selections.map((team) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: accentPrimary.withOpacity(0.15),
+                                  border: Border.all(
+                                      color: accentPrimary, width: 1),
+                                  borderRadius:
+                                  BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  team.toString(),
+                                  style: const TextStyle(
+                                    color: accentPrimary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+
+                        const SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: cardBorder.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             mainAxisAlignment:
                             MainAxisAlignment.spaceAround,
                             children: [
+                              _buildStatItem("Odd",
+                                  odd.toStringAsFixed(2), accentPrimary),
+                              _divider(),
+                              _buildStatItem("Amount",
+                                  amount.toStringAsFixed(0), accentGold),
+                              _divider(),
                               _buildStatItem(
-                                "Odd",
-                                odd.toStringAsFixed(2),
-                                Colors.blue,
-                              ),
-                              Container(
-                                height: 40,
-                                width: 1,
-                                color: Colors.grey[300],
-                              ),
-                              _buildStatItem(
-                                "Bet",
-                                amount.toStringAsFixed(0),
-                                Colors.orange,
-                              ),
-                              Container(
-                                height: 40,
-                                width: 1,
-                                color: Colors.grey[300],
-                              ),
-                              _buildStatItem(
-                                "Payout",
-                                payout,
-                                Colors.green,
-                              ),
+                                  "Payout", payout, successGreen),
                             ],
                           ),
                         ),
@@ -312,24 +318,29 @@ class _MyBetsPageState extends State<MyBetsPage> {
     );
   }
 
+  Widget _divider() => Container(
+    height: 40,
+    width: 1,
+    color: cardBorder,
+  );
+
   Widget _buildStatItem(String label, String value, Color color) {
     return Column(
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
+            color: textSecondary,
             fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
-            fontSize: 18,
             color: color,
             fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
       ],

@@ -97,4 +97,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountCreated => 'Account created successfully! ✅ ';
+
+  @override
+  String get userName => 'Username';
+
+  @override
+  String get enterUserName => 'Please type your username';
+
+  @override
+  String get oddsFormat => 'Choose your favorite odds format : ';
+
+  @override
+  String get infosCotesCgu => 'Odds & Terms Info';
+
+  @override
+  String get formatsDesCotes => 'Odds formats:';
+
+  @override
+  String get formatsDesCotesDescription =>
+      '- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)';
+
+  @override
+  String get cgu => 'Terms & Conditions:';
+
+  @override
+  String get cguDescription =>
+      '- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.';
+
+  @override
+  String get firstConnection => 'First connection';
 }

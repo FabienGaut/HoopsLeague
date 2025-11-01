@@ -22,6 +22,11 @@ class _SignUpPageState extends State<SignUpPage> {
   String? errorMessage;
   bool isLoading = false;
 
+  // Sélecteur de format de cote
+  int selectedIndex = 0;
+  final List<String> formats = ['FR', 'US', 'UK'];
+  String selectedFormat = 'FR';
+
   @override
   void dispose() {
     emailController.dispose();
@@ -43,7 +48,6 @@ class _SignUpPageState extends State<SignUpPage> {
           ? 'io.hoopsbets.app://login-callback/'
           : 'http://localhost:3000';
 
-      // ✅ Création du compte (le trigger SQL créera la ligne dans usersdata)
       final AuthResponse res = await supabase.auth.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -61,7 +65,9 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         );
 
-        // Redirection vers la page de connexion
+        // 👉 Ici tu pourrais aussi sauvegarder le format choisi dans Supabase si tu veux
+        print("Format de cote choisi : $selectedFormat");
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const SignInPage()),
@@ -103,6 +109,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: Image.asset("assets/images/logo.jpeg"),
                   ),
                   const SizedBox(height: 16),
+
+                  // Email
                   TextFormField(
                     controller: emailController,
                     decoration: const InputDecoration(
@@ -122,7 +130,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 12),
+
+                  // Mot de passe
                   TextFormField(
                     controller: passwordController,
                     decoration: InputDecoration(
@@ -131,17 +142,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       prefixIcon: const Icon(Icons.lock),
                     ),
                     obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)!.enterPassword;
-                      }
-                      if (value.length < 6) {
-                        return AppLocalizations.of(context)!.passwordTooShort;
-                      }
-                      return null;
-                    },
                   ),
+
                   const SizedBox(height: 12),
+
+                  // Confirmation mot de passe
                   TextFormField(
                     controller: confirmController,
                     decoration: InputDecoration(
@@ -157,7 +162,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 20),
+
                   if (errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -167,15 +174,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+
                   ElevatedButton(
                     onPressed: isLoading ? null : signUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

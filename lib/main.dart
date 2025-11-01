@@ -1,16 +1,23 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:hive_flutter/hive_flutter.dart';
 import 'pages/games_page.dart';
-import 'pages/sign_in_page.dart';
 import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
+import 'pages/app_state.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb) {
+    await Hive.initFlutter();
+    await Hive.openBox('betsBox');
+  }
 
   final envPath = File('${Directory.current.path}/.env').path;
   await dotenv.load(fileName: envPath);
@@ -22,58 +29,61 @@ Future<void> main() async {
     throw Exception("Supabase URL ou ANON KEY manquante dans le .env");
   }
 
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseKey,
-  );
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
   final session = Supabase.instance.client.auth.currentSession;
+  String? uid = session?.user.id;
 
-  runApp(MyApp(initialSession: session));
+  // Récupérer la langue depuis Supabase si utilisateur connecté
+  if (uid != null) {
+    final userData = await Supabase.instance.client
+        .from('usersdata')
+        .select('language')
+        .eq('id', uid)
+        .single();
+    final lang = userData['language'] ?? 'fr';
+    appState.setLocale(lang);
+  }
+
+  runApp(
+    ChangeNotifierProvider<AppState>.value(
+      value: appState,
+      child: MyApp(initialSession: session, uid: uid),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
   final Session? initialSession;
+  final String? uid;
 
-  const MyApp({super.key, required this.initialSession});
+  const MyApp({super.key, required this.initialSession, this.uid});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  int _currentIndex = 0;
-
-  void setCurrentIndex(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final session = widget.initialSession;
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('fr', ''),
-      ],
-      locale: const Locale('fr'),
-      home: session != null
-          ? GamesPage(uid: session.user.id) // user déjà connecté
-          : Scaffold(
-        backgroundColor: Colors.white,
-
-        body: HomePage(),
-      ), // sinon page avec Sign in / Sign up
+    return Consumer<AppState>(
+      builder: (context, state, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        locale: state.locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('fr', ''),
+          Locale('en', ''),
+        ],
+        home: widget.uid != null
+            ? GamesPage(uid: widget.uid!)
+            : const HomePage(),
+      ),
     );
   }
 }

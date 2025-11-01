@@ -50,15 +50,25 @@
       }
     }
   },
-   "successfulBet" : " Bet placed successfully ! ✅ ",
-    "passwordTooShort" : "Password too short! Must be at least 6 characters.",
-    "enterPassword" : "Please type your password",
-    "wrongEmail" : "Wrong mail format",
-    "enterEmail" : "Please type your mail address",
-    "wrongPassword" : "Wrong password",
-    "noAccountForTheseId" : "Incorrect email or password",
-    "confirmPasswordError" : "Passwords do not match",
-    "mailAlreadyUsed" : "This email is already registered",
-    "weakPassword" : "This password is too weak",
-    "accountCreated" : "Account created successfully! ✅ "
+  "successfulBet" : " Bet placed successfully ! ✅ ",
+  "passwordTooShort" : "Password too short! Must be at least 6 characters.",
+  "enterPassword" : "Please type your password",
+  "wrongEmail" : "Wrong mail format",
+  "enterEmail" : "Please type your mail address",
+  "wrongPassword" : "Wrong password",
+  "noAccountForTheseId" : "Incorrect email or password",
+  "confirmPasswordError" : "Passwords do not match",
+  "mailAlreadyUsed" : "This email is already registered",
+  "weakPassword" : "This password is too weak",
+  "accountCreated" : "Account created successfully! ✅ ",
+  "userName" : "Username",
+  "enterUserName" : "Please type your username",
+  "oddsFormat": "Choose your favorite odds format : ",
+  "infosCotesCgu": "Odds & Terms Info",
+  "formatsDesCotes": "Odds formats:",
+  "formatsDesCotesDescription": "- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)",
+  "cgu": "Terms & Conditions:",
+  "cguDescription": "- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.",
+  "firstConnection" : "First connection"
+
 }

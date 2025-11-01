@@ -98,4 +98,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountCreated => 'Votre compte a été créé avec succès';
+
+  @override
+  String get userName => 'Nom d\'utilisateur';
+
+  @override
+  String get enterUserName => 'Entrez votre nom d\'utilisateur';
+
+  @override
+  String get oddsFormat => 'Choisis ton format de cote préféré :';
+
+  @override
+  String get infosCotesCgu => 'Infos cotes & CGU';
+
+  @override
+  String get formatsDesCotes => 'Formats des cotes :';
+
+  @override
+  String get formatsDesCotesDescription =>
+      '- FR : cotes décimales (ex : 2.5) → gain = mise × cote\n- US : cotes américaines (ex : +150 / -200) → gain selon montant mis\n- UK : cotes fractionnaires (ex : 5/2) → gain = mise × (numérateur / dénominateur)';
+
+  @override
+  String get cgu => 'Conditions générales (CGU) :';
+
+  @override
+  String get cguDescription =>
+      '- Vous devez avoir 18 ans ou plus.\n- Les paris sont à vos risques.\n- Les informations fournies doivent être exactes.\n- Supabase HoopsBets n’est pas responsable des pertes financières.';
+
+  @override
+  String get firstConnection => 'Première connexion';
 }

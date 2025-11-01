@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:HoopsBets/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:HoopsBets/pages/bet_cache.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -26,6 +27,15 @@ class _BucketPageState extends State<BucketPage> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadCachedBets();
+  }
+  Future<void> _loadCachedBets() async {
+    final cachedBets = await BetCache.loadBets();
+    if (cachedBets.isNotEmpty) {
+      setState(() {
+        widget.bets.addAll(cachedBets);
+      });
+    }
   }
 
   @override
@@ -109,7 +119,7 @@ class _BucketPageState extends State<BucketPage> {
         'selection': widget.bets.map((b) => b['pickedTeam'] ?? '').toList(),
         'timestamp': DateTime.now().toIso8601String(),
       });
-
+      await BetCache.saveBets(widget.bets);
       final currentPoints = (userData?['points'] ?? 0).toDouble();
       final newPoints = (currentPoints - parsedAmount).toInt();
 
@@ -126,6 +136,7 @@ class _BucketPageState extends State<BucketPage> {
 
       setState(() => widget.bets.clear());
       Navigator.pop(context);
+      _loadUserData();
     } catch (e) {
       if (kDebugMode) print('Erreur envoi pari: $e');
       ScaffoldMessenger.of(context).showSnackBar(

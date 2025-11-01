@@ -259,6 +259,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account created successfully! ✅ '**
   String get accountCreated;
+
+  /// No description provided for @userName.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get userName;
+
+  /// No description provided for @enterUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please type your username'**
+  String get enterUserName;
+
+  /// No description provided for @oddsFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your favorite odds format : '**
+  String get oddsFormat;
+
+  /// No description provided for @infosCotesCgu.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds & Terms Info'**
+  String get infosCotesCgu;
+
+  /// No description provided for @formatsDesCotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds formats:'**
+  String get formatsDesCotes;
+
+  /// No description provided for @formatsDesCotesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)'**
+  String get formatsDesCotesDescription;
+
+  /// No description provided for @cgu.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions:'**
+  String get cgu;
+
+  /// No description provided for @cguDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.'**
+  String get cguDescription;
+
+  /// No description provided for @firstConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'First connection'**
+  String get firstConnection;
 }
 
 class _AppLocalizationsDelegate

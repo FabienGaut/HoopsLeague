@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
+import 'first_connection_page.dart';
 import 'games_page.dart';
 
 final supabase = Supabase.instance.client;
@@ -43,12 +44,49 @@ class _SignInPageState extends State<SignInPage> {
         password: passwordController.text.trim(),
       );
 
-      if (response.user != null) {
+      final user = response.user;
+      if (user != null) {
+        try {
+          final dataResponse = await supabase
+              .from('usersdata')
+              .select()
+              .eq('id', user.id)
+              .single();
+
+          if (dataResponse != null) {
+            final userName = dataResponse['user_name']; // fonctionne si c'est un Map
+            final email = dataResponse['email'];
+
+
+            if (userName == null || userName == "") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => FirstConnectionPage()),
+              );
+              return;
+            }
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => FirstConnectionPage()),
+            );
+            return;
+          }
+        } catch (e) {
+          print('Erreur fetch user: $e');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => FirstConnectionPage()),
+          );
+          return;
+        }
+
+
         // ✅ Connexion réussie → navigation
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => GamesPage(uid: response.user!.id),
+            builder: (_) => GamesPage(uid: user!.id),
           ),
         );
       } else {
