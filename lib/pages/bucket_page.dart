@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:HoopsBets/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:HoopsBets/pages/bet_cache.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -23,20 +22,24 @@ class _BucketPageState extends State<BucketPage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
 
+  // Couleurs du thème sombre
+  static const Color darkBg = Color(0xFF0D0D0D);
+  static const Color cardBg = Color(0xFF1A1A1A);
+  static const Color cardBorder = Color(0xFF2A2A2A);
+  static const Color accentPrimary = Colors.deepPurple;
+  static const Color accentGold = Color(0xFFFFD700);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9E9E9E);
+  static const Color successGreen = Color(0xFF4CAF50);
+
+
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
-    _loadCachedBets();
   }
-  Future<void> _loadCachedBets() async {
-    final cachedBets = await BetCache.loadBets();
-    if (cachedBets.isNotEmpty) {
-      setState(() {
-        widget.bets.addAll(cachedBets);
-      });
-    }
-  }
+
 
   @override
   void dispose() {
@@ -119,7 +122,7 @@ class _BucketPageState extends State<BucketPage> {
         'selection': widget.bets.map((b) => b['pickedTeam'] ?? '').toList(),
         'timestamp': DateTime.now().toIso8601String(),
       });
-      await BetCache.saveBets(widget.bets);
+
       final currentPoints = (userData?['points'] ?? 0).toDouble();
       final newPoints = (currentPoints - parsedAmount).toInt();
 
@@ -157,61 +160,26 @@ class _BucketPageState extends State<BucketPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: darkBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo.jpeg', height: 30),
+            Image.asset('assets/images/logo_black.png', height: 30),
             const SizedBox(width: 8),
-            const Text("HoopsBets"),
+            const Text("HoopsBets", style: TextStyle(color: Colors.white),),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context, widget.bets),
         ),
       ),
 
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            if (isLoading) const LinearProgressIndicator(),
-            UserAccountsDrawerHeader(
-              accountName: Text(userData?['user_name'] ?? 'No name'),
-              accountEmail: Text(userData?['email'] ?? 'No email'),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Colors.blue, size: 40),
-              ),
-              decoration: const BoxDecoration(color: Colors.blueAccent),
-            ),
-            ListTile(
-              leading: const Icon(Icons.stars),
-              title: Text('Points : ${userData?['points'] ?? 0}'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.refresh),
-              title: Text(AppLocalizations.of(context)!.reloadData),
-              onTap: _loadUserData,
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: Text(AppLocalizations.of(context)!.logout,
-                  style: const TextStyle(color: Colors.red)),
-              onTap: _logout,
-            ),
-          ],
-        ),
-      ),
+
+
 
       body: Column(
         children: [
@@ -239,12 +207,20 @@ class _BucketPageState extends State<BucketPage> {
                     ? (bet['odd'] as int).toDouble()
                     : bet['odd'] as double;
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 4,
-                  shadowColor: Colors.black26,
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: cardBorder, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -259,7 +235,7 @@ class _BucketPageState extends State<BucketPage> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
-                                  color: Colors.black87,
+                                  color: textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -268,28 +244,31 @@ class _BucketPageState extends State<BucketPage> {
                                   odd,
                                   bet['start_time'].toString(),
                                 ),
-                                style: const TextStyle(
-                                    fontSize: 13, color: Colors.black54),
+                                style: const TextStyle(fontSize: 13, color: textSecondary),
                               ),
                             ],
                           ),
                         ),
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.blueAccent,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: accentPrimary.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: accentPrimary, width: 1),
+                              ),
                               child: Text(
                                 odd.toStringAsFixed(2),
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: accentPrimary,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline,
-                                  color: Colors.red),
+                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                               onPressed: () => _removeBet(index),
                             ),
                           ],
@@ -298,6 +277,7 @@ class _BucketPageState extends State<BucketPage> {
                     ),
                   ),
                 );
+
               },
             ),
           ),
@@ -306,10 +286,10 @@ class _BucketPageState extends State<BucketPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBg,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26.withOpacity(0.1),
+                    color: Colors.black.withOpacity(0.4),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   ),
@@ -317,31 +297,35 @@ class _BucketPageState extends State<BucketPage> {
               ),
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      AppLocalizations.of(context)!
-                          .combinedOdd(combinedOdd.toStringAsFixed(2)),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    AppLocalizations.of(context)!.combinedOdd(combinedOdd.toStringAsFixed(2)),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
+                  const SizedBox(height: 12),
                   TextField(
                     controller: _amountController,
-                    keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.totalAmount,
-                      border: OutlineInputBorder(
+                      labelStyle: const TextStyle(color: textSecondary),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: cardBorder),
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blueAccent),
                       ),
-                      prefixIcon:
-                      const Icon(Icons.attach_money, color: Colors.blueAccent),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: accentPrimary),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.attach_money, color: Colors.white70 ),
                       filled: true,
-                      fillColor: Colors.grey[100],
+                      fillColor: cardBg,
                     ),
+                    style: const TextStyle(color: textPrimary),
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 12),
@@ -350,19 +334,18 @@ class _BucketPageState extends State<BucketPage> {
                     child: ElevatedButton(
                       onPressed: _sendBetToSupabase,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
+                        backgroundColor: accentPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 5,
                       ),
                       child: Text(
                         AppLocalizations.of(context)!.payout(totalPayout),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -370,6 +353,7 @@ class _BucketPageState extends State<BucketPage> {
                 ],
               ),
             ),
+
         ],
       ),
     );

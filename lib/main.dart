@@ -1,5 +1,5 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform, File, Directory;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,14 +10,28 @@ import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+
+late tz.Location localLocation;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
 
-  if (!kIsWeb) {
-    await Hive.initFlutter();
-    await Hive.openBox('betsBox');
+
+
+  String localTz = 'UTC'; // valeur par défaut
+
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows)) {
+    try {
+      localTz = await FlutterNativeTimezone.getLocalTimezone();
+    } catch (_) {}
+  } else if (Platform.isLinux || kIsWeb) {
+    localTz = 'Europe/Paris'; // ou détecte via user param
   }
+  localLocation = tz.getLocation(localTz);
 
   final envPath = File('${Directory.current.path}/.env').path;
   await dotenv.load(fileName: envPath);

@@ -8,9 +8,14 @@ import 'package:HoopsBets/pages/passed_bets.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
 import '../l10n/app_localizations.dart';
+import '../main.dart';
 import 'graph_page.dart';
 import 'package:HoopsBets/pages/manage_account_page.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -33,7 +38,7 @@ class _GamesPageState extends State<GamesPage> {
   static const Color darkBg = Color(0xFF0D0D0D);
   static const Color cardBg = Color(0xFF1A1A1A);
   static const Color cardBorder = Color(0xFF2A2A2A);
-  static const Color accentPrimary = Color(0xFF00D9FF);
+  static const Color accentPrimary = Colors.deepPurple;
   static const Color accentGold = Color(0xFFFFD700);
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF9E9E9E);
@@ -41,7 +46,7 @@ class _GamesPageState extends State<GamesPage> {
 
   static const Map<String, String> teamEmojis = {
     'Celtics': '🍀',
-    'Nets': '🕸️',
+    'Nets': '🕸',
     '76ers': '⭐',
     'Knicks': '🗽',
     'Raptors': '🦖',
@@ -118,6 +123,16 @@ class _GamesPageState extends State<GamesPage> {
       if (teamName.contains(entry.key)) return entry.value;
     }
     return '🏀'; // fallback
+  }
+
+  String formatGameTime(String utcString) {
+    try {
+      final utcTime = DateTime.parse(utcString).toUtc();
+      final localTime = utcTime.toLocal();
+      return DateFormat('EEE d MMM - HH:mm').format(localTime);
+    } catch (_) {
+      return utcString;
+    }
   }
 
 
@@ -267,9 +282,17 @@ class _GamesPageState extends State<GamesPage> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-
+          final nowLocal = tz.TZDateTime.now(localLocation);
           final games = snapshot.data!;
+
           final filteredGames = games.where((game) {
+            try {
+              final startUtc = DateTime.parse(game['start_time']).toUtc();
+              final startLocal = tz.TZDateTime.from(startUtc, localLocation);
+              if (startLocal.isBefore(nowLocal)) return false;
+            } catch (_) {
+              return false;
+            }
             final gameId = game['id'];
             // On vérifie que ce gameId n’apparaît dans aucun bet
             return !betsNotifier.value.any((b) {

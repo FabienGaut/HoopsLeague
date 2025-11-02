@@ -1,12 +1,11 @@
 import 'package:HoopsBets/pages/password_change_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:HoopsBets/pages/bet_cache.dart';
 import 'package:HoopsBets/pages/password_change_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_state.dart';
-import 'bet_cache.dart';
+
 
 final supabase = Supabase.instance.client;
 
@@ -66,7 +65,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   }
 
   Future<void> _clearCache() async {
-    await BetCache.clear();
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Cache vidé avec succès')),
     );
