@@ -114,6 +114,19 @@ class _BucketPageState extends State<BucketPage> {
 
     try {
       final pointsBetted = parsedAmount.toInt();
+      final currentPoints = (userData?['points'] ?? 0).toDouble();
+
+// ✅ Vérifie si le joueur a assez de points
+      if (parsedAmount > currentPoints) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text("❌ Solde insuffisant pour ce pari."),
+            backgroundColor: Colors.red,
+          ),
+        );
+
+      }
+
       await supabase.from('bets').insert({
         'user_id': widget.uid,
         'games_id': gameIds,
@@ -123,7 +136,7 @@ class _BucketPageState extends State<BucketPage> {
         'timestamp': DateTime.now().toIso8601String(),
       });
 
-      final currentPoints = (userData?['points'] ?? 0).toDouble();
+
       final newPoints = (currentPoints - parsedAmount).toInt();
 
       await supabase.from('usersdata').update({'points': newPoints}).eq('id', widget.uid);

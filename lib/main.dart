@@ -1,10 +1,11 @@
 import 'dart:io' show Platform, File, Directory;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'pages/games_page.dart';
 import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
@@ -19,11 +20,8 @@ late tz.Location localLocation;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
-
-
-
   String localTz = 'UTC'; // valeur par défaut
-
+  await Hive.initFlutter();
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows)) {
     try {
       localTz = await FlutterNativeTimezone.getLocalTimezone();

@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
+import 'package:HoopsBets/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'graph_page.dart';
@@ -135,11 +135,78 @@ class _GamesPageState extends State<GamesPage> {
     }
   }
 
+  Future<void> syncUserPoints(String uid) async {
+    try {
+      // 1️⃣ Récupérer tous les paris du joueur
+      final bets = await supabase
+          .from('bets')
+          .select('points_betted, odd, status, reward_given')
+          .eq('user_id', uid);
+
+      double totalWon = 0;
+
+      // 2️⃣ Calculer les gains non encore crédités
+      for (var bet in bets) {
+        final isWon = bet['status'] == 'won';
+        final alreadyCredited = bet['reward_given'] ?? false;
+
+        if (isWon && !alreadyCredited) {
+          final amount = (bet['points_betted'] ?? 0).toDouble();
+          final odd = (bet['odd'] ?? 1.0).toDouble();
+          totalWon += amount * odd;
+
+          // Marquer le gain comme crédité en BDD
+          await supabase
+              .from('bets')
+              .update({'reward_given': true})
+              .eq('user_id', uid)
+              .eq('status', 'won');
+        }
+      }
+
+      // 3️⃣ Récupérer le solde actuel depuis la BDD
+      final user = await supabase
+          .from('usersdata')
+          .select('points')
+          .eq('id', uid)
+          .single();
+
+      final currentPoints = (user['points'] ?? 0).toDouble();
+      final newPoints = (currentPoints + totalWon).toInt();
+
+      // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
+      if (totalWon > 0) {
+        await supabase
+            .from('usersdata')
+            .update({'points': newPoints})
+            .eq('id', uid);
+      }
+
+      // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
+      await CacheService.saveUserPoints(newPoints);
+
+    } catch (e) {
+      debugPrint('Erreur syncUserPoints: $e');
+    }
+  }
+
+
+  Future<void> _loadCachedPoints() async {
+    final cachedPoints = await CacheService.loadUserPoints();
+    setState(() {
+      userData = {'points': cachedPoints};
+      isLoading = false;
+    });
+  }
+
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadCachedPoints();
+    syncUserPoints(widget.uid).then((_) {
+      _loadUserData();
+    });
   }
 
   Future<void> _loadUserData() async {
@@ -261,7 +328,7 @@ class _GamesPageState extends State<GamesPage> {
           children: [
             Image.asset('assets/images/logo_black.png', height: 30),
             const SizedBox(width: 8),
-            const Text("HoopsBets", style: TextStyle(color: Colors.white),),
+            const Text("HoopsLeague", style: TextStyle(color: Colors.white),),
           ],
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -522,9 +589,9 @@ class _GamesPageState extends State<GamesPage> {
               }
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 36),
-            label: Text("(${bets.length})"),
+            label: Text("(${bets.length})", style: TextStyle(color: Colors.white),),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: accentPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -765,7 +832,7 @@ class _GamesPageState extends State<GamesPage> {
             },
           ),
           _buildDrawerItem(
-            icon: Icons.account_box,
+            icon: Icons.leaderboard,
             title: "Rankings",
             onTap: () {
               Navigator.pop(context);
@@ -798,7 +865,7 @@ class _GamesPageState extends State<GamesPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LinearProgressIndicator(),
+                  builder: (_) => PointsGraphPage(),
                 ),
               );
             },

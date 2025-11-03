@@ -22,7 +22,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
   static const Color darkBg = Color(0xFF0D0D0D);
   static const Color cardBg = Color(0xFF1A1A1A);
   static const Color cardBorder = Color(0xFF2A2A2A);
-  static const Color accentPrimary = Color(0xFF547D85);
+  static const Color accentPrimary = Color(0xFF8551CF);
   static const Color accentGold = Color(0xFFFFD700);
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF9E9E9E);
