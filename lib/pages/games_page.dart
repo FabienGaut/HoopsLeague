@@ -1,6 +1,5 @@
 import 'package:HoopsBets/pages/password_change_page.dart';
 import 'package:HoopsBets/pages/ranking_page.dart';
-import 'package:HoopsBets/pages/test_page.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:HoopsBets/pages/bucket_page.dart';
@@ -20,6 +19,49 @@ import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'leagues_page.dart';
 
 final supabase = Supabase.instance.client;
+class BasketballJerseyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // Largeur des bretelles
+    double strapWidth = size.width * 0.20;
+    double neckDepth = size.height * 0.4;  // profondeur du col rond
+
+    // Épaule gauche (bretelle large)
+    path.lineTo(0, size.height * 0.15);
+    path.moveTo(0, 0);
+    path.lineTo(strapWidth, 0);
+
+    // Faire un col rond vers la bretelle droite
+    path.arcToPoint(
+      Offset(size.width - strapWidth, 0),
+      radius: Radius.circular(size.width * 0.31), // rayon pour arrondi
+      clockwise: false,
+    );
+
+
+    // Épaule droite (bretelle large)
+    path.lineTo(size.width - strapWidth, 0);
+    path.lineTo(size.width,  0);
+
+
+
+
+    // Côtés du débardeur
+    path.lineTo(size.width*0.97, size.height * 0.85);
+    path.lineTo(size.width*0.03, size.height * 0.85);
+
+    // Fermeture du path
+    path.lineTo(0, size.height * 0.15);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
 
 class GamesPage extends StatefulWidget {
   final String uid;

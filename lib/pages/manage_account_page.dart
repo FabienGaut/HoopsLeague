@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/password_change_page.dart';
+import '../l10n/app_localizations.dart';
 import 'app_state.dart';
 
 final supabase = Supabase.instance.client;
@@ -27,7 +28,6 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   static const Color cardBorder = Color(0xFF2A2A2A);
   static const Color accentPrimary = Colors.deepPurple;
   static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF9E9E9E);
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     } catch (e) {
       if (kDebugMode) print('Erreur chargement utilisateur: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de chargement: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.loadingError(e.toString()))),
       );
       setState(() => isLoading = false);
     }
@@ -58,19 +58,19 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     try {
       await supabase.from('usersdata').update({field: value}).eq('id', widget.uid);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Modification enregistrée')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.updateSuccess)),
       );
       await _loadUserData();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur mise à jour: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.updateError(e.toString()))),
       );
     }
   }
 
   Future<void> _clearCache() async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cache vidé avec succès')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.cacheCleared)),
     );
   }
 
@@ -102,10 +102,12 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: darkBg,
       appBar: AppBar(
-        title: const Text('Gérer mon compte'),
+        title: Text(t.manageAccountTitle),
         backgroundColor: cardBg,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
@@ -121,27 +123,28 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Nom d’utilisateur', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  Text(t.usernameLabel,
+                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _usernameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Nom d’utilisateur',
-                      hintStyle: TextStyle(color: textSecondary),
+                      hintText: t.usernameHint,
+                      hintStyle: const TextStyle(color: textPrimary),
                       filled: true,
                       fillColor: cardBg,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cardBorder),
+                        borderSide: const BorderSide(color: cardBorder),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
                     onPressed: () => _updateUserField('user_name', _usernameController.text.trim()),
-                    icon: const Icon(Icons.save),
-                    label: const Text('Sauvegarder'),
+                    icon: const Icon(Icons.save, color: textPrimary,),
+                    label: Text(t.saveButton, style: TextStyle(color: textPrimary),),
                     style: ElevatedButton.styleFrom(backgroundColor: accentPrimary),
                   ),
                 ],
@@ -152,13 +155,14 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Langue', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  Text(t.languageLabel,
+                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedLang,
-                    items: const [
-                      DropdownMenuItem(value: 'fr', child: Text('Français')),
-                      DropdownMenuItem(value: 'en', child: Text('English')),
+                    items: [
+                      DropdownMenuItem(value: 'fr', child: Text(t.french)),
+                      DropdownMenuItem(value: 'en', child: Text(t.english)),
                     ],
                     onChanged: (v) {
                       if (v == null) return;
@@ -171,7 +175,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cardBorder),
+                        borderSide: const BorderSide(color: cardBorder),
                       ),
                     ),
                   ),
@@ -183,14 +187,15 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Format des cotes', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  Text(t.oddsFormatLabel,
+                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedOddFormat,
-                    items: const [
-                      DropdownMenuItem(value: 'FR', child: Text('Français (décimal)')),
-                      DropdownMenuItem(value: 'US', child: Text('Américain')),
-                      DropdownMenuItem(value: 'UK', child: Text('Fractionnel')),
+                    items: [
+                      DropdownMenuItem(value: 'FR', child: Text(t.oddsFormatFrench)),
+                      DropdownMenuItem(value: 'US', child: Text(t.oddsFormatUS)),
+                      DropdownMenuItem(value: 'UK', child: Text(t.oddsFormatUK)),
                     ],
                     onChanged: (v) {
                       setState(() => _selectedOddFormat = v);
@@ -201,7 +206,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cardBorder),
+                        borderSide: const BorderSide(color: cardBorder),
                       ),
                     ),
                   ),
@@ -212,8 +217,9 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
             _buildCard(
               child: ListTile(
                 leading: const Icon(Icons.lock_outline, color: accentPrimary),
-                title: const Text('Changer le mot de passe', style: TextStyle(color: textPrimary)),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: textSecondary),
+                title: Text(t.changePassword,
+                    style: const TextStyle(color: textPrimary)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: textPrimary),
                 onTap: _openChangePasswordPage,
               ),
             ),
@@ -221,7 +227,8 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
             _buildCard(
               child: ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Vider le cache local', style: TextStyle(color: textPrimary)),
+                title: Text(t.clearCache,
+                    style: const TextStyle(color: textPrimary)),
                 onTap: _clearCache,
               ),
             ),

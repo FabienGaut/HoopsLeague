@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../l10n/app_localizations.dart';
 import '../services/cache_service.dart';
 
 final supabase = Supabase.instance.client;
@@ -24,7 +25,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
   final TextEditingController _leagueNameController = TextEditingController();
   final TextEditingController _joinLeagueController = TextEditingController();
   bool isLoading = false;
-  List<Map<String, dynamic>> myLeagues = [];
+  List<Map<String, dynamic>> Leagues = [];
 
   @override
   void initState() {
@@ -38,9 +39,9 @@ class _LeaguesPageState extends State<LeaguesPage> {
       final data = await supabase
           .from('leagues')
           .select()
-          .contains('users_id', [widget.uid]);
+          ;
       setState(() {
-        myLeagues = List<Map<String, dynamic>>.from(data);
+        Leagues = List<Map<String, dynamic>>.from(data);
       });
     } catch (e) {
       debugPrint('Erreur chargement leagues: $e');
@@ -63,7 +64,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
 
       if (existing != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Une league avec ce nom existe déjà !')),
+           SnackBar(content: Text(AppLocalizations.of(context)!.leagueExists)),
         );
         return;
       }
@@ -77,7 +78,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
       _leagueNameController.clear();
       _loadLeagues();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('League créée !')),
+         SnackBar(content: Text(AppLocalizations.of(context)!.leagueCreated)),
       );
     } catch (e) {
       debugPrint('Erreur création league: $e');
@@ -132,7 +133,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
       _joinLeagueController.clear();
       _loadLeagues();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vous avez rejoint la league !')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.leagueJoined)),
       );
     } catch (e) {
       debugPrint('Erreur join league: $e');
@@ -145,7 +146,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
     return Scaffold(
       backgroundColor: darkBg,
       appBar: AppBar(
-        title: const Text('Mes Leagues'),
+        title: Text(AppLocalizations.of(context)!.leagues),
         centerTitle: true,
         backgroundColor: cardBg,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -157,7 +158,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Créer une league', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.createLeague, style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -166,7 +167,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
                     controller: _leagueNameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Nom de la league',
+                      hintText: AppLocalizations.of(context)!.leagueName,
                       hintStyle: TextStyle(color: textSecondary),
                       filled: true,
                       fillColor: cardBg,
@@ -181,12 +182,12 @@ class _LeaguesPageState extends State<LeaguesPage> {
                 ElevatedButton(
                   onPressed: _createLeague,
                   style: ElevatedButton.styleFrom(backgroundColor: accentPrimary),
-                  child: const Text('Créer'),
+                  child: Text(AppLocalizations.of(context)!.create),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            Text('Rejoindre une league', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.joinLeague, style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -195,7 +196,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
                     controller: _joinLeagueController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'ID de la league',
+                      hintText: AppLocalizations.of(context)!.enterLeagueName,
                       hintStyle: TextStyle(color: textSecondary),
                       filled: true,
                       fillColor: cardBg,
@@ -210,24 +211,26 @@ class _LeaguesPageState extends State<LeaguesPage> {
                 ElevatedButton(
                   onPressed: _joinLeague,
                   style: ElevatedButton.styleFrom(backgroundColor: accentPrimary),
-                  child: const Text('Rejoindre'),
+                  child: Text(AppLocalizations.of(context)!.join),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            Text('Mes leagues', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.myLeagues, style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
-                itemCount: myLeagues.length,
+                itemCount: Leagues.length,
                 itemBuilder: (context, index) {
-                  final league = myLeagues[index];
+                  final league = Leagues[index];
                   return Card(
                     color: cardBg,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: cardBorder)),
                     child: ListTile(
                       title: Text(league['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      subtitle: Text('ID: ${league['id']}', style: TextStyle(color: textSecondary)),
+                      subtitle: Text( AppLocalizations.of(context)!.membersCount(
+                        (league['users_id'] as List?)?.length ?? 0,
+                      ), style: TextStyle(color: textSecondary)),
                     ),
                   );
                 },

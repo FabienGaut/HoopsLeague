@@ -68,8 +68,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get successfulBet => ' Pari enregistré ✅ ';
 
   @override
-  String get passwordTooShort =>
-      'Votre mot de passe est trop court ! Il faut au moins 6 caractères !';
+  String get passwordTooShort => 'Minimum 6 caractères';
 
   @override
   String get enterPassword => 'Entrez votre mot de passe';
@@ -141,7 +140,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get betDeleted => '❌ Pari supprimé';
 
   @override
-  String get userNotConnected => 'Utlisateur non connecté';
+  String get userNotConnected => 'Utilisateur non connecté';
 
   @override
   String get save => 'Enregistrer';
@@ -164,7 +163,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dailyPointsTaken => 'Bonus déjà utilisé';
 
   @override
-  String get leagues => 'ligues';
+  String get leagues => 'Mes ligues';
 
   @override
   String get manageAccount => ' Gérer mon compte';
@@ -177,4 +176,148 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get alreadyHaveAccount => 'Se connecter';
+
+  @override
+  String get leagueExists => 'Une league avec ce nom existe déjà !';
+
+  @override
+  String get leagueCreated => 'La ligue a été créée ! ✅';
+
+  @override
+  String get leagueJoined => 'Vous avez rejoint la league ! ✅';
+
+  @override
+  String get myLeagues => 'Mes ligues';
+
+  @override
+  String get createLeague => 'Créer une ligue';
+
+  @override
+  String get leagueName => 'Nom de la ligue';
+
+  @override
+  String get create => 'Créer';
+
+  @override
+  String get joinLeague => 'Rejoindre une ligue';
+
+  @override
+  String get enterLeagueName => 'Entrez le nom de la ligue';
+
+  @override
+  String get join => 'Rejoindre';
+
+  @override
+  String membersCount(int count) {
+    return 'Membres : $count';
+  }
+
+  @override
+  String get manageAccountTitle => 'Gérer mon compte';
+
+  @override
+  String get usernameLabel => 'Nom d’utilisateur';
+
+  @override
+  String get usernameHint => 'Nom d’utilisateur';
+
+  @override
+  String get saveButton => 'Sauvegarder';
+
+  @override
+  String get languageLabel => 'Langue';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get oddsFormatLabel => 'Format des cotes';
+
+  @override
+  String get oddsFormatFrench => 'Français (décimal)';
+
+  @override
+  String get oddsFormatUS => 'Américain';
+
+  @override
+  String get oddsFormatUK => 'Fractionnel';
+
+  @override
+  String get changePassword => 'Changer le mot de passe';
+
+  @override
+  String get clearCache => 'Vider le cache local';
+
+  @override
+  String loadingError(Object error) {
+    return 'Erreur de chargement: $error';
+  }
+
+  @override
+  String updateError(Object error) {
+    return 'Erreur mise à jour: $error';
+  }
+
+  @override
+  String get updateSuccess => 'Modification enregistrée';
+
+  @override
+  String get cacheCleared => 'Cache vidé avec succès';
+
+  @override
+  String get yourBalance => 'Votre solde';
+
+  @override
+  String get amount => 'montant';
+
+  @override
+  String get payoutText => 'Gains';
+
+  @override
+  String get changePasswordTitle => 'Changer le mot de passe';
+
+  @override
+  String get oldPasswordLabel => 'Ancien mot de passe';
+
+  @override
+  String get newPasswordLabel => 'Nouveau mot de passe';
+
+  @override
+  String get confirmPasswordLabel => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get oldPasswordEmpty => 'Veuillez entrer l’ancien mot de passe';
+
+  @override
+  String get wrongOldPassword => 'Ancien mot de passe incorrect';
+
+  @override
+  String get passwordsDoNotMatch =>
+      'Les nouveaux mots de passe ne correspondent pas';
+
+  @override
+  String get passwordUpdated => 'Mot de passe mis à jour avec succès';
+
+  @override
+  String errorMessage(Object error) {
+    return 'Erreur: $error';
+  }
+
+  @override
+  String get changePasswordButton => 'Changer le mot de passe';
+
+  @override
+  String get hoopsLeagueTitle => 'HoopsLeague';
+
+  @override
+  String get noMembersInLeague => 'Aucun membre dans cette ligue';
+
+  @override
+  String get unknownUser => 'Inconnu';
+
+  @override
+  String get pointsSuffix => 'pts';
 }

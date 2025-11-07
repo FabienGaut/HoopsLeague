@@ -82,8 +82,8 @@ class _MyBetsPageState extends State<MyBetsPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: true,
-        title: const Text(
-          "My Bets",
+        title:  Text(
+          AppLocalizations.of(context)?.myBets ?? "My Bets",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -107,8 +107,8 @@ class _MyBetsPageState extends State<MyBetsPage> {
                 const Icon(Icons.account_balance_wallet,
                     color: accentPrimary, size: 40),
                 const SizedBox(height: 12),
-                const Text(
-                  "Your Balance",
+                Text(
+                  AppLocalizations.of(context)?.yourBalance ?? "Your Balance",
                   style: TextStyle(
                       color: textSecondary,
                       fontSize: 15,
@@ -295,14 +295,15 @@ class _MyBetsPageState extends State<MyBetsPage> {
                             mainAxisAlignment:
                             MainAxisAlignment.spaceAround,
                             children: [
-                              _buildStatItem("Odd",
+                              _buildStatItem(AppLocalizations.of(context)?.odd ?? "Odds",
                                   odd.toStringAsFixed(2), accentPrimary),
                               _divider(),
-                              _buildStatItem("Amount",
+                              _buildStatItem(AppLocalizations.of(context)?.amount ?? "Amount",
                                   amount.toStringAsFixed(0), accentGold),
                               _divider(),
                               _buildStatItem(
-                                  "Payout", payout, successGreen),
+                                  AppLocalizations.of(context)?.payoutText ?? "Payout",
+                                  payout, successGreen),
                             ],
                           ),
                         ),

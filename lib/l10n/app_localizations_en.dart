@@ -68,8 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get successfulBet => ' Bet placed successfully ! ✅ ';
 
   @override
-  String get passwordTooShort =>
-      'Password too short! Must be at least 6 characters.';
+  String get passwordTooShort => 'Minimum 6 characters';
 
   @override
   String get enterPassword => 'Please type your password';
@@ -163,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyPointsTaken => 'Daily points already used';
 
   @override
-  String get leagues => 'Leagues';
+  String get leagues => 'My leagues';
 
   @override
   String get manageAccount => 'Manage my account';
@@ -176,4 +175,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alreadyHaveAccount => 'Sign in';
+
+  @override
+  String get leagueExists => 'A league with this name already exists';
+
+  @override
+  String get leagueCreated => 'League created successfully! ✅';
+
+  @override
+  String get leagueJoined => 'League joined successfully! ✅';
+
+  @override
+  String get myLeagues => 'My leagues';
+
+  @override
+  String get createLeague => 'Create a league';
+
+  @override
+  String get leagueName => 'League name';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get joinLeague => 'Join a league';
+
+  @override
+  String get enterLeagueName =>
+      'Please type the name of the league you want to join';
+
+  @override
+  String get join => 'Join';
+
+  @override
+  String membersCount(int count) {
+    return 'Members: $count';
+  }
+
+  @override
+  String get manageAccountTitle => 'Manage my account';
+
+  @override
+  String get usernameLabel => 'Username';
+
+  @override
+  String get usernameHint => 'Username';
+
+  @override
+  String get saveButton => 'Save';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
+  String get french => 'French';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get oddsFormatLabel => 'Odds format';
+
+  @override
+  String get oddsFormatFrench => 'French (decimal)';
+
+  @override
+  String get oddsFormatUS => 'American';
+
+  @override
+  String get oddsFormatUK => 'Fractional';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get clearCache => 'Clear local cache';
+
+  @override
+  String loadingError(Object error) {
+    return 'Loading error: $error';
+  }
+
+  @override
+  String updateError(Object error) {
+    return 'Update error: $error';
+  }
+
+  @override
+  String get updateSuccess => 'Changes saved';
+
+  @override
+  String get cacheCleared => 'Cache successfully cleared';
+
+  @override
+  String get yourBalance => 'Your balance';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get payoutText => 'Payout';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get oldPasswordLabel => 'Old password';
+
+  @override
+  String get newPasswordLabel => 'New password';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm new password';
+
+  @override
+  String get oldPasswordEmpty => 'Please enter your old password';
+
+  @override
+  String get wrongOldPassword => 'Incorrect old password';
+
+  @override
+  String get passwordsDoNotMatch => 'New passwords do not match';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
+
+  @override
+  String errorMessage(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get changePasswordButton => 'Change password';
+
+  @override
+  String get hoopsLeagueTitle => 'HoopsLeague';
+
+  @override
+  String get noMembersInLeague => 'No members in this league';
+
+  @override
+  String get unknownUser => 'Unknown';
+
+  @override
+  String get pointsSuffix => 'pts';
 }
