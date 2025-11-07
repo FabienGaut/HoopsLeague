@@ -69,6 +69,30 @@
   "formatsDesCotesDescription": "- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)",
   "cgu": "Terms & Conditions:",
   "cguDescription": "- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.",
-  "firstConnection" : "First connection"
-
+  "firstConnection" : "First connection",
+  "invalidAmount" : "Invalid amount",
+  "notEnoughPoints" : "❌ Not enough points to place this bet",
+  "errorSendingBet" : "❌ Error sending bet",
+  "betDeleted" : "❌ Bet deleted",
+  "userNotConnected" : "User not connected",
+  "save" : "Save",
+  "myGraph" : "My statistics",
+  "pointsAdded": "{value} points earned !",
+      "@pointsAdded": {
+        "description": "Displays the points added by the winning bets",
+        "placeholders": {
+          "value": {
+          "type": "int"
+          }
+        }
+      },
+  "myBets" : "My bets",
+  "dailyPoints" : "Daily points",
+  "dailyPointsTaken" : "Daily points already used",
+  "leagues" : "Leagues",
+  "manageAccount": "Manage my account",
+  "rankings" : "Rankings",
+  "pointsEvolution" : "Points evolution",
+  "noData" : "No data available",
+  "alreadyHaveAccount" : "Sign in"
 }

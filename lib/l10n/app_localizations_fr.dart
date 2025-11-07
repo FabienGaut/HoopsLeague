@@ -12,7 +12,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get title => 'HoopsBets';
 
   @override
-  String get noData => 'Pas de données';
+  String get noData => 'Aucune données disponible';
 
   @override
   String get noBetsSelected => 'Aucun pari';
@@ -127,4 +127,54 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get firstConnection => 'Première connexion';
+
+  @override
+  String get invalidAmount => 'Montant invalide';
+
+  @override
+  String get notEnoughPoints => '❌ Solde insuffisant pour ce pari.';
+
+  @override
+  String get errorSendingBet => '❌ Erreur lors de l\'envoi du pari';
+
+  @override
+  String get betDeleted => '❌ Pari supprimé';
+
+  @override
+  String get userNotConnected => 'Utlisateur non connecté';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get myGraph => 'Mes statistiques';
+
+  @override
+  String pointsAdded(int value) {
+    return '$value points gagnés !';
+  }
+
+  @override
+  String get myBets => 'Mes paris';
+
+  @override
+  String get dailyPoints => 'Bonus quotidien';
+
+  @override
+  String get dailyPointsTaken => 'Bonus déjà utilisé';
+
+  @override
+  String get leagues => 'ligues';
+
+  @override
+  String get manageAccount => ' Gérer mon compte';
+
+  @override
+  String get rankings => 'Classement';
+
+  @override
+  String get pointsEvolution => 'Évolution des points';
+
+  @override
+  String get alreadyHaveAccount => 'Se connecter';
 }

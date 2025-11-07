@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:HoopsBets/services/cache_service.dart';
 
+import '../l10n/app_localizations.dart';
+
 class PointsGraphPage extends StatefulWidget {
   const PointsGraphPage({super.key});
 
@@ -43,7 +45,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
     return Scaffold(
       backgroundColor: darkBg,
       appBar: AppBar(
-        title: const Text('Évolution des points', style:  TextStyle(color: Colors.white),),
+        title:  Text(AppLocalizations.of(context)!.pointsEvolution, style:  TextStyle(color: Colors.white),),
         backgroundColor: Colors.black,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -53,7 +55,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
           : pointsHistory.isEmpty
           ? Center(
         child: Text(
-          "Aucune donnée disponible",
+          AppLocalizations.of(context)!.noData,
           style: TextStyle(color: textSecondary),
         ),
       )

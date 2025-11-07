@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:HoopsBets/pages/sign_in_page.dart';
 import '../l10n/app_localizations.dart';
@@ -65,7 +66,6 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         );
 
-        // 👉 Ici tu pourrais aussi sauvegarder le format choisi dans Supabase si tu veux
         print("Format de cote choisi : $selectedFormat");
 
         Navigator.pushReplacement(
@@ -90,117 +90,264 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  Widget _buildGlassButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required double fontSize,
+    required double width,
+    required double height,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(height / 2),
+        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white, size: fontSize * 1.2),
+        label: Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(height / 2),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final double logoSize = ((screenWidth * 0.35).clamp(80, 160)).toDouble();
+    final double fieldWidth = ((screenWidth * 0.75).clamp(200, 340)).toDouble();
+    final double buttonWidth = ((screenWidth * 0.7).clamp(160, 300)).toDouble();
+    final double buttonHeight = ((screenHeight * 0.07).clamp(45, 60)).toDouble();
+    final double fontSize = ((screenWidth * 0.045).clamp(14, 18)).toDouble();
+    final double spacing = ((screenHeight * 0.03).clamp(10, 25)).toDouble();
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
+      body: Stack(
+        children: [
+          // Fond dégradé violet-noir
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.deepPurple.shade900, Colors.black],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          // Effet assombri
+          Container(color: Colors.black.withOpacity(0.3)),
+
+          Center(
+            child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Transform.scale(
-                    scale: 0.5,
-                    child: Image.asset("assets/images/logo.jpeg"),
+                  Image.asset(
+                    "assets/images/logo.png", // ton logo blanc transparent
+                    width: logoSize,
+                    height: logoSize,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: spacing),
 
-                  // Email
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'ex: example@gmail.com',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
+                  AutoSizeText(
+                    "Join HoopsLeague Today",
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)!.enterEmail;
-                      }
-                      if (!value.contains('@') || !value.contains('.')) {
-                        return AppLocalizations.of(context)!.wrongEmail;
-                      }
-                      return null;
-                    },
                   ),
+                  SizedBox(height: spacing * 1.5),
 
-                  const SizedBox(height: 12),
-
-                  // Mot de passe
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.password,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.lock),
+                  // Conteneur semi-transparent du formulaire
+                  Container(
+                    width: fieldWidth,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
-                    obscureText: true,
-                  ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // Email
+                          TextFormField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              labelStyle:
+                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              prefixIcon:
+                              const Icon(Icons.email, color: Colors.white),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                const BorderSide(color: Colors.white),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppLocalizations.of(context)!.enterEmail;
+                              }
+                              if (!value.contains('@') || !value.contains('.')) {
+                                return AppLocalizations.of(context)!.wrongEmail;
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: spacing),
 
-                  const SizedBox(height: 12),
+                          // Mot de passe
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.password,
+                              labelStyle:
+                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              prefixIcon:
+                              const Icon(Icons.lock, color: Colors.white),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                const BorderSide(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: spacing),
 
-                  // Confirmation mot de passe
-                  TextFormField(
-                    controller: confirmController,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.confirmPassword,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.lock),
+                          // Confirmation
+                          TextFormField(
+                            controller: confirmController,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText:
+                              AppLocalizations.of(context)!.confirmPassword,
+                              labelStyle:
+                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              prefixIcon:
+                              const Icon(Icons.lock, color: Colors.white),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                const BorderSide(color: Colors.white),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value != passwordController.text) {
+                                return AppLocalizations.of(context)!
+                                    .confirmPasswordError;
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value != passwordController.text) {
-                        return AppLocalizations.of(context)!.confirmPasswordError;
-                      }
-                      return null;
-                    },
                   ),
-
-                  const SizedBox(height: 20),
+                  SizedBox(height: spacing),
 
                   if (errorMessage != null)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Text(
                         errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.redAccent),
                         textAlign: TextAlign.center,
                       ),
                     ),
 
-                  ElevatedButton(
-                    onPressed: isLoading ? null : signUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 5,
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                      AppLocalizations.of(context)!.signUP,
+                  SizedBox(height: spacing),
+
+                  _buildGlassButton(
+                    label: AppLocalizations.of(context)!.signUP,
+                    icon: Icons.person_add,
+                    fontSize: fontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    onPressed: isLoading ? () {} : signUp,
+                  ),
+
+                  SizedBox(height: spacing),
+
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignInPage()),
+                      );
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.alreadyHaveAccount,
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.white70,
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
                       ),
+                    ),
+                  ),
+
+                  SizedBox(height: spacing * 2),
+
+                  Text(
+                    "© 2025 HoopsLeague. All rights reserved.",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

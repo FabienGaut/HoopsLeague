@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'HoopsBets';
 
   @override
-  String get noData => 'No data';
+  String get noData => 'No data available';
 
   @override
   String get noBetsSelected => 'No bets selected';
@@ -126,4 +126,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstConnection => 'First connection';
+
+  @override
+  String get invalidAmount => 'Invalid amount';
+
+  @override
+  String get notEnoughPoints => '❌ Not enough points to place this bet';
+
+  @override
+  String get errorSendingBet => '❌ Error sending bet';
+
+  @override
+  String get betDeleted => '❌ Bet deleted';
+
+  @override
+  String get userNotConnected => 'User not connected';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get myGraph => 'My statistics';
+
+  @override
+  String pointsAdded(int value) {
+    return '$value points earned !';
+  }
+
+  @override
+  String get myBets => 'My bets';
+
+  @override
+  String get dailyPoints => 'Daily points';
+
+  @override
+  String get dailyPointsTaken => 'Daily points already used';
+
+  @override
+  String get leagues => 'Leagues';
+
+  @override
+  String get manageAccount => 'Manage my account';
+
+  @override
+  String get rankings => 'Rankings';
+
+  @override
+  String get pointsEvolution => 'Points evolution';
+
+  @override
+  String get alreadyHaveAccount => 'Sign in';
 }

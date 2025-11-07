@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:
-  /// **'No data'**
+  /// **'No data available'**
   String get noData;
 
   /// No description provided for @noBetsSelected.
@@ -313,6 +313,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First connection'**
   String get firstConnection;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount'**
+  String get invalidAmount;
+
+  /// No description provided for @notEnoughPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Not enough points to place this bet'**
+  String get notEnoughPoints;
+
+  /// No description provided for @errorSendingBet.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Error sending bet'**
+  String get errorSendingBet;
+
+  /// No description provided for @betDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Bet deleted'**
+  String get betDeleted;
+
+  /// No description provided for @userNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'User not connected'**
+  String get userNotConnected;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @myGraph.
+  ///
+  /// In en, this message translates to:
+  /// **'My statistics'**
+  String get myGraph;
+
+  /// Displays the points added by the winning bets
+  ///
+  /// In en, this message translates to:
+  /// **'{value} points earned !'**
+  String pointsAdded(int value);
+
+  /// No description provided for @myBets.
+  ///
+  /// In en, this message translates to:
+  /// **'My bets'**
+  String get myBets;
+
+  /// No description provided for @dailyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily points'**
+  String get dailyPoints;
+
+  /// No description provided for @dailyPointsTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily points already used'**
+  String get dailyPointsTaken;
+
+  /// No description provided for @leagues.
+  ///
+  /// In en, this message translates to:
+  /// **'Leagues'**
+  String get leagues;
+
+  /// No description provided for @manageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage my account'**
+  String get manageAccount;
+
+  /// No description provided for @rankings.
+  ///
+  /// In en, this message translates to:
+  /// **'Rankings'**
+  String get rankings;
+
+  /// No description provided for @pointsEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Points evolution'**
+  String get pointsEvolution;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get alreadyHaveAccount;
 }
 
 class _AppLocalizationsDelegate

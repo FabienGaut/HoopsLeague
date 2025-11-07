@@ -35,5 +35,22 @@
   "formatsDesCotesDescription": "- FR : cotes décimales (ex : 2.5) → gain = mise × cote\n- US : cotes américaines (ex : +150 / -200) → gain selon montant mis\n- UK : cotes fractionnaires (ex : 5/2) → gain = mise × (numérateur / dénominateur)",
   "cgu": "Conditions générales (CGU) :",
   "cguDescription": "- Vous devez avoir 18 ans ou plus.\n- Les paris sont à vos risques.\n- Les informations fournies doivent être exactes.\n- Supabase HoopsBets n’est pas responsable des pertes financières.",
-  "firstConnection" : "Première connexion"
+  "firstConnection" : "Première connexion",
+  "invalidAmount" : "Montant invalide",
+  "notEnoughPoints" : "❌ Solde insuffisant pour ce pari.",
+  "errorSendingBet" : "❌ Erreur lors de l'envoi du pari",
+  "betDeleted" : "❌ Pari supprimé",
+  "userNotConnected": "Utlisateur non connecté",
+  "save" : "Enregistrer",
+  "myGraph" : "Mes statistiques",
+  "pointsAdded": "{value} points gagnés !",
+  "myBets" : "Mes paris",
+  "dailyPoints" : "Bonus quotidien",
+  "dailyPointsTaken" : "Bonus déjà utilisé",
+  "leagues" : "ligues",
+  "manageAccount" : " Gérer mon compte",
+  "rankings" : "Classement",
+  "pointsEvolution" : "Évolution des points",
+  "noData" : "Aucune données disponible",
+  "alreadyHaveAccount" : "Se connecter"
 }

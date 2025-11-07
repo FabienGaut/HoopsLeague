@@ -107,7 +107,7 @@ class _BucketPageState extends State<BucketPage> {
 
     if (parsedAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Invalid amount."), backgroundColor: Colors.red),
+         SnackBar(content: Text(AppLocalizations.of(context)!.invalidAmount), backgroundColor: Colors.red),
       );
       return;
     }
@@ -120,7 +120,7 @@ class _BucketPageState extends State<BucketPage> {
       if (parsedAmount > currentPoints) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text("❌ Solde insuffisant pour ce pari."),
+            content:  Text(AppLocalizations.of(context)!.notEnoughPoints),
             backgroundColor: Colors.red,
           ),
         );
@@ -154,9 +154,8 @@ class _BucketPageState extends State<BucketPage> {
       Navigator.pop(context);
       _loadUserData();
     } catch (e) {
-      if (kDebugMode) print('Erreur envoi pari: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur envoi pari: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorSendingBet), backgroundColor: Colors.red),
       );
     }
   }
@@ -166,7 +165,7 @@ class _BucketPageState extends State<BucketPage> {
       widget.bets.removeAt(index);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Pari supprimé du panier.")),
+       SnackBar(content: Text(AppLocalizations.of(context)!.betDeleted)),
     );
   }
 
@@ -182,7 +181,7 @@ class _BucketPageState extends State<BucketPage> {
           children: [
             Image.asset('assets/images/logo_black.png', height: 30),
             const SizedBox(width: 8),
-            const Text("HoopsBets", style: TextStyle(color: Colors.white),),
+            const Text("HoopsLeague", style: TextStyle(color: Colors.white),),
           ],
         ),
         leading: IconButton(

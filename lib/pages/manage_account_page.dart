@@ -1,11 +1,8 @@
-import 'package:HoopsBets/pages/password_change_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:HoopsBets/pages/password_change_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:HoopsBets/pages/password_change_page.dart';
 import 'app_state.dart';
-
 
 final supabase = Supabase.instance.client;
 
@@ -24,6 +21,13 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   final _usernameController = TextEditingController();
   String? _selectedLang;
   String? _selectedOddFormat;
+
+  static const Color darkBg = Color(0xFF0D0D0D);
+  static const Color cardBg = Color(0xFF1A1A1A);
+  static const Color cardBorder = Color(0xFF2A2A2A);
+  static const Color accentPrimary = Colors.deepPurple;
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9E9E9E);
 
   @override
   void initState() {
@@ -65,7 +69,6 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   }
 
   Future<void> _clearCache() async {
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Cache vidé avec succès')),
     );
@@ -84,93 +87,143 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     super.dispose();
   }
 
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cardBorder),
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gérer mon compte')),
+      backgroundColor: darkBg,
+      appBar: AppBar(
+        title: const Text('Gérer mon compte'),
+        backgroundColor: cardBg,
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
+      ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: accentPrimary))
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Username field ---
-            TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom d’utilisateur',
-                border: OutlineInputBorder(),
+            _buildCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Nom d’utilisateur', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _usernameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Nom d’utilisateur',
+                      hintStyle: TextStyle(color: textSecondary),
+                      filled: true,
+                      fillColor: cardBg,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cardBorder),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: () => _updateUserField('user_name', _usernameController.text.trim()),
+                    icon: const Icon(Icons.save),
+                    label: const Text('Sauvegarder'),
+                    style: ElevatedButton.styleFrom(backgroundColor: accentPrimary),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: () => _updateUserField('user_name', _usernameController.text.trim()),
-              icon: const Icon(Icons.save),
-              label: const Text('Sauvegarder le nom'),
+
+            _buildCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Langue', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedLang,
+                    items: const [
+                      DropdownMenuItem(value: 'fr', child: Text('Français')),
+                      DropdownMenuItem(value: 'en', child: Text('English')),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setState(() => _selectedLang = v);
+                      _updateUserField('language', v);
+                      appState.setLocale(v);
+                    },
+                    dropdownColor: cardBg,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cardBorder),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 24),
-            const Divider(),
-
-            // --- Langue ---
-            const Text('Langue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedLang,
-              items: const [
-                DropdownMenuItem(value: 'fr', child: Text('Français')),
-                DropdownMenuItem(value: 'en', child: Text('English')),
-              ],
-              onChanged: (v) {
-                if (v == null) return;
-                setState(() => _selectedLang = v);
-                _updateUserField('language', v);
-                appState.setLocale(v); // <-- met à jour immédiatement la langue globale
-              },
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+            _buildCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Format des cotes', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedOddFormat,
+                    items: const [
+                      DropdownMenuItem(value: 'FR', child: Text('Français (décimal)')),
+                      DropdownMenuItem(value: 'US', child: Text('Américain')),
+                      DropdownMenuItem(value: 'UK', child: Text('Fractionnel')),
+                    ],
+                    onChanged: (v) {
+                      setState(() => _selectedOddFormat = v);
+                      _updateUserField('oddsformat', v);
+                    },
+                    dropdownColor: cardBg,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cardBorder),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-
-            const SizedBox(height: 24),
-            const Divider(),
-
-            // --- Format des cotes ---
-            const Text('Format des cotes',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedOddFormat,
-              items: const [
-                DropdownMenuItem(value: 'FR', child: Text('Français (décimal)')),
-                DropdownMenuItem(value: 'US', child: Text('Américain')),
-                DropdownMenuItem(value: 'UK', child: Text('Fractionnel')),
-              ],
-              onChanged: (v) {
-                setState(() => _selectedOddFormat = v);
-                _updateUserField('oddsformat', v);
-              },
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+            _buildCard(
+              child: ListTile(
+                leading: const Icon(Icons.lock_outline, color: accentPrimary),
+                title: const Text('Changer le mot de passe', style: TextStyle(color: textPrimary)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: textSecondary),
+                onTap: _openChangePasswordPage,
+              ),
             ),
 
-            const SizedBox(height: 24),
-            const Divider(),
-
-            // --- Bouton changer mot de passe ---
-            ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: const Text('Changer le mot de passe'),
-              onTap: _openChangePasswordPage,
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            ),
-
-            const Divider(),
-
-            // --- Bouton vider le cache ---
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('Vider le cache local'),
-              onTap: _clearCache,
+            _buildCard(
+              child: ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text('Vider le cache local', style: TextStyle(color: textPrimary)),
+                onTap: _clearCache,
+              ),
             ),
           ],
         ),

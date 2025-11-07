@@ -33,7 +33,7 @@ class _FirstConnectionPageState extends State<FirstConnectionPage> {
     final user = supabase.auth.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Utilisateur non connecté')),
+         SnackBar(content: Text(AppLocalizations.of(context)!.userNotConnected)),
       );
       setState(() => isLoading = false);
       return;
@@ -62,7 +62,7 @@ class _FirstConnectionPageState extends State<FirstConnectionPage> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     } finally {
       setState(() => isLoading = false);
@@ -148,7 +148,7 @@ class _FirstConnectionPageState extends State<FirstConnectionPage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Enregistrer', style: TextStyle(fontSize: 18)),
+                      : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontSize: 18)),
                 ),
 
               ),

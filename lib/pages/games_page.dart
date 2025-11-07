@@ -17,6 +17,8 @@ import 'graph_page.dart';
 import 'package:HoopsBets/pages/manage_account_page.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
+import 'leagues_page.dart';
+
 final supabase = Supabase.instance.client;
 
 class GamesPage extends StatefulWidget {
@@ -175,12 +177,79 @@ class _GamesPageState extends State<GamesPage> {
       final newPoints = (currentPoints + totalWon).toInt();
 
       // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
+      // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
       if (totalWon > 0) {
         await supabase
             .from('usersdata')
             .update({'points': newPoints})
             .eq('id', uid);
+
+        // ✅ ANIMATION POPUP ici
+        if (mounted) {
+          showGeneralDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierLabel: '',
+            transitionDuration: const Duration(milliseconds: 400),
+            pageBuilder: (context, animation1, animation2) {
+              return Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: 200,
+                  margin: const EdgeInsets.symmetric(horizontal: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.amber, width: 2.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withOpacity(0.4),
+                        blurRadius: 12,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.emoji_events, color: Colors.amber, size: 60),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context)!.pointsAdded(totalWon.toInt()),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            transitionBuilder: (context, anim1, anim2, child) {
+              return FadeTransition(
+                opacity: CurvedAnimation(parent: anim1, curve: Curves.easeOut),
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.8, end: 1.0)
+                      .animate(CurvedAnimation(parent: anim1, curve: Curves.elasticOut)),
+                  child: child,
+                ),
+              );
+            },
+          );
+
+          // Fermeture automatique après 2 secondes
+          Future.delayed(const Duration(seconds: 2), () {
+            if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+          });
+        }
+
       }
+
 
       // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
       await CacheService.saveUserPoints(newPoints);
@@ -763,7 +832,7 @@ class _GamesPageState extends State<GamesPage> {
           const SizedBox(height: 8),
           _buildDrawerItem(
             icon: Icons.history_rounded,
-            title: "Mes paris",
+            title: AppLocalizations.of(context)!.myBets,
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -774,24 +843,11 @@ class _GamesPageState extends State<GamesPage> {
               );
             },
           ), const SizedBox(height: 8),
-          _buildDrawerItem(
-            icon: Icons.history_rounded,
-            title: "Test",
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TestPage(uid: widget.uid),
-                ),
-              );
-            },
-          ), const SizedBox(height: 8),
 
           if (userData?['daily_points_used'] == false)
             _buildDrawerItem(
               icon: Icons.control_point_rounded,
-              title: "Daily points",
+              title: AppLocalizations.of(context)!.dailyPoints,
               onTap: () {
                 _addPoints(10);
                 _loadUserData();
@@ -800,15 +856,28 @@ class _GamesPageState extends State<GamesPage> {
           else
             _buildDrawerItem(
               icon: Icons.not_interested,
-              title: "Daily points (déjà pris)",
+              title: AppLocalizations.of(context)!.dailyPointsTaken,
               textColor: Colors.grey,
               iconColor: Colors.grey,
               onTap: null,
             ),
           const SizedBox(height: 8),
           _buildDrawerItem(
+            icon: Icons.people,
+            title: AppLocalizations.of(context)!.leagues,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LeaguesPage(uid: widget.uid),
+                ),
+              );
+            },
+          ),const SizedBox(height: 8),
+          _buildDrawerItem(
             icon: Icons.account_box,
-            title: "Manage account",
+            title: AppLocalizations.of(context)!.manageAccount,
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -833,33 +902,21 @@ class _GamesPageState extends State<GamesPage> {
           ),
           _buildDrawerItem(
             icon: Icons.leaderboard,
-            title: "Rankings",
+            title: AppLocalizations.of(context)!.rankings,
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LeaderboardPage(),
+                  builder: (_) => LeaderboardPage(uid: widget.uid),
                 ),
               );
             },
-          ), const SizedBox(height: 8),
-          _buildDrawerItem(
-            icon: Icons.account_box,
-            title: "My bets",
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MyBetsPage(uid: widget.uid),
-                ),
-              );
-            },
-          ), const SizedBox(height: 8),
+          ),
+           const SizedBox(height: 8),
           _buildDrawerItem(
             icon: Icons.line_axis_outlined,
-            title: "My graph",
+            title: AppLocalizations.of(context)!.myGraph,
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -874,7 +931,7 @@ class _GamesPageState extends State<GamesPage> {
           const Divider(color: cardBorder, height: 32, indent: 16, endIndent: 16),
           _buildDrawerItem(
             icon: Icons.logout_rounded,
-            title: "Déconnexion",
+            title: AppLocalizations.of(context)!.logout,
             textColor: Colors.red[400],
             iconColor: Colors.red[400],
             onTap: () {
