@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:HoopsBets/pages/sign_in_page.dart';
+import 'package:hoopsleague/pages/sign_in_page.dart';
 import '../l10n/app_localizations.dart';
 
 final supabase = Supabase.instance.client;

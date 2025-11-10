@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:HoopsBets/pages/sign_in_page.dart';
-import 'package:HoopsBets/pages/sign_up_page.dart';
+import 'package:hoopsleague/pages/sign_in_page.dart';
+import 'package:hoopsleague/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {

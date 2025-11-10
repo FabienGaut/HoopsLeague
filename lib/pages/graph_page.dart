@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:HoopsBets/services/cache_service.dart';
+import 'package:hoopsleague/services/cache_service.dart';
 
 import '../l10n/app_localizations.dart';
 

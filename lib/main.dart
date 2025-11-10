@@ -1,8 +1,6 @@
-import 'dart:io' show Platform, File, Directory;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -11,28 +9,16 @@ import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
-
-late tz.Location localLocation;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  tz.initializeTimeZones();
-  String localTz = 'UTC'; // valeur par défaut
-  await Hive.initFlutter();
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows)) {
-    try {
-      localTz = await FlutterNativeTimezone.getLocalTimezone();
-    } catch (_) {}
-  } else if (Platform.isLinux || kIsWeb) {
-    localTz = 'Europe/Paris'; // ou détecte via user param
-  }
-  localLocation = tz.getLocation(localTz);
 
-  final envPath = File('${Directory.current.path}/.env').path;
-  await dotenv.load(fileName: envPath);
+  // Initialiser Hive (compatible Web et mobile)
+  await Hive.initFlutter();
+
+  // Charger les variables d'environnement
+  await dotenv.load(fileName: 'assets/.env');
+
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
@@ -63,6 +49,11 @@ Future<void> main() async {
       child: MyApp(initialSession: session, uid: uid),
     ),
   );
+}
+
+// Exemple d'utilisation de la date partout
+DateTime getNow() {
+  return DateTime.now(); // local machine / navigateur
 }
 
 class MyApp extends StatefulWidget {

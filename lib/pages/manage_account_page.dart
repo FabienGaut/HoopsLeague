@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:HoopsBets/pages/password_change_page.dart';
+import 'package:hoopsleague/pages/password_change_page.dart';
 import '../l10n/app_localizations.dart';
 import 'app_state.dart';
 

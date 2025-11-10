@@ -1,20 +1,19 @@
-import 'package:HoopsBets/pages/password_change_page.dart';
-import 'package:HoopsBets/pages/ranking_page.dart';
+import 'package:hoopsleague/pages/password_change_page.dart';
+import 'package:hoopsleague/pages/ranking_page.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:HoopsBets/pages/bucket_page.dart';
-import 'package:HoopsBets/pages/passed_bets.dart';
-import 'package:HoopsBets/pages/sign_in_page.dart';
+import 'package:hoopsleague/pages/bucket_page.dart';
+import 'package:hoopsleague/pages/passed_bets.dart';
+import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:HoopsBets/services/cache_service.dart';
+import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import 'graph_page.dart';
-import 'package:HoopsBets/pages/manage_account_page.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:hoopsleague/pages/manage_account_page.dart';
 
 import 'leagues_page.dart';
 
@@ -460,17 +459,19 @@ class _GamesPageState extends State<GamesPage> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-          final nowLocal = tz.TZDateTime.now(localLocation);
+          final nowLocal = DateTime.now(); // heure locale de l'appareil / navigateur
+
           final games = snapshot.data!;
 
           final filteredGames = games.where((game) {
             try {
               final startUtc = DateTime.parse(game['start_time']).toUtc();
-              final startLocal = tz.TZDateTime.from(startUtc, localLocation);
+              final startLocal = startUtc.toLocal(); // conversion vers heure locale
               if (startLocal.isBefore(nowLocal)) return false;
             } catch (_) {
               return false;
             }
+
             final gameId = game['id'];
             // On vérifie que ce gameId n’apparaît dans aucun bet
             return !betsNotifier.value.any((b) {

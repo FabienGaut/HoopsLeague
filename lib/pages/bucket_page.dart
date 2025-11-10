@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:HoopsBets/pages/sign_in_page.dart';
-import 'package:HoopsBets/l10n/app_localizations.dart';
+import 'package:hoopsleague/pages/sign_in_page.dart';
+import 'package:hoopsleague/l10n/app_localizations.dart';
 
 final supabase = Supabase.instance.client;
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:HoopsBets/pages/sign_up_page.dart';
+import 'package:hoopsleague/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
 import 'first_connection_page.dart';
 import 'games_page.dart';
