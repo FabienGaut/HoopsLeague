@@ -41,7 +41,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -90,12 +90,12 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
               padding: const EdgeInsets.all(16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -122,7 +122,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                             drawVerticalLine: false,
                             horizontalInterval: 10,
                             getDrawingHorizontalLine: (value) => FlLine(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               strokeWidth: 1,
                             ),
                           ),
@@ -190,7 +190,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                                 show: true,
                                 gradient: LinearGradient(
                                   colors: [
-                                    accentGlow.withOpacity(0.25),
+                                    accentGlow.withValues(alpha: 0.25),
                                     Colors.transparent
                                   ],
                                   begin: Alignment.topCenter,

@@ -79,7 +79,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -114,7 +114,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
 
           SafeArea(
             child: Column(
@@ -128,10 +128,10 @@ class _MyBetsPageState extends State<MyBetsPage> {
                       color: Color(0xFF182134),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.2), width: 1),
+                          color: Colors.white.withValues(alpha: 0.2), width: 1),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -244,10 +244,10 @@ class _MyBetsPageState extends State<MyBetsPage> {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                               color:
-                              Colors.white.withOpacity(0.15)),
+                              Colors.white.withValues(alpha: 0.15)),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -266,7 +266,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                     const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: statusColor
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                       borderRadius:
                                       BorderRadius.circular(8),
                                     ),
@@ -320,10 +320,10 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                           vertical: 6),
                                       decoration: BoxDecoration(
                                         color: accentGlow
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         border: Border.all(
                                             color: accentGlow
-                                                .withOpacity(0.4),
+                                                .withValues(alpha: 0.4),
                                             width: 1),
                                         borderRadius:
                                         BorderRadius.circular(8),
@@ -345,7 +345,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.white
-                                      .withOpacity(0.05),
+                                      .withValues(alpha: 0.05),
                                   borderRadius:
                                   BorderRadius.circular(8),
                                 ),
@@ -385,7 +385,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
   Widget _divider() => Container(
     height: 40,
     width: 1,
-    color: Colors.white.withOpacity(0.15),
+    color: Colors.white.withValues(alpha: 0.15),
   );
 
   Widget _buildStatItem(String label, String value, Color color) {

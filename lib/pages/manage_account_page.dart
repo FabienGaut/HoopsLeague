@@ -98,12 +98,12 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -120,7 +120,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -147,7 +147,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
 
           SafeArea(
             child: isLoading
@@ -173,10 +173,10 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                             ),
                           ),
                           child: TextField(
@@ -209,7 +209,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                            accentPrimary.withOpacity(0.9),
+                            accentPrimary.withValues(alpha: 0.9),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -232,7 +232,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: _selectedLang,
+                          initialValue: _selectedLang,
                           items: [
                             DropdownMenuItem(
                               value: 'fr',
@@ -254,15 +254,15 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                             appState.setLocale(v);
                           },
                           dropdownColor:
-                          Colors.black.withOpacity(0.8),
+                          Colors.black.withValues(alpha: 0.8),
                           iconEnabledColor: accentGlow,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
+                            fillColor: Colors.white.withValues(alpha: 0.1),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                               ),
                             ),
                           ),
@@ -284,7 +284,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: _selectedOddFormat,
+                          initialValue: _selectedOddFormat,
                           items: [
                             DropdownMenuItem(
                                 value: 'FR',
@@ -307,15 +307,15 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                             _updateUserField('oddsformat', v);
                           },
                           dropdownColor:
-                          Colors.black.withOpacity(0.8),
+                          Colors.black.withValues(alpha: 0.8),
                           iconEnabledColor: accentGlow,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
+                            fillColor: Colors.white.withValues(alpha: 0.1),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                               ),
                             ),
                           ),

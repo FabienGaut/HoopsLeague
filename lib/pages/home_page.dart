@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
           ),
           // --- Overlay transparent pour effet glass ---
           Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
           ),
           // --- Contenu principal ---
           Center(
@@ -63,7 +63,7 @@ class HomePage extends StatelessWidget {
                       "Let's see if you know ball.",
                       maxLines: 2,
                       style: TextStyle(
-                        color: textPrimary.withOpacity(0.9),
+                        color: textPrimary.withValues(alpha: 0.9),
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.1,
@@ -105,7 +105,7 @@ class HomePage extends StatelessWidget {
                   Text(
                     "© 2025 HoopsLeague. All rights reserved.",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,
                     ),
                   )
@@ -131,12 +131,12 @@ class HomePage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15), // effet glass
+        color: Colors.white.withValues(alpha: 0.15), // effet glass
         borderRadius: BorderRadius.circular(height / 2),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),

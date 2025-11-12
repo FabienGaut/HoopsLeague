@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,23 +9,10 @@ import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
 
 Future<void> main() async {
   tz.initializeTimeZones();
-  final String timeZoneName = DateTime.now().timeZoneName;
-
-// Map des fuseaux non standard vers IANA
-  final Map<String, String> timeZoneMap = {
-    'CET': 'Europe/Paris',
-    'CEST': 'Europe/Paris',
-    // ajouter d'autres si nécessaire
-  };
-
-  final tz.Location localLocation = tz.getLocation(
-      timeZoneMap[timeZoneName] ?? 'UTC'
-  );
 
   WidgetsFlutterBinding.ensureInitialized();
 

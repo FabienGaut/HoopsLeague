@@ -126,13 +126,13 @@ class _FirstConnectionPageState extends State<FirstConnectionPage> {
               ),
 
               DropdownButtonFormField<String>(
-                value: selectedFormat,
+                initialValue: selectedFormat,
                 decoration:  InputDecoration(
                   labelText: AppLocalizations.of(context)!.oddsFormat,
                   border: OutlineInputBorder(),
                 ),
                 items: ['FR', 'US', 'UK']
-                    .map((e) => DropdownMenuItem(child: Text(e), value: e))
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (v) => setState(() => selectedFormat = v!),
               ),

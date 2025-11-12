@@ -53,40 +53,42 @@ class _SignInPageState extends State<SignInPage> {
               .eq('id', user.id)
               .single();
 
-          if (dataResponse != null) {
-            final userName = dataResponse['user_name'];
-            if (userName == null || userName == "") {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) =>  FirstConnectionPage()),
-              );
-              return;
-            }
-          } else {
+
+          final userName = dataResponse['user_name'];
+          if (userName == null || userName == "") {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) =>  FirstConnectionPage()),
+              MaterialPageRoute(builder: (_) => FirstConnectionPage()),
             );
             return;
           }
+
         } catch (e) {
+          if (!mounted) return; // ✅ Ajouté ici
+
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) =>  FirstConnectionPage()),
+            MaterialPageRoute(builder: (_) => FirstConnectionPage()),
           );
           return;
         }
+
+        if (!mounted) return; // ✅ Ajouté ici
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => GamesPage(uid: user.id)),
         );
       } else {
+        if (!mounted) return; // ✅ Ajouté ici
+
         setState(() {
           errorMessage = AppLocalizations.of(context)!.noAccountForTheseId;
         });
       }
     } on AuthException catch (e) {
+      if (!mounted) return; // ✅ Ajouté ici
+
       setState(() {
         if (e.message.contains('Invalid login credentials')) {
           errorMessage = AppLocalizations.of(context)!.wrongPassword;
@@ -97,13 +99,18 @@ class _SignInPageState extends State<SignInPage> {
         }
       });
     } catch (e) {
+      if (!mounted) return; // ✅ Ajouté ici
+
       setState(() {
         errorMessage = 'Error : $e';
       });
     } finally {
+      if (!mounted)  // ✅ Ajouté ici
+
       setState(() => isLoading = false);
     }
   }
+
 
   // 🔹 Bouton “verre” réutilisable (même que HomePage)
   Widget _buildGlassButton({
@@ -118,12 +125,12 @@ class _SignInPageState extends State<SignInPage> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(height / 2),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -176,7 +183,7 @@ class _SignInPageState extends State<SignInPage> {
             ),
           ),
           // Effet glass
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
           Center(
             child: SingleChildScrollView(
               child: Column(
@@ -192,7 +199,7 @@ class _SignInPageState extends State<SignInPage> {
                     "Welcome back to HoopsLeague",
                     maxLines: 1,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
@@ -205,9 +212,9 @@ class _SignInPageState extends State<SignInPage> {
                     width: fieldWidth,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                     ),
                     child: Form(
                       key: _formKey,
@@ -220,13 +227,13 @@ class _SignInPageState extends State<SignInPage> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
                               const Icon(Icons.email, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                    color: Colors.white.withOpacity(0.3)),
+                                    color: Colors.white.withValues(alpha: 0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -254,13 +261,13 @@ class _SignInPageState extends State<SignInPage> {
                               labelText:
                               AppLocalizations.of(context)!.password,
                               labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
                               const Icon(Icons.lock, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                    color: Colors.white.withOpacity(0.3)),
+                                    color: Colors.white.withValues(alpha: 0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -330,7 +337,7 @@ class _SignInPageState extends State<SignInPage> {
                   Text(
                     "© 2025 HoopsLeague. All rights reserved.",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,
                     ),
                   ),

@@ -96,13 +96,13 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   Color getRankColor(int rank) {
     switch (rank) {
       case 1:
-        return accentGlow.withOpacity(0.25);
+        return accentGlow.withValues(alpha: 0.25);
       case 2:
-        return Colors.purpleAccent.withOpacity(0.15);
+        return Colors.purpleAccent.withValues(alpha: 0.15);
       case 3:
-        return Colors.indigoAccent.withOpacity(0.15);
+        return Colors.indigoAccent.withValues(alpha: 0.15);
       default:
-        return Colors.white.withOpacity(0.05);
+        return Colors.white.withValues(alpha: 0.05);
     }
   }
 
@@ -113,7 +113,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -147,7 +147,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
 
           SafeArea(
             child: isLoading
@@ -161,14 +161,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.25)),
+                            color: Colors.white.withValues(alpha: 0.25)),
                       ),
                       child: DropdownButton<Map<String, dynamic>>(
                         value: selectedLeague,
-                        dropdownColor: Colors.black.withOpacity(0.8),
+                        dropdownColor: Colors.black.withValues(alpha: 0.8),
                         isExpanded: true,
                         underline: const SizedBox(),
                         iconEnabledColor: accentGlow,
@@ -223,13 +223,13 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             color: getRankColor(rank),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color:
-                                Colors.black.withOpacity(0.3),
+                                Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -259,12 +259,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: accentGlow.withOpacity(0.15),
+                                color: accentGlow.withValues(alpha: 0.15),
                                 borderRadius:
                                 BorderRadius.circular(8),
                                 border: Border.all(
                                   color:
-                                  accentGlow.withOpacity(0.5),
+                                  accentGlow.withValues(alpha: 0.5),
                                   width: 1,
                                 ),
                               ),

@@ -15,7 +15,6 @@ class LeaguesPage extends StatefulWidget {
 
 class _LeaguesPageState extends State<LeaguesPage> {
   static const Color accentPrimary = Color(0xFF256af4);
-  static const Color accentGlow = Color(0xFF9C9CFF);
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.white70;
 
@@ -88,13 +87,6 @@ class _LeaguesPageState extends State<LeaguesPage> {
           .eq('name', leagueName)
           .single();
 
-      if (league == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('League introuvable')),
-        );
-        return;
-      }
-
       final leagueId = league['id'];
       List users = List.from(league['users_id'] ?? []);
       if (!users.contains(widget.uid)) users.add(widget.uid);
@@ -134,7 +126,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -161,7 +153,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
 
           SafeArea(
             child: Padding(
@@ -232,14 +224,14 @@ class _LeaguesPageState extends State<LeaguesPage> {
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.08),
+                            color: Colors.white.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -284,9 +276,9 @@ class _LeaguesPageState extends State<LeaguesPage> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.25)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
             ),
             child: TextField(
               controller: controller,
@@ -305,7 +297,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
         ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: accentPrimary.withOpacity(0.9),
+            backgroundColor: accentPrimary.withValues(alpha: 0.9),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

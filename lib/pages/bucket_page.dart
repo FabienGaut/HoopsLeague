@@ -25,12 +25,9 @@ class _BucketPageState extends State<BucketPage> {
 
   // 🎨 Palette du thème cohérente avec LeaderboardPage
   static const Color accentPrimary = Color(0xFF256af4);
-  static const Color accentGlow = Color(0xFF9C9CFF); // bleu-violet clair
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.white70;
-  static const Color successGreen = Color(0xFF4CAF50);
   static const Color surfaceDark = Color(0xFF182134);
-  static const Color borderDark = Color(0xFF314368);
   static const Color backgroundDark = Color(0xFF101622);
 
   @override
@@ -61,17 +58,6 @@ class _BucketPageState extends State<BucketPage> {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur chargement utilisateur: $e')),
-      );
-    }
-  }
-
-  Future<void> _logout() async {
-    await supabase.auth.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInPage()),
-            (route) => false,
       );
     }
   }
@@ -184,7 +170,7 @@ class _BucketPageState extends State<BucketPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -218,7 +204,7 @@ class _BucketPageState extends State<BucketPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
           SafeArea(
           child:
           Column(
@@ -244,10 +230,6 @@ class _BucketPageState extends State<BucketPage> {
                   itemCount: widget.bets.length,
                   itemBuilder: (context, index) {
                     final bet = widget.bets[index];
-                    final pickedTeam = bet['pickedTeam'];
-                    final odd = bet['odd'] is int
-                        ? (bet['odd'] as int).toDouble()
-                        : bet['odd'] as double;
 
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -258,7 +240,7 @@ class _BucketPageState extends State<BucketPage> {
                         border: Border.all(color: surfaceDark, width: 0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -336,7 +318,7 @@ class _BucketPageState extends State<BucketPage> {
                     border: Border.all(color: surfaceDark, width: 0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -363,7 +345,7 @@ class _BucketPageState extends State<BucketPage> {
                           labelStyle: const TextStyle(color: textSecondary),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.25)),
+                                color: Colors.white.withValues(alpha: 0.25)),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -373,7 +355,7 @@ class _BucketPageState extends State<BucketPage> {
                           prefixIcon: const Icon(Icons.attach_money,
                               color: Colors.white70),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
+                          fillColor: Colors.white.withValues(alpha: 0.1),
                         ),
                         style: const TextStyle(color: textPrimary),
                         onChanged: (_) => setState(() {}),

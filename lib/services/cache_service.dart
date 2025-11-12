@@ -25,7 +25,6 @@ class CacheService {
 
     await box.put('history', history);
 
-    print('Saved history: $history'); // DEBUG
   }
 
 
@@ -33,7 +32,7 @@ class CacheService {
   static Future<List<Map<String, dynamic>>> loadPointsHistory() async {
     final box = await Hive.openBox(_pointsBox);
     final rawHistory = box.get('history', defaultValue: []);
-    print('Raw history from Hive: $rawHistory'); // DEBUG
+
 
     return List<Map<String, dynamic>>.from(rawHistory.map((e) {
       return {

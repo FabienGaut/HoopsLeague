@@ -86,12 +86,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(height / 2),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -134,7 +134,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -168,7 +168,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
 
           Center(
             child: SingleChildScrollView(
@@ -181,7 +181,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   Text(
                     t.changePasswordTitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
@@ -195,9 +195,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     width: fieldWidth,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                     ),
                     child: Form(
                       key: _formKey,
@@ -210,13 +210,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             decoration: InputDecoration(
                               labelText: t.oldPasswordLabel,
                               labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon: const Icon(Icons.lock_outline,
                                   color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
-                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                                BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -234,13 +234,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             decoration: InputDecoration(
                               labelText: t.newPasswordLabel,
                               labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
                               const Icon(Icons.lock, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
-                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                                BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -258,13 +258,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             decoration: InputDecoration(
                               labelText: t.confirmPasswordLabel,
                               labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.8)),
+                              TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
                               const Icon(Icons.lock, color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
-                                BorderSide(color: Colors.white.withOpacity(0.3)),
+                                BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -295,7 +295,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   Text(
                     "© 2025 HoopsLeague",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,
                     ),
                   ),

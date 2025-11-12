@@ -20,7 +20,6 @@ class BasketballJerseyClipper extends CustomClipper<Path> {
 
     // Largeur des bretelles
     double strapWidth = size.width * 0.20;
-    double neckDepth = size.height * 0.4;  // profondeur du col rond
 
     // Épaule gauche (bretelle large)
     path.lineTo(0, size.height * 0.15);
@@ -72,9 +71,7 @@ class _GamesPageState extends State<GamesPage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
 
-  // Couleurs améliorées
-  static  Color successGreen = Color(0xFF4CAF50);
-  static  Color appBarDark = Color(0xFF0B1017).withOpacity(0.5);
+
   static  Color backgroundDark = Color(0xFF101622);
   static  Color surfaceDark = Color(0xFF182134);
   static  Color borderDark = Color(0xFF314368);
@@ -241,7 +238,7 @@ class _GamesPageState extends State<GamesPage> {
                     border: Border.all(color: Colors.amber, width: 2.5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.amber.withOpacity(0.4),
+                        color: Colors.amber.withValues(alpha: 0.4),
                         blurRadius: 12,
                         spreadRadius: 4,
                       ),
@@ -336,6 +333,7 @@ class _GamesPageState extends State<GamesPage> {
         ),
       );
     }
+
   }
   String convertOdds(double frOdd, String oddsFormat) {
 
@@ -429,7 +427,7 @@ class _GamesPageState extends State<GamesPage> {
       extendBodyBehindAppBar: true,
       backgroundColor: backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -557,7 +555,7 @@ class _GamesPageState extends State<GamesPage> {
                     border: Border.all(color: surfaceDark, width: 0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -598,19 +596,19 @@ class _GamesPageState extends State<GamesPage> {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            getTeamColor(homeTeam).withOpacity(0.6),
+                                            getTeamColor(homeTeam).withValues(alpha: 0.6),
                                             getTeamColor(homeTeam)
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
                                         border: Border.all(
-                                          color: getTeamColor(homeTeam).withOpacity(0.8),
+                                          color: getTeamColor(homeTeam).withValues(alpha: 0.8),
                                           width: 2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: getTeamColor(homeTeam).withOpacity(0.4),
+                                            color: getTeamColor(homeTeam).withValues(alpha: 0.4),
                                             blurRadius: 6,
                                             offset: const Offset(0, 2),
                                           ),
@@ -672,19 +670,19 @@ class _GamesPageState extends State<GamesPage> {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            getTeamColor(awayTeam).withOpacity(0.6),
+                                            getTeamColor(awayTeam).withValues(alpha: 0.6),
                                             getTeamColor(awayTeam)
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
                                         border: Border.all(
-                                          color: getTeamColor(awayTeam).withOpacity(0.8),
+                                          color: getTeamColor(awayTeam).withValues(alpha: 0.8),
                                           width: 2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: getTeamColor(awayTeam).withOpacity(0.4),
+                                            color: getTeamColor(awayTeam).withValues(alpha: 0.4),
                                             blurRadius: 6,
                                             offset: const Offset(0, 2),
                                           ),
@@ -850,85 +848,6 @@ class _GamesPageState extends State<GamesPage> {
 
   }
 
-  Widget _teamWidget(
-      String teamShort,
-      String teamFull,
-      Color color,
-      String odd,
-      double scale,
-      ) {
-    final emoji = getTeamEmoji(teamFull);
-
-    return Column(
-
-      children: [
-        ClipPath(
-          clipper: BasketballJerseyClipper(),
-          child: Container(
-            width: 60,
-            height: 80,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color.withOpacity(0.6), color],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: color.withOpacity(0.8), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
-              child: AutoSizeText(
-                '$emoji\n$teamShort',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          teamFull,
-          style: TextStyle(
-            color: textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: textPrimary.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: textPrimary.withOpacity(0.5), width: 1),
-          ),
-          child: Text(
-            odd,
-            style:  TextStyle(
-              color: textPrimary,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       backgroundColor: surfaceDark,
@@ -1069,6 +988,7 @@ class _GamesPageState extends State<GamesPage> {
             onTap: () {
               Navigator.pop(context); // ferme le drawer
               _loadUserData();
+              syncUserPoints(widget.uid);
               setState(() {
                 bets.clear();
                 betsNotifier.value = [];
