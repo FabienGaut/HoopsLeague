@@ -11,5 +11,6 @@ class AppState extends ChangeNotifier {
   }
 }
 
+
 // Instancier une seule fois pour l'utiliser globalement
 final AppState appState = AppState();
