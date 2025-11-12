@@ -44,6 +44,8 @@ class _LeaguesPageState extends State<LeaguesPage> {
   }
 
   Future<void> _createLeague() async {
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     final name = _leagueNameController.text.trim();
     if (name.isEmpty) return;
 
@@ -55,8 +57,8 @@ class _LeaguesPageState extends State<LeaguesPage> {
           .maybeSingle();
 
       if (existing != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.leagueExists)),
+        messenger.showSnackBar(
+          SnackBar(content: Text(t.leagueExists)),
         );
         return;
       }
@@ -68,8 +70,8 @@ class _LeaguesPageState extends State<LeaguesPage> {
 
       _leagueNameController.clear();
       _loadLeagues();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.leagueCreated)),
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.leagueCreated)),
       );
     } catch (e) {
       debugPrint('Erreur création league: $e');
@@ -77,6 +79,10 @@ class _LeaguesPageState extends State<LeaguesPage> {
   }
 
   Future<void> _joinLeague() async {
+
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
     final leagueName = _joinLeagueController.text.trim();
     if (leagueName.isEmpty) return;
 
@@ -111,8 +117,8 @@ class _LeaguesPageState extends State<LeaguesPage> {
 
       _joinLeagueController.clear();
       _loadLeagues();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.leagueJoined)),
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.leagueJoined)),
       );
     } catch (e) {
       debugPrint('Erreur join league: $e');

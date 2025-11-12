@@ -172,6 +172,7 @@ class _GamesPageState extends State<GamesPage> {
   }
 
   Future<void> syncUserPoints(String uid) async {
+    final nav = Navigator.of(context);
     try {
       // 1️⃣ Récupérer tous les paris du joueur
       final bets = await supabase
@@ -278,7 +279,7 @@ class _GamesPageState extends State<GamesPage> {
 
           // Fermeture automatique après 2 secondes
           Future.delayed(const Duration(seconds: 2), () {
-            if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+            if (nav.canPop()) nav.pop();
           });
         }
 
@@ -313,6 +314,7 @@ class _GamesPageState extends State<GamesPage> {
   }
 
   Future<void> _loadUserData() async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final data = await supabase
           .from('usersdata')
@@ -326,7 +328,7 @@ class _GamesPageState extends State<GamesPage> {
       });
     } catch (e) {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Erreur chargement utilisateur: $e'),
           backgroundColor: Colors.red,
@@ -392,6 +394,7 @@ class _GamesPageState extends State<GamesPage> {
   }
 
   Future<void> _addPoints(int points) async {
+    final messenger = ScaffoldMessenger.of(context);
     if (userData == null) return;
     final response = await supabase
         .from('usersdata')
@@ -412,7 +415,7 @@ class _GamesPageState extends State<GamesPage> {
         userData!['points'] = newPoints;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('You earned $points points!'),
           backgroundColor: Colors.green,

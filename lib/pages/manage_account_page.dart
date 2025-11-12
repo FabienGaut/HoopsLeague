@@ -36,6 +36,8 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   }
 
   Future<void> _loadUserData() async {
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final data =
       await supabase.from('usersdata').select().eq('id', widget.uid).single();
@@ -48,10 +50,10 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
       });
     } catch (e) {
       if (kDebugMode) print('Erreur chargement utilisateur: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content:
-          Text(AppLocalizations.of(context)!.loadingError(e.toString())),
+          Text(t.loadingError(e.toString())),
         ),
       );
       setState(() => isLoading = false);
@@ -59,17 +61,19 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   }
 
   Future<void> _updateUserField(String field, dynamic value) async {
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await supabase.from('usersdata').update({field: value}).eq('id', widget.uid);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.updateSuccess)),
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.updateSuccess)),
       );
       await _loadUserData();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
             content:
-            Text(AppLocalizations.of(context)!.updateError(e.toString()))),
+            Text(t.updateError(e.toString()))),
       );
     }
   }

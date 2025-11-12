@@ -6,11 +6,13 @@ import 'games_page.dart';
 final supabase = Supabase.instance.client;
 
 class FirstConnectionPage extends StatefulWidget {
+  const FirstConnectionPage({super.key});
+
   @override
-  _FirstConnectionPageState createState() => _FirstConnectionPageState();
+  FirstConnectionPageState createState() => FirstConnectionPageState();
 }
 
-class _FirstConnectionPageState extends State<FirstConnectionPage> {
+class FirstConnectionPageState extends State<FirstConnectionPage> {
   final _formKey = GlobalKey<FormState>();
   final userNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -55,7 +57,7 @@ class _FirstConnectionPageState extends State<FirstConnectionPage> {
         'created_at': now.toIso8601String(),
         'language' : selectedLanguage,
       });
-
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => GamesPage(uid: user.id)),

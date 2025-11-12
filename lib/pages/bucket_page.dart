@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:hoopsleague/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/services/cache_service.dart';
@@ -43,6 +41,7 @@ class _BucketPageState extends State<BucketPage> {
   }
 
   Future<void> _loadUserData() async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final data = await supabase
           .from('usersdata')
@@ -56,7 +55,7 @@ class _BucketPageState extends State<BucketPage> {
       });
     } catch (e) {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Erreur chargement utilisateur: $e')),
       );
     }
