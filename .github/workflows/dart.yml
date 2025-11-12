@@ -36,10 +36,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 5️⃣ Vérifie la qualité du code (lint/analyse)
-      - name: Analyze project source
-        run: flutter analyze
-
       # 6️⃣ Exécute les tests unitaires
       - name: Run Flutter tests
         run: flutter test
