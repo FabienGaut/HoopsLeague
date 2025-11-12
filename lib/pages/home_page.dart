@@ -22,7 +22,6 @@ class HomePage extends StatelessWidget {
     final double buttonFontSize = ((screenWidth * 0.045).clamp(14, 18)).toDouble();
     final double spacing = ((screenHeight * 0.03).clamp(10, 30)).toDouble();
 
-
     return Scaffold(
       body: Stack(
         children: [
