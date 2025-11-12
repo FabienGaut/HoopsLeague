@@ -19,7 +19,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'  # adapte à ta version
+          flutter-version: '3.26.3'
           channel: 'stable'
 
       # 3️⃣ Met en cache les dépendances Flutter/Dart
