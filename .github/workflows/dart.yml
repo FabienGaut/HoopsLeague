@@ -1,0 +1,46 @@
+name: Flutter Tests
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Récupère le code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Installe Flutter (stable channel)
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'  # adapte à ta version
+          channel: 'stable'
+
+      # 3️⃣ Met en cache les dépendances Flutter/Dart
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      # 4️⃣ Récupère les dépendances du projet
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5️⃣ Vérifie la qualité du code (lint/analyse)
+      - name: Analyze project source
+        run: flutter analyze
+
+      # 6️⃣ Exécute les tests unitaires
+      - name: Run Flutter tests
+        run: flutter test

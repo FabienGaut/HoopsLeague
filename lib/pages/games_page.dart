@@ -1,4 +1,3 @@
-import 'package:hoopsleague/pages/password_change_page.dart';
 import 'package:hoopsleague/pages/ranking_page.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -7,14 +6,10 @@ import 'package:hoopsleague/pages/passed_bets.dart';
 import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
-import '../main.dart';
 import 'graph_page.dart';
 import 'package:hoopsleague/pages/manage_account_page.dart';
-
 import 'leagues_page.dart';
 
 final supabase = Supabase.instance.client;
@@ -78,14 +73,15 @@ class _GamesPageState extends State<GamesPage> {
   bool isLoading = true;
 
   // Couleurs améliorées
-  static const Color darkBg = Color(0xFF0D0D0D);
-  static const Color cardBg = Color(0xFF1A1A1A);
-  static const Color cardBorder = Color(0xFF2A2A2A);
-  static const Color accentPrimary = Colors.deepPurple;
-  static const Color accentGold = Color(0xFFFFD700);
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF9E9E9E);
-  static const Color successGreen = Color(0xFF4CAF50);
+  static  Color successGreen = Color(0xFF4CAF50);
+  static  Color appBarDark = Color(0xFF0B1017).withOpacity(0.5);
+  static  Color backgroundDark = Color(0xFF101622);
+  static  Color surfaceDark = Color(0xFF182134);
+  static  Color borderDark = Color(0xFF314368);
+  static  Color primaryBlue = Color(0xFF256af4);
+  static  Color textPrimary = Colors.white;
+  static  Color textSecondary = Color(0xFF90A4CB);
+
 
   static const Map<String, String> teamEmojis = {
     'Celtics': '🍀',
@@ -158,7 +154,7 @@ class _GamesPageState extends State<GamesPage> {
     for (var entry in teamColors.entries) {
       if (teamName.contains(entry.key)) return entry.value;
     }
-    return accentPrimary;
+    return primaryBlue;
   }
 
   String getTeamEmoji(String teamName) {
@@ -215,7 +211,7 @@ class _GamesPageState extends State<GamesPage> {
           .single();
 
       final currentPoints = (user['points'] ?? 0).toDouble();
-      final newPoints = (currentPoints + totalWon).toInt();
+      final newPoints = (currentPoints + totalWon);
 
       // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
       // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
@@ -240,7 +236,7 @@ class _GamesPageState extends State<GamesPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 30),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   decoration: BoxDecoration(
-                    color: Colors.black87,
+                    color: surfaceDark,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: Colors.amber, width: 2.5),
                     boxShadow: [
@@ -302,7 +298,7 @@ class _GamesPageState extends State<GamesPage> {
 
 
   Future<void> _loadCachedPoints() async {
-    final cachedPoints = await CacheService.loadUserPoints();
+    final cachedPoints = await CacheService.loadLastPoints();
     setState(() {
       userData = {'points': cachedPoints};
       isLoading = false;
@@ -407,36 +403,38 @@ class _GamesPageState extends State<GamesPage> {
 
     final bool dailyPointsUsed = response['daily_points_used'] ?? false;
     if (!dailyPointsUsed) {
-    final newPoints = (userData!['points'] ?? 0) + points;
+      final newPoints = (userData!['points'] ?? 0) + points;
 
-    await supabase
-        .from('usersdata')
-        .update({'points': newPoints, 'daily_points_used': true})
-        .eq('id', widget.uid);
+      await supabase
+          .from('usersdata')
+          .update({'points': newPoints, 'daily_points_used': true})
+          .eq('id', widget.uid);
 
-    setState(() {
-      userData!['points'] = newPoints;
-    });
+      setState(() {
+        userData!['points'] = newPoints;
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You earned $points points!'),
-        backgroundColor: Colors.green,
-      ),
-    );}
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You earned $points points!'),
+          backgroundColor: Colors.green,
+        ),
+      );}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBg,
+
+      extendBodyBehindAppBar: true,
+      backgroundColor: backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black.withOpacity(0.2),
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo_black.png', height: 30),
+            Image.asset('assets/images/logo.png', height: 30),
             const SizedBox(width: 8),
             const Text("HoopsLeague", style: TextStyle(color: Colors.white),),
           ],
@@ -446,7 +444,23 @@ class _GamesPageState extends State<GamesPage> {
 
       drawer: _buildDrawer(context),
 
-      body: StreamBuilder<List<Map<String, dynamic>>>(
+      body: Stack(
+          children: [
+
+              Center(
+                child: Opacity(
+                  opacity: 0.1, // 🔸 Transparence pour effet watermark
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    width: 250,
+                    height: 250,
+                  ),
+                ),
+              ),
+    // 📜 Contenu principal
+    SafeArea(
+    child:
+    StreamBuilder<List<Map<String, dynamic>>>(
         stream: supabase
             .from('gamesdata')
             .stream(primaryKey: ['id'])
@@ -459,19 +473,18 @@ class _GamesPageState extends State<GamesPage> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-          final nowLocal = DateTime.now(); // heure locale de l'appareil / navigateur
-
+          final nowLocal = DateTime.now();
           final games = snapshot.data!;
 
           final filteredGames = games.where((game) {
             try {
               final startUtc = DateTime.parse(game['start_time']).toUtc();
-              final startLocal = startUtc.toLocal(); // conversion vers heure locale
+              final startLocal = startUtc.toLocal();
+
               if (startLocal.isBefore(nowLocal)) return false;
             } catch (_) {
               return false;
             }
-
             final gameId = game['id'];
             // On vérifie que ce gameId n’apparaît dans aucun bet
             return !betsNotifier.value.any((b) {
@@ -483,7 +496,6 @@ class _GamesPageState extends State<GamesPage> {
               }
             });
           }).toList();
-
 
           return ListView.builder(
             itemCount: filteredGames.length,
@@ -497,24 +509,24 @@ class _GamesPageState extends State<GamesPage> {
                 (game['odd_away_team'] as num).toDouble(),
                 (userData?['oddsformat'] ?? 'FR') as String,
               );
-
               final oddHome = convertOdds(
                 (game['odd_home_team'] as num).toDouble(),
                 (userData?['oddsformat'] ?? 'FR') as String,
               );
+
               return Dismissible(
                 key: Key(game['id'].toString()),
                 background: Container(
                   color: getTeamColor(homeTeam),
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.only(left: 20),
-                  child: const Icon(Icons.check, color: Colors.white),
+                  child: const Icon(Icons.check, color: Colors.white, size: 32),
                 ),
                 secondaryBackground: Container(
                   color: getTeamColor(awayTeam),
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.check, color: Colors.white),
+                  child: const Icon(Icons.check, color: Colors.white, size: 32),
                 ),
                 confirmDismiss: (direction) async {
                   Map<String, dynamic> betToAdd;
@@ -538,11 +550,11 @@ class _GamesPageState extends State<GamesPage> {
                   return true;
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: cardBorder, width: 1),
+                    color: surfaceDark,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: surfaceDark, width: 0),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.3),
@@ -552,126 +564,241 @@ class _GamesPageState extends State<GamesPage> {
                     ],
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header with start time
+                      // Date et heure
                       if (game['start_time'] != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: cardBorder,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Center(
+                            child : Text(
+                            formatGameTime(game['start_time']),
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.schedule, size: 14, color: textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                game['start_time'].toString(),
-                                style: TextStyle(
-                                  color: textSecondary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
-                      // Teams row
+                        ),
+                      // Section des équipes
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: Row(
                           children: [
+                            // Équipe domicile avec maillot
                             Expanded(
-                              child: _teamWidget(
-                                homeTeamShort,
-                                homeTeam,
-                                getTeamColor(homeTeam),
-                                oddHome,
-                                1.0,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               child: Column(
                                 children: [
-                                  Text(
-                                    "VS",
-                                    style: TextStyle(
-                                      color: Color(0xB6FFFFFF),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 2,
-                                      shadows: [
-                                        Shadow(
-                                          offset: Offset(2, 2),
-                                          blurRadius: 4,
-                                          color: Colors.black.withOpacity(0.6),
+                                  ClipPath(
+                                    clipper: BasketballJerseyClipper(),
+                                    child: Container(
+                                      width: 48,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            getTeamColor(homeTeam).withOpacity(0.6),
+                                            getTeamColor(homeTeam)
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
                                         ),
-                                        Shadow(
-                                          offset: Offset(-2, -2),
-                                          blurRadius: 4,
-                                          color: Colors.black.withOpacity(0.4),
+                                        border: Border.all(
+                                          color: getTeamColor(homeTeam).withOpacity(0.8),
+                                          width: 2,
                                         ),
-                                      ],
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: getTeamColor(homeTeam).withOpacity(0.4),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: AutoSizeText(
+                                          '${getTeamEmoji(homeTeam)}\n$homeTeamShort',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Icon(Icons.swap_horiz, color: textSecondary, size: 20),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    homeTeam,
+                                    style: TextStyle(
+                                      color: textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ],
                               ),
                             ),
+
+                            // VS au centre
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                "VS",
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
+
+                            // Équipe extérieure avec maillot
                             Expanded(
-                              child: _teamWidget(
-                                awayTeamShort,
-                                awayTeam,
-                                getTeamColor(awayTeam),
-                                oddAway,
-                                1.0,
+                              child: Column(
+                                children: [
+                                  ClipPath(
+                                    clipper: BasketballJerseyClipper(),
+                                    child: Container(
+                                      width: 48,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            getTeamColor(awayTeam).withOpacity(0.6),
+                                            getTeamColor(awayTeam)
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        border: Border.all(
+                                          color: getTeamColor(awayTeam).withOpacity(0.8),
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: getTeamColor(awayTeam).withOpacity(0.4),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: AutoSizeText(
+                                          '${getTeamEmoji(awayTeam)}\n$awayTeamShort',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    awayTeam,
+                                    style: TextStyle(
+                                      color: textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // Swipe hint
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: cardBorder.withOpacity(0.5),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
-                          ),
-                        ),
+
+                      // Boutons de paris
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.swipe, size: 14, color: textSecondary),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Glissez pour parier',
-                              style: TextStyle(
-                                color: textSecondary,
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF222F49),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    oddHome,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF222F49),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    oddAway,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
+
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.swipe, size: 14, color: textSecondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Glissez pour parier',
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14))
+                        ],
+                      ),
+
                     ],
                   ),
                 ),
               );
-
             },
           );
+
         },
       ),
-
+    ),
+  ]),
       floatingActionButton: ValueListenableBuilder<List<Map<String, dynamic>>>(
         valueListenable: betsNotifier,
         builder: (context, bets, _) {
@@ -703,19 +830,24 @@ class _GamesPageState extends State<GamesPage> {
             icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 36),
             label: Text("(${bets.length})", style: TextStyle(color: Colors.white),),
             style: ElevatedButton.styleFrom(
-              backgroundColor: accentPrimary,
+              backgroundColor: primaryBlue,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
               elevation: 8,
             ),
+
           );
+
         },
+
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
     );
+
   }
 
   Widget _teamWidget(
@@ -767,7 +899,7 @@ class _GamesPageState extends State<GamesPage> {
         const SizedBox(height: 8),
         Text(
           teamFull,
-          style: const TextStyle(
+          style: TextStyle(
             color: textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 13,
@@ -780,14 +912,14 @@ class _GamesPageState extends State<GamesPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: accentGold.withOpacity(0.2),
+            color: textPrimary.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: accentGold.withOpacity(0.5), width: 1),
+            border: Border.all(color: textPrimary.withOpacity(0.5), width: 1),
           ),
           child: Text(
             odd,
-            style: const TextStyle(
-              color: accentGold,
+            style:  TextStyle(
+              color: textPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -799,21 +931,21 @@ class _GamesPageState extends State<GamesPage> {
 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
-      backgroundColor: cardBg,
+      backgroundColor: surfaceDark,
       child: isLoading
-          ? const Center(child: CircularProgressIndicator(color: accentPrimary))
+          ?  Center(child: CircularProgressIndicator(color: primaryBlue))
           : ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [darkBg, cardBg],
+                colors: [backgroundDark, surfaceDark],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               border: Border(
-                bottom: BorderSide(color: cardBorder, width: 1),
+                bottom: BorderSide(color: borderDark, width: 1),
               ),
             ),
             child: FittedBox( // <-- Ajout
@@ -826,36 +958,36 @@ class _GamesPageState extends State<GamesPage> {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: accentPrimary, width: 2),
+                      border: Border.all(color: primaryBlue, width: 2),
                     ),
                     child: CircleAvatar(
                       radius: 28,
-                      backgroundColor: cardBg,
+                      backgroundColor: surfaceDark,
                       child: Text(
                         (userData?['user_name'] ?? 'U')[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: accentPrimary,
+                        style:  TextStyle(
+                          color: primaryBlue,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                   SizedBox(height: 12),
                   AutoSizeText( // <-- pour auto-ajuster le nom
                     userData?['user_name'] ?? 'No name',
                     maxLines: 1,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                   SizedBox(height: 4),
                   AutoSizeText(
                     userData?['email'] ?? 'No email',
                     maxLines: 1,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: textSecondary,
                       fontSize: 13,
                     ),
@@ -863,7 +995,7 @@ class _GamesPageState extends State<GamesPage> {
                   AutoSizeText(
                     'Points : ${userData?['points'] ?? 0}',
                     maxLines: 1,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: textSecondary,
                       fontSize: 13,
                     ),
@@ -956,7 +1088,7 @@ class _GamesPageState extends State<GamesPage> {
               );
             },
           ),
-           const SizedBox(height: 8),
+          const SizedBox(height: 8),
           _buildDrawerItem(
             icon: Icons.line_axis_outlined,
             title: AppLocalizations.of(context)!.myGraph,
@@ -970,8 +1102,7 @@ class _GamesPageState extends State<GamesPage> {
               );
             },
           ),
-
-          const Divider(color: cardBorder, height: 32, indent: 16, endIndent: 16),
+          Divider(color: borderDark, height: 32, indent: 16, endIndent: 16),
           _buildDrawerItem(
             icon: Icons.logout_rounded,
             title: AppLocalizations.of(context)!.logout,
@@ -995,7 +1126,7 @@ class _GamesPageState extends State<GamesPage> {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? accentPrimary),
+      leading: Icon(icon, color: iconColor ?? primaryBlue),
       title: Text(
         title,
         style: TextStyle(
@@ -1010,5 +1141,4 @@ class _GamesPageState extends State<GamesPage> {
     );
   }
 }
-
 

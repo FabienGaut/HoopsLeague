@@ -20,7 +20,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   bool isLoading = true;
 
   // 🎨 Nouvelle palette cohérente
-  static const Color accentPrimary = Colors.deepPurpleAccent;
+  static const Color accentPrimary = Color(0xFF256af4);
   static const Color accentGlow = Color(0xFF9C9CFF); // bleu-violet clair
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.white70;
@@ -141,7 +141,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.deepPurple.shade900, Colors.black],
+                colors: [Color(0xFF314368), Colors.black],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

@@ -82,7 +82,7 @@
         "description": "Displays the points added by the winning bets",
         "placeholders": {
           "value": {
-          "type": "int"
+          "type": "String"
           }
         }
       },

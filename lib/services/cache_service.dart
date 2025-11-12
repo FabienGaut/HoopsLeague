@@ -2,53 +2,56 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class CacheService {
   static const _pointsBox = 'user_points';
-  static Future<void> saveUserPoints(int points) async {
-    final box = await Hive.openBox('user');
-    await box.put('points', {
-      'value': points,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-  }
 
-  static Future<void> saveUserPointsWithDate(int points) async {
+  /// Sauvegarde un nouveau point avec la date dans le même tableau (double avec 2 décimales)
+  static Future<void> saveUserPoints(double points) async {
     final box = await Hive.openBox(_pointsBox);
+
     final today = DateTime.now();
-    final history = box.get('history', defaultValue: []) as List;
-    // Ajouter le nouveau point du jour
-    history.add({'date': today.toIso8601String(), 'points': points});
+
+    // Récupération sécurisée du contenu
+    final rawHistory = box.get('history', defaultValue: []) as List<dynamic>;
+
+    // Convertir proprement en List<Map<String, dynamic>>
+    final history = rawHistory
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
+
+    // Arrondir à 2 décimales
+    final roundedPoints = double.parse(points.toStringAsFixed(2));
+
+    // Ajouter la nouvelle entrée
+    history.add({'date': today.toIso8601String(), 'points': roundedPoints});
+
     await box.put('history', history);
+
+    print('Saved history: $history'); // DEBUG
   }
 
-  static Future<int> loadLastPoints() async {
+
+  /// Récupère l’historique complet
+  static Future<List<Map<String, dynamic>>> loadPointsHistory() async {
     final box = await Hive.openBox(_pointsBox);
-    final history = box.get('history', defaultValue: []) as List;
-    if (history.isEmpty) return 0;
-    return history.last['points'] as int;
+    final rawHistory = box.get('history', defaultValue: []);
+    print('Raw history from Hive: $rawHistory'); // DEBUG
+
+    return List<Map<String, dynamic>>.from(rawHistory.map((e) {
+      return {
+        'date': DateTime.parse(e['date']),
+        'points': (e['points'] as num).toDouble(),
+      };
+    }));
+  }
+
+  /// Récupère uniquement le dernier point enregistré
+  static Future<double> loadLastPoints() async {
+    final history = await loadPointsHistory();
+    if (history.isEmpty) return 0.0;
+    return (history.last['points'] as num).toDouble();
   }
 
   /// Supprime le cache complet
   static Future<void> clearCache() async {
     await Hive.deleteBoxFromDisk(_pointsBox);
   }
-
-  static Future<List<Map<String, dynamic>>> loadPointsHistory() async {
-    final box = await Hive.openBox(_pointsBox);
-    final history = box.get('history', defaultValue: []) as List;
-    return history.map((e) {
-      return {
-        'date': DateTime.parse(e['date']),
-        'points': e['points'] as int,
-      };
-    }).toList();
-  }
-
-  static Future<Map<String, dynamic>> loadUserPoints() async {
-    final box = await Hive.openBox('user');
-    final data = box.get('points', defaultValue: {'value': 0, 'timestamp': null});
-    return {
-      'value': data['value'] ?? 0,
-      'timestamp': data['timestamp'],
-    };
-  }
 }
-

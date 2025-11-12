@@ -23,11 +23,11 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   String? _selectedLang;
   String? _selectedOddFormat;
 
-  static const Color darkBg = Color(0xFF0D0D0D);
-  static const Color cardBg = Color(0xFF1A1A1A);
-  static const Color cardBorder = Color(0xFF2A2A2A);
-  static const Color accentPrimary = Colors.deepPurple;
-  static const Color textPrimary = Color(0xFFFFFFFF);
+  // 🎨 Palette cohérente avec LeaderboardPage
+  static const Color accentPrimary = Color(0xFF256af4);
+  static const Color accentGlow = Color(0xFF9C9CFF);
+  static const Color textPrimary = Colors.white;
+  static const Color textSecondary = Colors.white70;
 
   @override
   void initState() {
@@ -37,7 +37,8 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
 
   Future<void> _loadUserData() async {
     try {
-      final data = await supabase.from('usersdata').select().eq('id', widget.uid).single();
+      final data =
+      await supabase.from('usersdata').select().eq('id', widget.uid).single();
       setState(() {
         userData = data;
         _usernameController.text = data['user_name'] ?? '';
@@ -48,7 +49,10 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     } catch (e) {
       if (kDebugMode) print('Erreur chargement utilisateur: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.loadingError(e.toString()))),
+        SnackBar(
+          content:
+          Text(AppLocalizations.of(context)!.loadingError(e.toString())),
+        ),
       );
       setState(() => isLoading = false);
     }
@@ -63,7 +67,9 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
       await _loadUserData();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.updateError(e.toString()))),
+        SnackBar(
+            content:
+            Text(AppLocalizations.of(context)!.updateError(e.toString()))),
       );
     }
   }
@@ -87,14 +93,21 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     super.dispose();
   }
 
-  Widget _buildCard({required Widget child}) {
+  Widget _glassCard({required Widget child}) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cardBorder),
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
     );
@@ -105,135 +118,244 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: darkBg,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(t.manageAccountTitle),
-        backgroundColor: cardBg,
-        iconTheme: const IconThemeData(color: Colors.white),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: accentPrimary))
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.usernameLabel,
-                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _usernameController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: t.usernameHint,
-                      hintStyle: const TextStyle(color: textPrimary),
-                      filled: true,
-                      fillColor: cardBg,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: cardBorder),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    onPressed: () => _updateUserField('user_name', _usernameController.text.trim()),
-                    icon: const Icon(Icons.save, color: textPrimary,),
-                    label: Text(t.saveButton, style: TextStyle(color: textPrimary),),
-                    style: ElevatedButton.styleFrom(backgroundColor: accentPrimary),
-                  ),
-                ],
-              ),
-            ),
-
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.languageLabel,
-                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedLang,
-                    items: [
-                      DropdownMenuItem(value: 'fr', child: Text(t.french)),
-                      DropdownMenuItem(value: 'en', child: Text(t.english)),
-                    ],
-                    onChanged: (v) {
-                      if (v == null) return;
-                      setState(() => _selectedLang = v);
-                      _updateUserField('language', v);
-                      appState.setLocale(v);
-                    },
-                    dropdownColor: cardBg,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: cardBorder),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.oddsFormatLabel,
-                      style: const TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedOddFormat,
-                    items: [
-                      DropdownMenuItem(value: 'FR', child: Text(t.oddsFormatFrench)),
-                      DropdownMenuItem(value: 'US', child: Text(t.oddsFormatUS)),
-                      DropdownMenuItem(value: 'UK', child: Text(t.oddsFormatUK)),
-                    ],
-                    onChanged: (v) {
-                      setState(() => _selectedOddFormat = v);
-                      _updateUserField('oddsformat', v);
-                    },
-                    dropdownColor: cardBg,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: cardBorder),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            _buildCard(
-              child: ListTile(
-                leading: const Icon(Icons.lock_outline, color: accentPrimary),
-                title: Text(t.changePassword,
-                    style: const TextStyle(color: textPrimary)),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: textPrimary),
-                onTap: _openChangePasswordPage,
-              ),
-            ),
-
-            _buildCard(
-              child: ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: Text(t.clearCache,
-                    style: const TextStyle(color: textPrimary)),
-                onTap: _clearCache,
-              ),
-            ),
-          ],
+        backgroundColor: Colors.black.withOpacity(0.2),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
+        title: Text(
+          t.manageAccountTitle,
+          style: const TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          // 🌌 Dégradé violet → noir
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF314368), Colors.black],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Container(color: Colors.black.withOpacity(0.3)),
+
+          SafeArea(
+            child: isLoading
+                ? const Center(
+                child: CircularProgressIndicator(color: accentPrimary))
+                : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _glassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.usernameLabel,
+                          style: const TextStyle(
+                            color: textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.25),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _usernameController,
+                            style:
+                            const TextStyle(color: textPrimary),
+                            decoration: InputDecoration(
+                              hintText: t.usernameHint,
+                              hintStyle:
+                              const TextStyle(color: textSecondary),
+                              border: InputBorder.none,
+                              contentPadding:
+                              const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 14),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () => _updateUserField(
+                            'user_name',
+                            _usernameController.text.trim(),
+                          ),
+                          icon: const Icon(Icons.save,
+                              color: textPrimary),
+                          label: Text(
+                            t.saveButton,
+                            style:
+                            const TextStyle(color: textPrimary),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                            accentPrimary.withOpacity(0.9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  _glassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.languageLabel,
+                          style: const TextStyle(
+                            color: textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedLang,
+                          items: [
+                            DropdownMenuItem(
+                              value: 'fr',
+                              child: Text(t.french,
+                                  style: const TextStyle(
+                                      color: textPrimary)),
+                            ),
+                            DropdownMenuItem(
+                              value: 'en',
+                              child: Text(t.english,
+                                  style: const TextStyle(
+                                      color: textPrimary)),
+                            ),
+                          ],
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setState(() => _selectedLang = v);
+                            _updateUserField('language', v);
+                            appState.setLocale(v);
+                          },
+                          dropdownColor:
+                          Colors.black.withOpacity(0.8),
+                          iconEnabledColor: accentGlow,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  _glassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.oddsFormatLabel,
+                          style: const TextStyle(
+                            color: textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedOddFormat,
+                          items: [
+                            DropdownMenuItem(
+                                value: 'FR',
+                                child: Text(t.oddsFormatFrench,
+                                    style: const TextStyle(
+                                        color: textPrimary))),
+                            DropdownMenuItem(
+                                value: 'US',
+                                child: Text(t.oddsFormatUS,
+                                    style: const TextStyle(
+                                        color: textPrimary))),
+                            DropdownMenuItem(
+                                value: 'UK',
+                                child: Text(t.oddsFormatUK,
+                                    style: const TextStyle(
+                                        color: textPrimary))),
+                          ],
+                          onChanged: (v) {
+                            setState(() => _selectedOddFormat = v);
+                            _updateUserField('oddsformat', v);
+                          },
+                          dropdownColor:
+                          Colors.black.withOpacity(0.8),
+                          iconEnabledColor: accentGlow,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  _glassCard(
+                    child: ListTile(
+                      leading: const Icon(Icons.lock_outline,
+                          color: accentPrimary),
+                      title: Text(
+                        t.changePassword,
+                        style:
+                        const TextStyle(color: textPrimary),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios,
+                          size: 16, color: textPrimary),
+                      onTap: _openChangePasswordPage,
+                    ),
+                  ),
+
+                  _glassCard(
+                    child: ListTile(
+                      leading: const Icon(Icons.delete_outline,
+                          color: Colors.redAccent),
+                      title: Text(
+                        t.clearCache,
+                        style:
+                        const TextStyle(color: textPrimary),
+                      ),
+                      onTap: _clearCache,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
