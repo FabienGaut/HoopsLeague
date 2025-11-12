@@ -5,6 +5,9 @@ import '../l10n/app_localizations.dart';
 final supabase = Supabase.instance.client;
 
 class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
+
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
@@ -18,12 +21,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   Future<void> changePassword() async {
     final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
 
     if (!_formKey.currentState!.validate()) return;
 
     final user = supabase.auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(t.userNotConnected)),
       );
       return;
@@ -50,7 +54,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         UserAttributes(password: newPasswordController.text.trim()),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(t.passwordUpdated)),
       );
 
@@ -58,7 +62,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       newPasswordController.clear();
       confirmPasswordController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );
     } finally {

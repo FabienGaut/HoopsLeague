@@ -33,6 +33,7 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (!mounted) return;
     setState(() {
       errorMessage = null;
       isLoading = true;
@@ -53,6 +54,7 @@ class _SignInPageState extends State<SignInPage> {
               .eq('id', user.id)
               .single();
 
+          if (!mounted) return;
 
           final userName = dataResponse['user_name'];
           if (userName == null || userName == "") {
@@ -64,7 +66,7 @@ class _SignInPageState extends State<SignInPage> {
           }
 
         } catch (e) {
-          if (!mounted) return; // ✅ Ajouté ici
+          if (!mounted) return;
 
           Navigator.pushReplacement(
             context,
@@ -73,21 +75,21 @@ class _SignInPageState extends State<SignInPage> {
           return;
         }
 
-        if (!mounted) return; // ✅ Ajouté ici
+        if (!mounted) return;
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => GamesPage(uid: user.id)),
         );
       } else {
-        if (!mounted) return; // ✅ Ajouté ici
+        if (!mounted) return;
 
         setState(() {
           errorMessage = AppLocalizations.of(context)!.noAccountForTheseId;
         });
       }
     } on AuthException catch (e) {
-      if (!mounted) return; // ✅ Ajouté ici
+      if (!mounted) return;
 
       setState(() {
         if (e.message.contains('Invalid login credentials')) {
@@ -99,17 +101,18 @@ class _SignInPageState extends State<SignInPage> {
         }
       });
     } catch (e) {
-      if (!mounted) return; // ✅ Ajouté ici
+      if (!mounted) return;
 
       setState(() {
         errorMessage = 'Error : $e';
       });
     } finally {
-      if (!mounted)  // ✅ Ajouté ici
+
 
       setState(() => isLoading = false);
     }
   }
+
 
 
   // 🔹 Bouton “verre” réutilisable (même que HomePage)
