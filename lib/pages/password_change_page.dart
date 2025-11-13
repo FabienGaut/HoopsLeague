@@ -1,92 +1,81 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:hoopsleague/pages/sign_in_page.dart';
 import '../l10n/app_localizations.dart';
 
 final supabase = Supabase.instance.client;
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmController = TextEditingController();
-
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
-  String? errorMessage;
+  final oldPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   bool isLoading = false;
 
-  // Sélecteur de format de cote
-  int selectedIndex = 0;
-  final List<String> formats = ['FR', 'US', 'UK'];
-  String selectedFormat = 'FR';
+  Future<void> changePassword() async {
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    confirmController.dispose();
-    super.dispose();
-  }
-
-  Future<void> signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      errorMessage = null;
-      isLoading = true;
-    });
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.userNotConnected)),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
 
     try {
-      final redirectUrl = Platform.isAndroid || Platform.isIOS
-          ? 'io.hoopsbets.app://login-callback/'
-          : 'http://localhost:3000';
-
-      final AuthResponse res = await supabase.auth.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-        emailRedirectTo: redirectUrl,
+      final authResponse = await supabase.auth.signInWithPassword(
+        email: user.email!,
+        password: oldPasswordController.text.trim(),
       );
 
-      final user = res.user;
-      if (user != null) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.accountCreated),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const SignInPage()),
-        );
+      if (authResponse.user == null) {
+        throw t.wrongOldPassword;
       }
-    } on AuthException catch (e) {
-      setState(() {
-        if (e.message.contains('already registered')) {
-          errorMessage = AppLocalizations.of(context)!.mailAlreadyUsed;
-        } else {
-          errorMessage = 'Erreur: ${e.message}';
-        }
-      });
+
+      if (newPasswordController.text.trim() !=
+          confirmPasswordController.text.trim()) {
+        throw t.passwordsDoNotMatch;
+      }
+
+      await supabase.auth.updateUser(
+        UserAttributes(password: newPasswordController.text.trim()),
+      );
+
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.passwordUpdated)),
+      );
+
+      oldPasswordController.clear();
+      newPasswordController.clear();
+      confirmPasswordController.clear();
     } catch (e) {
-      setState(() {
-        errorMessage = 'Erreur inattendue: $e';
-      });
+      messenger.showSnackBar(
+        SnackBar(content: Text('Erreur: $e')),
+      );
     } finally {
       setState(() => isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
   }
 
   Widget _buildGlassButton({
@@ -136,19 +125,44 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final double logoSize = ((screenWidth * 0.35).clamp(80, 160)).toDouble();
-    final double fieldWidth = ((screenWidth * 0.75).clamp(200, 340)).toDouble();
+
+    final double fieldWidth = ((screenWidth * 0.75).clamp(220, 360)).toDouble();
     final double buttonWidth = ((screenWidth * 0.7).clamp(160, 300)).toDouble();
     final double buttonHeight = ((screenHeight * 0.07).clamp(45, 60)).toDouble();
     final double fontSize = ((screenWidth * 0.045).clamp(14, 18)).toDouble();
     final double spacing = ((screenHeight * 0.03).clamp(10, 25)).toDouble();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/logo.png', height: 28),
+            const SizedBox(width: 8),
+            Text(
+              t.hoopsLeagueTitle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
-          // Fond dégradé violet-noir
+          // Fond dégradé violet → noir
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -158,23 +172,18 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
           ),
-          // Effet assombri
           Container(color: Colors.black.withValues(alpha: 0.3)),
 
           Center(
             child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 100),
               child: Column(
                 children: [
-                  Image.asset(
-                    "assets/images/logo.png", // ton logo blanc transparent
-                    width: logoSize,
-                    height: logoSize,
-                  ),
+                  const Icon(Icons.lock_reset, color: Colors.white, size: 80),
                   SizedBox(height: spacing),
 
-                  AutoSizeText(
-                    "Join HoopsLeague Today",
-                    maxLines: 1,
+                  Text(
+                    t.changePasswordTitle,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 24,
@@ -182,9 +191,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       letterSpacing: 1.1,
                     ),
                   ),
+
                   SizedBox(height: spacing * 1.5),
 
-                  // Conteneur semi-transparent du formulaire
+                  // Bloc semi-transparent
                   Container(
                     width: fieldWidth,
                     padding: const EdgeInsets.all(16),
@@ -197,17 +207,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          // Email
                           TextFormField(
-                            controller: emailController,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: oldPasswordController,
+                            obscureText: true,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: 'Email',
+                              labelText: t.oldPasswordLabel,
                               labelStyle:
                               TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-                              prefixIcon:
-                              const Icon(Icons.email, color: Colors.white),
+                              prefixIcon: const Icon(Icons.lock_outline,
+                                  color: Colors.white),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
@@ -215,29 +224,19 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                const BorderSide(color: Colors.white),
+                                borderSide: const BorderSide(color: Colors.white),
                               ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return AppLocalizations.of(context)!.enterEmail;
-                              }
-                              if (!value.contains('@') || !value.contains('.')) {
-                                return AppLocalizations.of(context)!.wrongEmail;
-                              }
-                              return null;
-                            },
+                            validator: (v) =>
+                            (v == null || v.isEmpty) ? t.oldPasswordEmpty : null,
                           ),
                           SizedBox(height: spacing),
-
-                          // Mot de passe
                           TextFormField(
-                            controller: passwordController,
+                            controller: newPasswordController,
                             obscureText: true,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context)!.password,
+                              labelText: t.newPasswordLabel,
                               labelStyle:
                               TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
@@ -249,21 +248,19 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                const BorderSide(color: Colors.white),
+                                borderSide: const BorderSide(color: Colors.white),
                               ),
                             ),
+                            validator: (v) =>
+                            (v == null || v.length < 6) ? t.passwordTooShort : null,
                           ),
                           SizedBox(height: spacing),
-
-                          // Confirmation
                           TextFormField(
-                            controller: confirmController,
+                            controller: confirmPasswordController,
                             obscureText: true,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText:
-                              AppLocalizations.of(context)!.confirmPassword,
+                              labelText: t.confirmPasswordLabel,
                               labelStyle:
                               TextStyle(color: Colors.white.withValues(alpha: 0.8)),
                               prefixIcon:
@@ -275,68 +272,32 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                const BorderSide(color: Colors.white),
+                                borderSide: const BorderSide(color: Colors.white),
                               ),
                             ),
-                            validator: (value) {
-                              if (value != passwordController.text) {
-                                return AppLocalizations.of(context)!
-                                    .confirmPasswordError;
-                              }
-                              return null;
-                            },
+                            validator: (v) =>
+                            (v == null || v.length < 6) ? t.passwordTooShort : null,
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: spacing),
 
-                  if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Text(
-                        errorMessage!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                  SizedBox(height: spacing),
+                  SizedBox(height: spacing * 1.5),
 
                   _buildGlassButton(
-                    label: AppLocalizations.of(context)!.signUP,
-                    icon: Icons.person_add,
+                    label: t.save,
+                    icon: Icons.save,
+                    onPressed: isLoading ? () {} : changePassword,
                     fontSize: fontSize,
                     width: buttonWidth,
                     height: buttonHeight,
-                    onPressed: isLoading ? () {} : signUp,
-                  ),
-
-                  SizedBox(height: spacing),
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SignInPage()),
-                      );
-                    },
-                    child: Text(
-                      AppLocalizations.of(context)!.alreadyHaveAccount,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
                   ),
 
                   SizedBox(height: spacing * 2),
 
                   Text(
-                    "© 2025 HoopsLeague. All rights reserved.",
+                    "© 2025 HoopsLeague",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,

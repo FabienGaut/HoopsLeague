@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:
-  /// **'No data'**
+  /// **'No data available'**
   String get noData;
 
   /// No description provided for @noBetsSelected.
@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Password too short! Must be at least 6 characters.'**
+  /// **'Minimum 6 characters'**
   String get passwordTooShort;
 
   /// No description provided for @enterPassword.
@@ -259,6 +259,426 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account created successfully! ✅ '**
   String get accountCreated;
+
+  /// No description provided for @userName.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get userName;
+
+  /// No description provided for @enterUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please type your username'**
+  String get enterUserName;
+
+  /// No description provided for @oddsFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your favorite odds format : '**
+  String get oddsFormat;
+
+  /// No description provided for @infosCotesCgu.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds & Terms Info'**
+  String get infosCotesCgu;
+
+  /// No description provided for @formatsDesCotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds formats:'**
+  String get formatsDesCotes;
+
+  /// No description provided for @formatsDesCotesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)'**
+  String get formatsDesCotesDescription;
+
+  /// No description provided for @cgu.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions:'**
+  String get cgu;
+
+  /// No description provided for @cguDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.'**
+  String get cguDescription;
+
+  /// No description provided for @firstConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'First connection'**
+  String get firstConnection;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount'**
+  String get invalidAmount;
+
+  /// No description provided for @notEnoughPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Not enough points to place this bet'**
+  String get notEnoughPoints;
+
+  /// No description provided for @errorSendingBet.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Error sending bet'**
+  String get errorSendingBet;
+
+  /// No description provided for @betDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Bet deleted'**
+  String get betDeleted;
+
+  /// No description provided for @userNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'User not connected'**
+  String get userNotConnected;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @myGraph.
+  ///
+  /// In en, this message translates to:
+  /// **'My statistics'**
+  String get myGraph;
+
+  /// Displays the points added by the winning bets
+  ///
+  /// In en, this message translates to:
+  /// **'{value} points earned !'**
+  String pointsAdded(int value);
+
+  /// No description provided for @myBets.
+  ///
+  /// In en, this message translates to:
+  /// **'My bets'**
+  String get myBets;
+
+  /// No description provided for @dailyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily points'**
+  String get dailyPoints;
+
+  /// No description provided for @dailyPointsTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily points already used'**
+  String get dailyPointsTaken;
+
+  /// No description provided for @leagues.
+  ///
+  /// In en, this message translates to:
+  /// **'My leagues'**
+  String get leagues;
+
+  /// No description provided for @manageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage my account'**
+  String get manageAccount;
+
+  /// No description provided for @rankings.
+  ///
+  /// In en, this message translates to:
+  /// **'Rankings'**
+  String get rankings;
+
+  /// No description provided for @pointsEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Points evolution'**
+  String get pointsEvolution;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @leagueExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A league with this name already exists'**
+  String get leagueExists;
+
+  /// No description provided for @leagueCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'League created successfully! ✅'**
+  String get leagueCreated;
+
+  /// No description provided for @leagueJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'League joined successfully! ✅'**
+  String get leagueJoined;
+
+  /// No description provided for @myLeagues.
+  ///
+  /// In en, this message translates to:
+  /// **'My leagues'**
+  String get myLeagues;
+
+  /// No description provided for @createLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a league'**
+  String get createLeague;
+
+  /// No description provided for @leagueName.
+  ///
+  /// In en, this message translates to:
+  /// **'League name'**
+  String get leagueName;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @joinLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a league'**
+  String get joinLeague;
+
+  /// No description provided for @enterLeagueName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please type the name of the league you want to join'**
+  String get enterLeagueName;
+
+  /// No description provided for @join.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get join;
+
+  /// Displays the number of members in a league
+  ///
+  /// In en, this message translates to:
+  /// **'Members: {count}'**
+  String membersCount(int count);
+
+  /// No description provided for @manageAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage my account'**
+  String get manageAccountTitle;
+
+  /// No description provided for @usernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameLabel;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameHint;
+
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveButton;
+
+  /// No description provided for @languageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageLabel;
+
+  /// No description provided for @french.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get french;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @oddsFormatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds format'**
+  String get oddsFormatLabel;
+
+  /// No description provided for @oddsFormatFrench.
+  ///
+  /// In en, this message translates to:
+  /// **'French (decimal)'**
+  String get oddsFormatFrench;
+
+  /// No description provided for @oddsFormatUS.
+  ///
+  /// In en, this message translates to:
+  /// **'American'**
+  String get oddsFormatUS;
+
+  /// No description provided for @oddsFormatUK.
+  ///
+  /// In en, this message translates to:
+  /// **'Fractional'**
+  String get oddsFormatUK;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePassword;
+
+  /// No description provided for @clearCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local cache'**
+  String get clearCache;
+
+  /// No description provided for @loadingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error: {error}'**
+  String loadingError(Object error);
+
+  /// No description provided for @updateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Update error: {error}'**
+  String updateError(Object error);
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get updateSuccess;
+
+  /// No description provided for @cacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache successfully cleared'**
+  String get cacheCleared;
+
+  /// No description provided for @yourBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance'**
+  String get yourBalance;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @payoutText.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout'**
+  String get payoutText;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @oldPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Old password'**
+  String get oldPasswordLabel;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @oldPasswordEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your old password'**
+  String get oldPasswordEmpty;
+
+  /// No description provided for @wrongOldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect old password'**
+  String get wrongOldPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'New passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get passwordUpdated;
+
+  /// No description provided for @errorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorMessage(Object error);
+
+  /// No description provided for @changePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordButton;
+
+  /// No description provided for @hoopsLeagueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HoopsLeague'**
+  String get hoopsLeagueTitle;
+
+  /// No description provided for @noMembersInLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'No members in this league'**
+  String get noMembersInLeague;
+
+  /// No description provided for @unknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownUser;
+
+  /// No description provided for @pointsSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get pointsSuffix;
 }
 
 class _AppLocalizationsDelegate

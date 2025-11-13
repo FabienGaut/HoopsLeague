@@ -1,61 +1,95 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/home_page.dart';
-import 'firebase_options.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'pages/games_page.dart';
+import 'pages/home_page.dart';
 import 'l10n/app_localizations.dart';
+import 'pages/app_state.dart';
+import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 
-void main() async{
+Future<void> main() async {
+  tz.initializeTimeZones();
+
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
+  // Initialiser Hive (compatible Web et mobile)
+  await Hive.initFlutter();
 
-    options: DefaultFirebaseOptions.currentPlatform,
+  // Charger les variables d'environnement
+  await dotenv.load(fileName: 'assets/.env');
 
+
+  final supabaseUrl = dotenv.env['SUPABASE_URL'];
+  final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+  if (supabaseUrl == null || supabaseKey == null) {
+    throw Exception("Supabase URL ou ANON KEY manquante dans le .env");
+  }
+
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+  final session = Supabase.instance.client.auth.currentSession;
+  String? uid = session?.user.id;
+
+  // Récupérer la langue depuis Supabase si utilisateur connecté
+  if (uid != null) {
+    final userData = await Supabase.instance.client
+        .from('usersdata')
+        .select('language')
+        .eq('id', uid)
+        .single();
+    final lang = userData['language'] ?? 'fr';
+    appState.setLocale(lang);
+  }
+
+  runApp(
+    ChangeNotifierProvider<AppState>.value(
+      value: appState,
+      child: MyApp(initialSession: session, uid: uid),
+    ),
   );
-  runApp(const MyApp());
+}
+
+// Exemple d'utilisation de la date partout
+DateTime getNow() {
+  return DateTime.now(); // local machine / navigateur
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final Session? initialSession;
+  final String? uid;
+
+  const MyApp({super.key, required this.initialSession, this.uid});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  int _currentIndex = 0;
-  setCurrentIndex(int index){
-    setState(() {
-      _currentIndex = index;
-    });
-  }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
-      supportedLocales: const [
-        Locale('en', ''), // Anglais
-        Locale('fr', ''), // Français
-      ],
-
-      // 👇 Optionnel : définir une langue par défaut
-      locale: const Locale('fr'),
-
-      home: Scaffold(
-        backgroundColor: Colors.white,
-
-        body: HomePage(),
+    return Consumer<AppState>(
+      builder: (context, state, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        locale: state.locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('fr', ''),
+          Locale('en', ''),
+        ],
+        home: widget.uid != null
+            ? GamesPage(uid: widget.uid!)
+            : const HomePage(),
       ),
-
     );
   }
 }

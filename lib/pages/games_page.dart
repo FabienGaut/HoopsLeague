@@ -1,12 +1,60 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hoopsleague/pages/ranking_page.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/bucket_page.dart';
-import 'package:flutter_application_1/pages/passed_bets.dart';
-import 'package:flutter_application_1/pages/sign_in_page.dart';
+import 'package:hoopsleague/pages/bucket_page.dart';
+import 'package:hoopsleague/pages/passed_bets.dart';
+import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
+import 'graph_page.dart';
+import 'package:hoopsleague/pages/manage_account_page.dart';
+import 'leagues_page.dart';
+
+final supabase = Supabase.instance.client;
+class BasketballJerseyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // Largeur des bretelles
+    double strapWidth = size.width * 0.20;
+
+    // Épaule gauche (bretelle large)
+    path.lineTo(0, size.height * 0.15);
+    path.moveTo(0, 0);
+    path.lineTo(strapWidth, 0);
+
+    // Faire un col rond vers la bretelle droite
+    path.arcToPoint(
+      Offset(size.width - strapWidth, 0),
+      radius: Radius.circular(size.width * 0.31), // rayon pour arrondi
+      clockwise: false,
+    );
+
+
+    // Épaule droite (bretelle large)
+    path.lineTo(size.width - strapWidth, 0);
+    path.lineTo(size.width,  0);
+
+
+
+
+    // Côtés du débardeur
+    path.lineTo(size.width*0.97, size.height * 0.85);
+    path.lineTo(size.width*0.03, size.height * 0.85);
+
+    // Fermeture du path
+    path.lineTo(0, size.height * 0.15);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
 
 class GamesPage extends StatefulWidget {
   final String uid;
@@ -23,48 +71,319 @@ class _GamesPageState extends State<GamesPage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
 
+
+  static  Color backgroundDark = Color(0xFF101622);
+  static  Color surfaceDark = Color(0xFF182134);
+  static  Color borderDark = Color(0xFF314368);
+  static  Color primaryBlue = Color(0xFF256af4);
+  static  Color textPrimary = Colors.white;
+  static  Color textSecondary = Color(0xFF90A4CB);
+
+
+  static const Map<String, String> teamEmojis = {
+    'Celtics': '🍀',
+    'Nets': '🕸',
+    '76ers': '⭐',
+    'Knicks': '🗽',
+    'Raptors': '🦖',
+    'Bulls': '🐂',
+    'Cavaliers': '🛡️',
+    'Pistons': '🔧',
+    'Pacers': '🟡',
+    'Bucks': '🦌',
+    'Hawks': '🦅',
+    'Heat': '🔥',
+    'Hornets': '🐝',
+    'Magic': '🪄',
+    'Wizards': '🧙',
+    'Nuggets': '⛏️',
+    'Timberwolves': '🐺',
+    'Thunder': '⛈️',
+    'Trail Blazers': '🔥',
+    'Jazz': '🎷',
+    'Warriors': '⚔️',
+    'Clippers': '✂️',
+    'Lakers': '🌴',
+    'Suns': '☀️',
+    'Kings': '👑',
+    'Mavericks': '🤠',
+    'Rockets': '🚀',
+    'Grizzlies': '🐻',
+    'Pelicans': '🦩',
+    'Spurs': '🌵',
+  };
+
+
+  static const Map<String, Color> teamColors = {
+    'Celtics': Color(0xFF007A33),
+    'Nets': Color(0xFF000000),
+    '76ers': Color(0xFF002AB3),
+    'Knicks': Color(0xFF006BB6),
+    'Raptors': Color(0xFF73007E),
+    'Bulls': Color(0xFFD30C23),
+    'Cavaliers': Color(0xFF860038),
+    'Pistons': Color(0xFFC8102E),
+    'Pacers': Color(0xFF002D62),
+    'Bucks': Color(0xFF00471B),
+    'Hawks': Color(0xFFE03A3E),
+    'Heat': Color(0xFF98002E),
+    'Hornets': Color(0xFF1D1160),
+    'Magic': Color(0xFF0077C0),
+    'Wizards': Color(0xFF002B5C),
+    'Nuggets': Color(0xFF0E2240),
+    'Timberwolves': Color(0xFF0C2340),
+    'Thunder': Color(0xFF007AC1),
+    'Trail Blazers': Color(0xFFFF0005),
+    'Jazz': Color(0xFF002B5C),
+    'Warriors': Color(0xFF1D428A),
+    'Clippers': Color(0xFFC8102E),
+    'Lakers': Color(0xFF552583),
+    'Suns': Color(0xFF1D1160),
+    'Kings': Color(0xFF5A2D81),
+    'Mavericks': Color(0xFF00538C),
+    'Rockets': Color(0xFFCF001C),
+    'Grizzlies': Color(0xFF5D76A9),
+    'Pelicans': Color(0xFF0C2340),
+    'Spurs': Color(0xFF000000),
+  };
+
+  Color getTeamColor(String teamName) {
+    for (var entry in teamColors.entries) {
+      if (teamName.contains(entry.key)) return entry.value;
+    }
+    return primaryBlue;
+  }
+
+  String getTeamEmoji(String teamName) {
+    for (var entry in teamEmojis.entries) {
+      if (teamName.contains(entry.key)) return entry.value;
+    }
+    return '🏀'; // fallback
+  }
+
+  String formatGameTime(String utcString) {
+    try {
+      final utcTime = DateTime.parse(utcString).toUtc();
+      final localTime = utcTime.toLocal();
+      return DateFormat('EEE d MMM - HH:mm').format(localTime);
+    } catch (_) {
+      return utcString;
+    }
+  }
+
+  Future<void> syncUserPoints(String uid) async {
+    final nav = Navigator.of(context);
+    try {
+      // 1️⃣ Récupérer tous les paris du joueur
+      final bets = await supabase
+          .from('bets')
+          .select('points_betted, odd, status, reward_given')
+          .eq('user_id', uid);
+
+      double totalWon = 0;
+
+      // 2️⃣ Calculer les gains non encore crédités
+      for (var bet in bets) {
+        final isWon = bet['status'] == 'won';
+        final alreadyCredited = bet['reward_given'] ?? false;
+
+        if (isWon && !alreadyCredited) {
+          final amount = (bet['points_betted'] ?? 0).toDouble();
+          final odd = (bet['odd'] ?? 1.0).toDouble();
+          totalWon += amount * odd;
+
+          // Marquer le gain comme crédité en BDD
+          await supabase
+              .from('bets')
+              .update({'reward_given': true})
+              .eq('user_id', uid)
+              .eq('status', 'won');
+        }
+      }
+
+      // 3️⃣ Récupérer le solde actuel depuis la BDD
+      final user = await supabase
+          .from('usersdata')
+          .select('points')
+          .eq('id', uid)
+          .single();
+
+      final currentPoints = (user['points'] ?? 0).toDouble();
+      final newPoints = (currentPoints + totalWon);
+
+      // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
+      // 4️⃣ Mettre à jour la BDD uniquement si nécessaire
+      if (totalWon > 0) {
+        await supabase
+            .from('usersdata')
+            .update({'points': newPoints})
+            .eq('id', uid);
+
+        // ✅ ANIMATION POPUP ici
+        if (mounted) {
+          showGeneralDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierLabel: '',
+            transitionDuration: const Duration(milliseconds: 400),
+            pageBuilder: (context, animation1, animation2) {
+              return Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: 200,
+                  margin: const EdgeInsets.symmetric(horizontal: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: surfaceDark,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.amber, width: 2.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.emoji_events, color: Colors.amber, size: 60),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context)!.pointsAdded(totalWon.toInt()),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            transitionBuilder: (context, anim1, anim2, child) {
+              return FadeTransition(
+                opacity: CurvedAnimation(parent: anim1, curve: Curves.easeOut),
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.8, end: 1.0)
+                      .animate(CurvedAnimation(parent: anim1, curve: Curves.elasticOut)),
+                  child: child,
+                ),
+              );
+            },
+          );
+
+          // Fermeture automatique après 2 secondes
+          Future.delayed(const Duration(seconds: 2), () {
+            if (nav.canPop()) nav.pop();
+          });
+        }
+
+      }
+
+
+      // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
+      await CacheService.saveUserPoints(newPoints);
+
+    } catch (e) {
+      debugPrint('Erreur syncUserPoints: $e');
+    }
+  }
+
+
+  Future<void> _loadCachedPoints() async {
+    final cachedPoints = await CacheService.loadLastPoints();
+    setState(() {
+      userData = {'points': cachedPoints};
+      isLoading = false;
+    });
+  }
+
+
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadCachedPoints();
+    syncUserPoints(widget.uid).then((_) {
+      _loadUserData();
+    });
   }
 
   Future<void> _loadUserData() async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('UserData')
-          .doc(widget.uid)
-          .get();
+      final data = await supabase
+          .from('usersdata')
+          .select()
+          .eq('id', widget.uid)
+          .single();
 
-      if (doc.exists) {
-        setState(() {
-          userData = doc.data();
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User data not found in Firestore.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      setState(() {
+        userData = data;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text('Error loading user data: $e'),
+          content: Text('Erreur chargement utilisateur: $e'),
           backgroundColor: Colors.red,
         ),
       );
     }
+
+  }
+  String convertOdds(double frOdd, String oddsFormat) {
+
+    switch (oddsFormat.toUpperCase()) {
+      case 'FR':
+      // Format décimal, on renvoie tel quel
+        return frOdd.toStringAsFixed(2);
+
+      case 'UK':
+      // UK = (FR - 1) exprimé en fraction
+        double fraction = frOdd - 1;
+        return _toFraction(fraction);
+
+      case 'US':
+
+        if (frOdd >= 2.0) {
+          return '+${((frOdd - 1) * 100).round()}';
+        } else {
+          return (-100 / (frOdd - 1)).round().toString();
+        }
+
+      default:
+        return frOdd.toStringAsFixed(2);
+    }
+  }
+
+// --- Fonction interne pour transformer un nombre en fraction (format UK) ---
+  String _toFraction(double value) {
+    const tolerance = 1.0e-6;
+    int numerator = 1;
+    int denominator = 1;
+    double error = (numerator / denominator - value).abs();
+
+    while (error > tolerance && denominator < 100) {
+      if (numerator / denominator < value) {
+        numerator++;
+      } else {
+        denominator++;
+        numerator = (value * denominator).round();
+      }
+      error = (numerator / denominator - value).abs();
+    }
+
+    return "$numerator/$denominator";
   }
 
   Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
+    await supabase.auth.signOut();
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -75,287 +394,674 @@ class _GamesPageState extends State<GamesPage> {
   }
 
   Future<void> _addPoints(int points) async {
+    final messenger = ScaffoldMessenger.of(context);
     if (userData == null) return;
+    final response = await supabase
+        .from('usersdata')
+        .select('daily_points_used')
+        .eq('id', widget.uid)
+        .single();
 
-    final newPoints = (userData!['points'] ?? 0) + points;
+    final bool dailyPointsUsed = response['daily_points_used'] ?? false;
+    if (!dailyPointsUsed) {
+      final newPoints = (userData!['points'] ?? 0) + points;
 
-    await FirebaseFirestore.instance
-        .collection('UserData')
-        .doc(widget.uid)
-        .update({'points': newPoints});
+      await supabase
+          .from('usersdata')
+          .update({'points': newPoints, 'daily_points_used': true})
+          .eq('id', widget.uid);
 
-    setState(() {
-      userData!['points'] = newPoints;
-    });
+      setState(() {
+        userData!['points'] = newPoints;
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You earned $points points!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('You earned $points points!'),
+          backgroundColor: Colors.green,
+        ),
+      );}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      extendBodyBehindAppBar: true,
+      backgroundColor: backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/logo.jpeg',
-              height: 30,
-            ),
+            Image.asset('assets/images/logo.png', height: 30),
             const SizedBox(width: 8),
-             Text("HoopsBets"),
+            const Text("HoopsLeague", style: TextStyle(color: Colors.white),),
           ],
         ),
-        iconTheme: const IconThemeData(color: Colors.black), // couleur du menu
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      drawer: Drawer(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-          padding: EdgeInsets.zero,
+
+      drawer: _buildDrawer(context),
+
+      body: Stack(
           children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(userData?['user_name'] ?? 'No name'),
-              accountEmail: Text(userData?['email'] ?? 'No email'),
 
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Colors.blue, size: 40),
+              Center(
+                child: Opacity(
+                  opacity: 0.1, // 🔸 Transparence pour effet watermark
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    width: 250,
+                    height: 250,
+                  ),
+                ),
               ),
-              decoration: const BoxDecoration(color: Colors.blueAccent),
-            ),
-            ListTile(
-              leading: const Icon(Icons.stars),
-              title: Text('Points : ${userData?['points'] ?? 0}'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text("My bets"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => MyBetsPage(uid: widget.uid)),
-                );
-              },
-            ),
+    // 📜 Contenu principal
+    SafeArea(
+    child:
+    StreamBuilder<List<Map<String, dynamic>>>(
+        stream: supabase
+            .from('gamesdata')
+            .stream(primaryKey: ['id'])
+            .eq('status', 'scheduled')
+            .order('start_time', ascending: true),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text(AppLocalizations.of(context)!.noData));
+          }
+          final nowLocal = DateTime.now();
+          final games = snapshot.data!;
 
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.refresh),
-              title:  Text(AppLocalizations.of(context)!.reloadData),
-              onTap: () {
-                Navigator.pop(context); // ferme le drawer
-                _loadUserData();
-                setState(() {
-                  bets.clear();
-                  betsNotifier.value = [];
-                });
+          final filteredGames = games.where((game) {
+            try {
+              final startUtc = DateTime.parse(game['start_time']).toUtc();
+              final startLocal = startUtc.toLocal();
 
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: Text(
-                  AppLocalizations.of(context)!.logout,
-                  style: const TextStyle(color: Colors.red)),
-              onTap: _logout,
-            ),
-          ],
-        ),
-      ),
-
-      body:
-
-        StreamBuilder(
-
-          stream: FirebaseFirestore.instance.collection("GamesData").orderBy("start_time").snapshots(),
-          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if(snapshot.connectionState == ConnectionState.waiting){
-              return CircularProgressIndicator();
+              if (startLocal.isBefore(nowLocal)) return false;
+            } catch (_) {
+              return false;
             }
-            if(!snapshot.hasData){
-              return Text(AppLocalizations.of(context)!.noData);
-            }
-            List<dynamic> games = [];
-            snapshot.data!.docs.forEach((element) {
-              games.add(element);
+            final gameId = game['id'];
+            // On vérifie que ce gameId n’apparaît dans aucun bet
+            return !betsNotifier.value.any((b) {
+              final betGameIds = b['game_id'];
+              if (betGameIds is List) {
+                return betGameIds.contains(gameId);
+              } else {
+                return betGameIds == gameId;
+              }
             });
+          }).toList();
 
-            return  ListView.builder(
-              itemCount: games.length,
-              itemBuilder: (context, index) {
-                final game = games[index];
-                final homeTeam = game['home_team'];
-                final awayTeam = game['away_team'];
+          return ListView.builder(
+            itemCount: filteredGames.length,
+            itemBuilder: (context, index) {
+              final game = filteredGames[index];
+              final homeTeam = game['home_team'];
+              final awayTeam = game['away_team'];
+              final homeTeamShort = game['home_team_short'] ?? '';
+              final awayTeamShort = game['away_team_short'] ?? '';
+              final oddAway = convertOdds(
+                (game['odd_away_team'] as num).toDouble(),
+                (userData?['oddsformat'] ?? 'FR') as String,
+              );
+              final oddHome = convertOdds(
+                (game['odd_home_team'] as num).toDouble(),
+                (userData?['oddsformat'] ?? 'FR') as String,
+              );
 
-                return Dismissible(
-                  key: Key(game.id),
-                  background: Container(
-                    color: Colors.blueAccent, // swipe vers la droite → awayTeam ?
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.only(left: 20),
-                    child: const Icon(Icons.check, color: Colors.white),
+              return Dismissible(
+                key: Key(game['id'].toString()),
+                background: Container(
+                  color: getTeamColor(homeTeam),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 20),
+                  child: const Icon(Icons.check, color: Colors.white, size: 32),
+                ),
+                secondaryBackground: Container(
+                  color: getTeamColor(awayTeam),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  child: const Icon(Icons.check, color: Colors.white, size: 32),
+                ),
+                confirmDismiss: (direction) async {
+                  Map<String, dynamic> betToAdd;
+                  if (direction == DismissDirection.startToEnd) {
+                    betToAdd = {
+                      'pickedTeam': homeTeam,
+                      'odd': game['odd_home_team'],
+                      'start_time': game['start_time'],
+                      'game_id': game['id']
+                    };
+                  } else {
+                    betToAdd = {
+                      'pickedTeam': awayTeam,
+                      'odd': game['odd_away_team'],
+                      'start_time': game['start_time'],
+                      'game_id': game['id']
+                    };
+                  }
+                  bets.add(betToAdd);
+                  betsNotifier.value = [...betsNotifier.value, betToAdd];
+                  return true;
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: surfaceDark,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: surfaceDark, width: 0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  secondaryBackground: Container(
-                    color: Colors.red, // swipe vers la gauche → homeTeam ?
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: const Icon(Icons.check, color: Colors.white),
-                  ),
-                  confirmDismiss: (direction) async {
-                    String selectedTeam;
-                    Map<String, dynamic> betToAdd;
-
-                    if (direction == DismissDirection.startToEnd) {
-                      selectedTeam = homeTeam;
-                      betToAdd = {
-                        'pickedTeam': homeTeam,
-                        'odd': game['odd_home_team'],
-                        'start_time': game['start_time'],
-                        'game_id' : game['id']
-                      };
-                    } else {
-                      selectedTeam = awayTeam;
-                      betToAdd = {
-                        'pickedTeam': awayTeam,
-                        'odd': game['odd_away_team'],
-                        'start_time': game['start_time'],
-                        'game_id' : game['id']
-                      };
-                    }
-
-                    // Ajouter le pari sans appeler setState
-                    bets.add(betToAdd);
-                    betsNotifier.value = [...betsNotifier.value, betToAdd]; // ajoute le pari
-
-
-
-                    // Retourne true pour supprimer la Card
-                    return true;
-                  },
-
-
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 3,
-                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Image.asset("assets/images/${homeTeam.split(' ').last}.png", height: 48),
-                              Text("$homeTeam - $awayTeam",
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Image.asset("assets/images/${awayTeam.split(' ').last}.png", height: 48),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.blueAccent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text("${game['odd_home_team']}",
-                                    style: const TextStyle(
-                                        fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text("${game['odd_away_team']}",
-                                    style: const TextStyle(
-                                        fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            AppLocalizations.of(context)!.startsAt(
-                              DateFormat.yMd()
-                                  .add_jm()
-                                  .format(DateTime.parse(game['start_time']).toLocal()),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date et heure
+                      if (game['start_time'] != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Center(
+                            child : Text(
+                            formatGameTime(game['start_time']),
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13, color: Colors.grey),
                           ),
+                        ),
+                        ),
+                      // Section des équipes
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            // Équipe domicile avec maillot
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  ClipPath(
+                                    clipper: BasketballJerseyClipper(),
+                                    child: Container(
+                                      width: 48,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            getTeamColor(homeTeam).withValues(alpha: 0.6),
+                                            getTeamColor(homeTeam)
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        border: Border.all(
+                                          color: getTeamColor(homeTeam).withValues(alpha: 0.8),
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: getTeamColor(homeTeam).withValues(alpha: 0.4),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: AutoSizeText(
+                                          '${getTeamEmoji(homeTeam)}\n$homeTeamShort',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    homeTeam,
+                                    style: TextStyle(
+                                      color: textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // VS au centre
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                "VS",
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
+
+                            // Équipe extérieure avec maillot
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  ClipPath(
+                                    clipper: BasketballJerseyClipper(),
+                                    child: Container(
+                                      width: 48,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            getTeamColor(awayTeam).withValues(alpha: 0.6),
+                                            getTeamColor(awayTeam)
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        border: Border.all(
+                                          color: getTeamColor(awayTeam).withValues(alpha: 0.8),
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: getTeamColor(awayTeam).withValues(alpha: 0.4),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: AutoSizeText(
+                                          '${getTeamEmoji(awayTeam)}\n$awayTeamShort',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    awayTeam,
+                                    style: TextStyle(
+                                      color: textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Boutons de paris
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF222F49),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    oddHome,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFF222F49),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    oddAway,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.swipe, size: 14, color: textSecondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Glissez pour parier',
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14))
                         ],
                       ),
-                    ),
+
+                    ],
                   ),
-                );
-              },
-            );
+                ),
+              );
+            },
+          );
 
-          } ,
+        },
       ),
-
-      // Bouton de panier
+    ),
+  ]),
       floatingActionButton: ValueListenableBuilder<List<Map<String, dynamic>>>(
         valueListenable: betsNotifier,
         builder: (context, bets, _) {
           return ElevatedButton.icon(
             onPressed: () async {
-              if (widget.uid.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("❌ Erreur : UID utilisateur manquant."),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
               final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BucketPage(bets: bets, uid: widget.uid,)),
+                MaterialPageRoute(
+                  builder: (_) => BucketPage(
+                    bets: List<Map<String, dynamic>>.from(bets),
+                    uid: widget.uid,
+                  ),
+                ),
               );
-              if (result == 'refresh') {
-                _loadUserData();
+
+              // Le résultat renvoyé par BucketPage au retour
+              if (result != null && result is List<Map<String, dynamic>>) {
                 setState(() {
-                  bets.clear();
-                  betsNotifier.value = [];
+                  betsNotifier.value = result;
                 });
+
+
+              }
+              else {
+                _loadUserData();
+                bets.clear();
               }
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 36),
-            label: Text("(${bets.length})"),
+            label: Text("(${bets.length})", style: TextStyle(color: Colors.white),),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: primaryBlue,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
               elevation: 8,
             ),
+
           );
+
         },
+
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
     );
+
+  }
+
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      backgroundColor: surfaceDark,
+      child: isLoading
+          ?  Center(child: CircularProgressIndicator(color: primaryBlue))
+          : ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [backgroundDark, surfaceDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border(
+                bottom: BorderSide(color: borderDark, width: 1),
+              ),
+            ),
+            child: FittedBox( // <-- Ajout
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: primaryBlue, width: 2),
+                    ),
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: surfaceDark,
+                      child: Text(
+                        (userData?['user_name'] ?? 'U')[0].toUpperCase(),
+                        style:  TextStyle(
+                          color: primaryBlue,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                   SizedBox(height: 12),
+                  AutoSizeText( // <-- pour auto-ajuster le nom
+                    userData?['user_name'] ?? 'No name',
+                    maxLines: 1,
+                    style:  TextStyle(
+                      color: textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                   SizedBox(height: 4),
+                  AutoSizeText(
+                    userData?['email'] ?? 'No email',
+                    maxLines: 1,
+                    style:  TextStyle(
+                      color: textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                  AutoSizeText(
+                    'Points : ${userData?['points'] ?? 0}',
+                    maxLines: 1,
+                    style:  TextStyle(
+                      color: textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildDrawerItem(
+            icon: Icons.history_rounded,
+            title: AppLocalizations.of(context)!.myBets,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MyBetsPage(uid: widget.uid),
+                ),
+              );
+            },
+          ), const SizedBox(height: 8),
+
+          if (userData?['daily_points_used'] == false)
+            _buildDrawerItem(
+              icon: Icons.control_point_rounded,
+              title: AppLocalizations.of(context)!.dailyPoints,
+              onTap: () {
+                _addPoints(10);
+                _loadUserData();
+              },
+            )
+          else
+            _buildDrawerItem(
+              icon: Icons.not_interested,
+              title: AppLocalizations.of(context)!.dailyPointsTaken,
+              textColor: Colors.grey,
+              iconColor: Colors.grey,
+              onTap: null,
+            ),
+          const SizedBox(height: 8),
+          _buildDrawerItem(
+            icon: Icons.people,
+            title: AppLocalizations.of(context)!.leagues,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LeaguesPage(uid: widget.uid),
+                ),
+              );
+            },
+          ),const SizedBox(height: 8),
+          _buildDrawerItem(
+            icon: Icons.account_box,
+            title: AppLocalizations.of(context)!.manageAccount,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ManageAccountPage(uid: widget.uid),
+                ),
+              );
+            },
+          ),const SizedBox(height: 8),
+          _buildDrawerItem(
+            icon: Icons.refresh,
+            title: AppLocalizations.of(context)!.reloadData,
+            onTap: () {
+              Navigator.pop(context); // ferme le drawer
+              _loadUserData();
+              syncUserPoints(widget.uid);
+              setState(() {
+                bets.clear();
+                betsNotifier.value = [];
+              });
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.leaderboard,
+            title: AppLocalizations.of(context)!.rankings,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LeaderboardPage(uid: widget.uid),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildDrawerItem(
+            icon: Icons.line_axis_outlined,
+            title: AppLocalizations.of(context)!.myGraph,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PointsGraphPage(),
+                ),
+              );
+            },
+          ),
+          Divider(color: borderDark, height: 32, indent: 16, endIndent: 16),
+          _buildDrawerItem(
+            icon: Icons.logout_rounded,
+            title: AppLocalizations.of(context)!.logout,
+            textColor: Colors.red[400],
+            iconColor: Colors.red[400],
+            onTap: () {
+              Navigator.pop(context);
+              _logout();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    VoidCallback? onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? primaryBlue),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: textColor ?? textPrimary,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+    );
   }
 }
+

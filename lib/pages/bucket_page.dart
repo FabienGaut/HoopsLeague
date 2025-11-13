@@ -1,17 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/pages/games_page.dart';
-import 'package:flutter_application_1/pages/sign_in_page.dart';
-import 'package:flutter_application_1/l10n/app_localizations.dart';
+import 'package:hoopsleague/l10n/app_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:hoopsleague/services/cache_service.dart';
 
+final supabase = Supabase.instance.client;
 
 class BucketPage extends StatefulWidget {
   final List<Map<String, dynamic>> bets;
   final String uid;
 
-  const BucketPage({super.key, required this.bets,  required this.uid});
+  const BucketPage({super.key, required this.bets, required this.uid});
 
   @override
   State<BucketPage> createState() => _BucketPageState();
@@ -21,14 +20,19 @@ class _BucketPageState extends State<BucketPage> {
   final TextEditingController _amountController = TextEditingController();
   Map<String, dynamic>? userData;
   bool isLoading = true;
-  late final userPoints;
+
+  // 🎨 Palette du thème cohérente avec LeaderboardPage
+  static const Color accentPrimary = Color(0xFF256af4);
+  static const Color textPrimary = Colors.white;
+  static const Color textSecondary = Colors.white70;
+  static const Color surfaceDark = Color(0xFF182134);
+  static const Color backgroundDark = Color(0xFF101622);
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
-
 
   @override
   void dispose() {
@@ -37,76 +41,32 @@ class _BucketPageState extends State<BucketPage> {
   }
 
   Future<void> _loadUserData() async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('UserData')
-          .doc(widget.uid)
-          .get();
+      final data = await supabase
+          .from('usersdata')
+          .select()
+          .eq('id', widget.uid)
+          .single();
 
-      if (doc.exists) {
-        setState(() {
-          userData = doc.data();
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User data not found !'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      setState(() {
+        userData = data;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading user data: $e'),
-          backgroundColor: Colors.red,
-        ),
+      messenger.showSnackBar(
+        SnackBar(content: Text('Erreur chargement utilisateur: $e')),
       );
     }
-  }
-
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInPage()),
-            (route) => false,
-      );
-    }
-  }
-
-  Future<void> _addPoints(int points) async {
-    if (userData == null) return;
-
-    final newPoints = (userData!['points'] ?? 0) + points;
-
-    await FirebaseFirestore.instance
-        .collection('UserData')
-        .doc(widget.uid)
-        .update({'points': newPoints});
-
-    setState(() {
-      userData!['points'] = newPoints;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You earned $points points!'),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 
   double get combinedOdd {
     double prod = 1.0;
     for (var bet in widget.bets) {
-      final odd = bet['odd'] is int ? (bet['odd'] as int).toDouble() : bet['odd'] as double;
+      final odd = bet['odd'] is int
+          ? (bet['odd'] as int).toDouble()
+          : bet['odd'] as double;
       prod *= odd;
     }
     return prod;
@@ -114,290 +74,319 @@ class _BucketPageState extends State<BucketPage> {
 
   double get totalPayout {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
-    final payout = amount * combinedOdd;
-    return double.parse(payout.toStringAsFixed(2));
+    return double.parse((amount * combinedOdd).toStringAsFixed(2));
   }
 
-  Future<void> _sendBetToFirebase() async {
-    final gameIds = widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
+  Future<void> _sendBetToSupabase() async {
+    final gameIds =
+    widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
+    final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+
+    if (widget.uid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ UID Error !"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (parsedAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.invalidAmount),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
-      if (widget.uid.isEmpty) {
+      final pointsBetted = parsedAmount.toInt();
+      final currentPoints = (userData?['points'] ?? 0).toDouble();
+
+      if (parsedAmount > currentPoints) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("❌ UID Error !"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.notEnoughPoints),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
 
-      await FirebaseFirestore.instance.collection("Bets").add({
+      await supabase.from('bets').insert({
         'user_id': widget.uid,
         'games_id': gameIds,
-        'odd': combinedOdd.toDouble(),
-        'points_betted':
-        double.tryParse(_amountController.text.trim()) ?? 0.0,
-        'selection':
-        widget.bets.map((bet) => bet['pickedTeam'] as String? ?? '').toList(),
-        'timestamp': FieldValue.serverTimestamp(),
+        'odd': combinedOdd,
+        'points_betted': pointsBetted,
+        'selection': widget.bets.map((b) => b['pickedTeam'] ?? '').toList(),
+        'timestamp': DateTime.now().toIso8601String(),
       });
-      final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
-      final currentPoints = (userData?['points'] ?? 0).toDouble();
 
-      userPoints = currentPoints - parsedAmount;
+      final double newPoints = (currentPoints - parsedAmount);
 
-
-      await FirebaseFirestore.instance
-
-          .collection('UserData')
-          .doc(widget.uid)
-          .update({'points': userPoints}
-      );
-
+      await supabase
+          .from('usersdata')
+          .update({'points': newPoints.toInt()})
+          .eq('id', widget.uid);
+      await CacheService.saveUserPoints(newPoints);
 
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+        SnackBar(
           content: Text(AppLocalizations.of(context)!.successfulBet),
           backgroundColor: Colors.green,
         ),
       );
+
+      setState(() => widget.bets.clear());
+      Navigator.pop(context);
+      _loadUserData();
     } catch (e) {
+      debugPrint(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("UID Error ! , error : $e"),
+          content: Text(AppLocalizations.of(context)!.errorSendingBet),
           backgroundColor: Colors.red,
         ),
       );
     }
+  }
 
+  void _removeBet(int index) {
     setState(() {
-      widget.bets.clear();
+      widget.bets.removeAt(index);
     });
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => GamesPage(uid: widget.uid,)),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.betDeleted)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
+    final t = AppLocalizations.of(context)!;
 
+    return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black.withValues(alpha: 0.2),
+        elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context, widget.bets),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/logo.jpeg',
-              height: 30,
-            ),
+            Image.asset('assets/images/logo.png', height: 28),
             const SizedBox(width: 8),
-            const Text("HoopsBets")
-          ],
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-
-              Navigator.pop(context);
-
-          },
-        ),
-      ),
-
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            if (isLoading)
-              const LinearProgressIndicator(), // petit indicateur
-            UserAccountsDrawerHeader(
-              accountName: Text(userData?['user_name'] ?? 'No name'),
-              accountEmail: Text(userData?['email'] ?? 'No email'),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Colors.blue, size: 40),
+            Text(
+              "HoopsLeague",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-              decoration: const BoxDecoration(color: Colors.blueAccent),
-            ),
-            ListTile(
-              leading: const Icon(Icons.stars),
-              title: Text('Points : ${userData?['points'] ?? 0}'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: Text('Timezone : ${userData?['timezone'] ?? 'N/A'}'),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.refresh),
-              title:  Text(AppLocalizations.of(context)!.reloadData),
-              onTap: () {
-                Navigator.pop(context); // ferme le drawer
-                _loadUserData();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: Text(AppLocalizations.of(context)!.logout, style: const TextStyle(color: Colors.red)),
-              onTap: _logout,
             ),
           ],
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: widget.bets.isEmpty
-                ? Center(
-              child: Column (children: [
-
-                Text(AppLocalizations.of(context)!.noBetsSelected,
-                  style: TextStyle(fontSize: 26, color: Colors.grey[700]),
-                ),
-                Icon(Icons.shopping_cart, color: Colors.grey, size: 36),
-          ]
-
-              )
-
-            )
-                :
-            ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: widget.bets.length,
-              itemBuilder: (context, index) {
-                final bet = widget.bets[index];
-                final pickedTeam = bet['pickedTeam'];
-                final odd = bet['odd'] is int ? (bet['odd'] as int).toDouble() : bet['odd'] as double;
-
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 4,
-                  shadowColor: Colors.black26,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              pickedTeam,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.black87),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              AppLocalizations.of(context)!.oddAndStartTime(
-                                odd,  // passe le double directement
-                                bet['start_time'].toString(), // string
-                              ),
-                              style: const TextStyle(
-                                  fontSize: 13, color: Colors.black54),
-                            ),
-                          ],
-                        ),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.blueAccent,
-                          child: Text(
-                            odd.toStringAsFixed(2),
-                            style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              },
+          // 🌌 Dégradé violet → noir
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF314368), Color(0xFF182134)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-          if (widget.bets.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  if (widget.bets.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        AppLocalizations.of(context)!.combinedOdd(
-                          combinedOdd.toStringAsFixed(2),
-                        ),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ),
-                  TextField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.totalAmount,
-                      labelStyle: const TextStyle(color: Colors.blueAccent),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blueAccent),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blueAccent),
-                      ),
-                      fillColor: Colors.grey[100],
-                      filled: true,
-                      prefixIcon: const Icon(Icons.attach_money, color: Colors.blueAccent),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _sendBetToFirebase,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 5,
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)!.payout(
-                          totalPayout,
-                        ),
+          Container(color: Colors.black.withValues(alpha: 0.3)),
+          SafeArea(
+          child:
+          Column(
+            children: [
+              Expanded(
+                child: widget.bets.isEmpty
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        t.noBetsSelected,
                         style: const TextStyle(
+                            fontSize: 26, color: textSecondary),
+                      ),
+                      const Icon(Icons.shopping_cart,
+                          color: Colors.grey, size: 36),
+                    ],
+                  ),
+                )
+                    : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: widget.bets.length,
+                  itemBuilder: (context, index) {
+                    final bet = widget.bets[index];
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: surfaceDark,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: surfaceDark, width: 0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 🏀 Infos sur le pari
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  bet['pickedTeam'],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  t.oddAndStartTime(
+                                    bet['odd'],
+                                    bet['start_time'].toString(),
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 🎯 Cote et bouton supprimer
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF222F49),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: accentPrimary, width: 1),
+                                ),
+                                child: Text(
+                                  bet['odd'].toStringAsFixed(2),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                                onPressed: () => _removeBet(index),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+
+                  },
+                ),
+              ),
+              if (widget.bets.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: backgroundDark,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: surfaceDark, width: 0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        t.combinedOdd(combinedOdd.toStringAsFixed(2)),
+                        style: const TextStyle(
+                          color: textSecondary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _amountController,
+                        keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        decoration: InputDecoration(
+                          labelText: t.totalAmount,
+                          labelStyle: const TextStyle(color: textSecondary),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.25)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: accentPrimary),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.attach_money,
+                              color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.1),
+                        ),
+                        style: const TextStyle(color: textPrimary),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _sendBetToSupabase,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accentPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            t.payout(totalPayout),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-
-                ],
-              ),
-            ),
+                ),
+            ],
+          ),
+          )
         ],
       ),
     );
