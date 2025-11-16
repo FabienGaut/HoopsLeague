@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hoopsleague/services/clock.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
@@ -219,7 +221,7 @@ class _MyBetsPageState extends State<MyBetsPage> {
                       (amount * odd).toStringAsFixed(2);
                       final startTime =
                           DateTime.tryParse(bet['timestamp'] ?? '') ??
-                              DateTime.now();
+                              context.read<Clock>().now();
 
                       final status = bet['status'] ?? 'pending';
                       Color statusColor;

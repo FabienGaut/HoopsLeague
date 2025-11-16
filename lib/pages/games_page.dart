@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:hoopsleague/pages/bucket_page.dart';
 import 'package:hoopsleague/pages/passed_bets.dart';
 import 'package:hoopsleague/pages/sign_in_page.dart';
+import 'package:hoopsleague/services/clock.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
@@ -13,9 +15,7 @@ import 'package:hoopsleague/pages/manage_account_page.dart';
 import 'leagues_page.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
-
-
-
+import 'package:hoopsleague/utils/time_formatter.dart';
 
 final supabase = Supabase.instance.client;
 class BasketballJerseyClipper extends CustomClipper<Path> {
@@ -160,16 +160,6 @@ class _GamesPageState extends State<GamesPage> {
     return '🏀'; // fallback
   }
 
-  String formatGameTime(String utcString) {
-    try {
-      final utcTime = DateTime.parse(utcString).toUtc();
-      final localTime = utcTime.toLocal();
-      return DateFormat('EEE d MMM - HH:mm').format(localTime);
-    } catch (_) {
-      return utcString;
-    }
-  }
-
   Future<void> syncUserPoints(String uid) async {
     final nav = Navigator.of(context);
     try {
@@ -286,7 +276,8 @@ class _GamesPageState extends State<GamesPage> {
 
 
       // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
-      await CacheService.saveUserPoints(widget.uid, newPoints);
+      await CacheService.saveUserPoints(
+          widget.uid, newPoints, context.read<Clock>().now());
 
     } catch (e) {
       debugPrint('Erreur syncUserPoints: $e');
@@ -485,7 +476,7 @@ class _GamesPageState extends State<GamesPage> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-          final nowLocal = DateTime.now();
+          final nowLocal = Provider.of<Clock>(context, listen: false).now();
           final games = snapshot.data!;
 
           final filteredGames = games.where((game) {
