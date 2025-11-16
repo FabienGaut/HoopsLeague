@@ -3,6 +3,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:hoopsleague/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -105,7 +106,7 @@ class HomePage extends StatelessWidget {
                     "© 2025 HoopsLeague. All rights reserved.",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      fontSize: logScale(context, 12),
                     ),
                   )
                 ],

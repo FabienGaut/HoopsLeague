@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -32,7 +33,9 @@ class _LeaguesPageState extends State<LeaguesPage> {
   Future<void> _loadLeagues() async {
     setState(() => isLoading = true);
     try {
-      final data = await supabase.from('leagues').select();
+      final data = await supabase.from('leagues')
+          .select()
+          .contains('users_id', [widget.uid]);
       setState(() {
         leagues = List<Map<String, dynamic>>.from(data);
       });
@@ -87,6 +90,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
     if (leagueName.isEmpty) return;
 
     try {
+
       final league = await supabase
           .from('leagues')
           .select()
@@ -139,11 +143,23 @@ class _LeaguesPageState extends State<LeaguesPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          t.leagues,
-          style: const TextStyle(
-            color: textPrimary,
-            fontWeight: FontWeight.bold,
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
+              ),
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                t.myLeagues,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -172,10 +188,10 @@ class _LeaguesPageState extends State<LeaguesPage> {
                   // 🔹 Création de ligue
                   Text(
                     t.createLeague,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: textPrimary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: logScale(context, 18),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -190,10 +206,10 @@ class _LeaguesPageState extends State<LeaguesPage> {
                   // 🔹 Rejoindre une ligue
                   Text(
                     t.joinLeague,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: textPrimary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: logScale(context, 18),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -208,10 +224,10 @@ class _LeaguesPageState extends State<LeaguesPage> {
                   // 🔹 Liste des ligues
                   Text(
                     t.myLeagues,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: textPrimary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: logScale(context, 18),
                     ),
                   ),
                   const SizedBox(height: 8),

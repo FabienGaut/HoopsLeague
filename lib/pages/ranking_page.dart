@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -80,7 +81,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       }
 
       final response = await supabase
-          .from('usersdata')
+          .from('users_public')
           .select()
           .filter('id', 'in', leagueUsersIds)
           .order('points', ascending: false);
@@ -200,9 +201,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                         Center(
                           child: Text(
                             t.noMembersInLeague,
-                            style: const TextStyle(
+                            style:  TextStyle(
                               color: textSecondary,
-                              fontSize: 16,
+                              fontSize: logScale(context, 16),
                             ),
                           ),
                         ),
@@ -248,10 +249,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             ),
                             title: Text(
                               user['user_name'] ?? t.unknownUser,
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 color: textPrimary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: logScale(context, 16),
                               ),
                             ),
 
@@ -270,10 +271,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                               ),
                               child: Text(
                                 '${user['points'] ?? 0} ${t.pointsSuffix}',
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   color: accentGlow,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontSize: logScale(context, 14),
                                 ),
                               ),
                             ),

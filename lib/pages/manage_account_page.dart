@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/pages/password_change_page.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 import 'app_state.dart';
+import 'package:hoopsleague/services/cache_service.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -32,8 +34,12 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
   }
+
 
   Future<void> _loadUserData() async {
     final t = AppLocalizations.of(context)!;
@@ -79,6 +85,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   }
 
   Future<void> _clearCache() async {
+    CacheService.clearCache();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.cacheCleared)),
     );
@@ -131,11 +138,23 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: Text(
-          t.manageAccountTitle,
-          style: const TextStyle(
-            color: textPrimary,
-            fontWeight: FontWeight.bold,
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
+              ),
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                t.manageAccount,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -168,10 +187,10 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                       children: [
                         Text(
                           t.usernameLabel,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: textPrimary,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: logScale(context, 16),
                           ),
                         ),
                         const SizedBox(height: 8),

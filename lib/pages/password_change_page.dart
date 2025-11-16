@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -186,7 +187,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     t.changePasswordTitle,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 24,
+                      fontSize: logScale(context, 24),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
                     ),
@@ -300,7 +301,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     "© 2025 HoopsLeague",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      fontSize: logScale(context, 12),
                     ),
                   ),
                 ],
