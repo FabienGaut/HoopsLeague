@@ -29,7 +29,7 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 
-  static final Color appBar = Colors.black.withOpacity(0.2);
+  static final Color appBar = Colors.black.withValues(alpha: 0.2);
 
 
 

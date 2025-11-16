@@ -29,7 +29,7 @@ class HoopsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: elevation,
             offset: const Offset(0, 4),
           ),
