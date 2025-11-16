@@ -99,7 +99,7 @@
       "hoopsLeagueTitle": "HoopsLeague",
       "noMembersInLeague": "Aucun membre dans cette ligue",
       "unknownUser": "Inconnu",
-      "pointsSuffix": "pts"
-
+      "pointsSuffix": "pts",
+  "leagueNotFound" : "Ligue non trouvée"
 
 }

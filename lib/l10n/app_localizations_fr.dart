@@ -86,8 +86,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noAccountForTheseId => 'Email ou mot de passe incorrect';
 
   @override
-  String get confirmPasswordError =>
-      'Les mots de passe ne sont pas les mêmes !';
+  String get confirmPasswordError => 'Les mots de passe ne sont pas les mêmes !';
 
   @override
   String get mailAlreadyUsed => 'Cet adresse email est déjà utilisée';
@@ -114,15 +113,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get formatsDesCotes => 'Formats des cotes :';
 
   @override
-  String get formatsDesCotesDescription =>
-      '- FR : cotes décimales (ex : 2.5) → gain = mise × cote\n- US : cotes américaines (ex : +150 / -200) → gain selon montant mis\n- UK : cotes fractionnaires (ex : 5/2) → gain = mise × (numérateur / dénominateur)';
+  String get formatsDesCotesDescription => '- FR : cotes décimales (ex : 2.5) → gain = mise × cote\n- US : cotes américaines (ex : +150 / -200) → gain selon montant mis\n- UK : cotes fractionnaires (ex : 5/2) → gain = mise × (numérateur / dénominateur)';
 
   @override
   String get cgu => 'Conditions générales (CGU) :';
 
   @override
-  String get cguDescription =>
-      '- Vous devez avoir 18 ans ou plus.\n- Les paris sont à vos risques.\n- Les informations fournies doivent être exactes.\n- Supabase HoopsBets n’est pas responsable des pertes financières.';
+  String get cguDescription => '- Vous devez avoir 18 ans ou plus.\n- Les paris sont à vos risques.\n- Les informations fournies doivent être exactes.\n- Supabase HoopsBets n’est pas responsable des pertes financières.';
 
   @override
   String get firstConnection => 'Première connexion';
@@ -149,7 +146,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myGraph => 'Mes statistiques';
 
   @override
-  String pointsAdded(int value) {
+  String pointsAdded(String value) {
     return '$value points gagnés !';
   }
 
@@ -295,8 +292,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get wrongOldPassword => 'Ancien mot de passe incorrect';
 
   @override
-  String get passwordsDoNotMatch =>
-      'Les nouveaux mots de passe ne correspondent pas';
+  String get passwordsDoNotMatch => 'Les nouveaux mots de passe ne correspondent pas';
 
   @override
   String get passwordUpdated => 'Mot de passe mis à jour avec succès';
@@ -320,4 +316,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pointsSuffix => 'pts';
+
+  @override
+  String get leagueNotFound => 'Ligue non trouvée';
 }

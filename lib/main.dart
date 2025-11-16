@@ -9,19 +9,14 @@ import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
+import 'package:responsive_framework/responsive_framework.dart';
 
 Future<void> main() async {
   tz.initializeTimeZones();
-
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialiser Hive (compatible Web et mobile)
   await Hive.initFlutter();
-
-  // Charger les variables d'environnement
   await dotenv.load(fileName: 'assets/.env');
-
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
@@ -35,13 +30,13 @@ Future<void> main() async {
   final session = Supabase.instance.client.auth.currentSession;
   String? uid = session?.user.id;
 
-  // Récupérer la langue depuis Supabase si utilisateur connecté
   if (uid != null) {
     final userData = await Supabase.instance.client
         .from('usersdata')
         .select('language')
         .eq('id', uid)
         .single();
+
     final lang = userData['language'] ?? 'fr';
     appState.setLocale(lang);
   }
@@ -54,10 +49,7 @@ Future<void> main() async {
   );
 }
 
-// Exemple d'utilisation de la date partout
-DateTime getNow() {
-  return DateTime.now(); // local machine / navigateur
-}
+DateTime getNow() => DateTime.now();
 
 class MyApp extends StatefulWidget {
   final Session? initialSession;
@@ -86,6 +78,18 @@ class _MyAppState extends State<MyApp> {
           Locale('fr', ''),
           Locale('en', ''),
         ],
+
+        // 🔹 ResponsiveFramework juste pour breakpoints
+        builder: (context, child) => ResponsiveBreakpoints.builder(
+          child: child!,
+          breakpoints: const [
+            Breakpoint(start: 0, end: 450, name: MOBILE),
+            Breakpoint(start: 451, end: 800, name: TABLET),
+            Breakpoint(start: 801, end: 1920, name: DESKTOP),
+            Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+          ],
+        ),
+
         home: widget.uid != null
             ? GamesPage(uid: widget.uid!)
             : const HomePage(),

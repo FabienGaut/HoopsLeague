@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -86,19 +87,24 @@ class _MyBetsPageState extends State<MyBetsPage> {
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo.png', height: 28),
-            const SizedBox(width: 8),
-            Text(
-              t.hoopsLeagueTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
               ),
-            ),
-          ],
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                "HoopsLeague",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
+          ),
         ),
       ),
 
@@ -150,8 +156,8 @@ class _MyBetsPageState extends State<MyBetsPage> {
                         const SizedBox(height: 10),
                         Text(
                           t.yourBalance,
-                          style: const TextStyle(
-                              color: textSecondary, fontSize: 15),
+                          style:  TextStyle(
+                              color: textSecondary, fontSize: logScale(context, 15)),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -165,9 +171,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                         ),
                         Text(
                           "POINTS",
-                          style: const TextStyle(
+                          style:  TextStyle(
                             color: textSecondary,
-                            fontSize: 13,
+                            fontSize: logScale(context, 13),
                             letterSpacing: 2,
                           ),
                         ),
@@ -192,8 +198,8 @@ class _MyBetsPageState extends State<MyBetsPage> {
                         const SizedBox(height: 16),
                         Text(
                           t.noBetsSelected,
-                          style: const TextStyle(
-                              fontSize: 16,
+                          style:  TextStyle(
+                              fontSize: logScale(context, 16),
                               color: textSecondary,
                               fontWeight: FontWeight.w500),
                         ),
@@ -285,9 +291,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                         Text(
                                           bet['pickedTeam'] ??
                                               "Multiple Bet",
-                                          style: const TextStyle(
+                                          style:  TextStyle(
                                             color: textPrimary,
-                                            fontSize: 18,
+                                            fontSize: logScale(context, 18),
                                             fontWeight:
                                             FontWeight.bold,
                                           ),
@@ -297,9 +303,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                           DateFormat.yMd()
                                               .add_jm()
                                               .format(startTime),
-                                          style: const TextStyle(
+                                          style:  TextStyle(
                                             color: textSecondary,
-                                            fontSize: 12,
+                                            fontSize: logScale(context, 12),
                                           ),
                                         ),
                                       ],
@@ -330,9 +336,9 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                       ),
                                       child: Text(
                                         team.toString(),
-                                        style: const TextStyle(
+                                        style:  TextStyle(
                                           color: accentGlow,
-                                          fontSize: 14,
+                                          fontSize: logScale(context, 14),
                                           fontWeight:
                                           FontWeight.w600,
                                         ),
@@ -392,14 +398,14 @@ class _MyBetsPageState extends State<MyBetsPage> {
     return Column(
       children: [
         Text(label,
-            style: const TextStyle(color: textSecondary, fontSize: 12)),
+            style:  TextStyle(color: textSecondary, fontSize: logScale(context, 12))),
         const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
             color: color,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: logScale(context, 16),
           ),
         ),
       ],

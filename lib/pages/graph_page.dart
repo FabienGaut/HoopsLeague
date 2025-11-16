@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 
 class PointsGraphPage extends StatefulWidget {
-  const PointsGraphPage({super.key});
+  final String uid;
+
+  const PointsGraphPage({super.key, required this.uid});
 
   @override
   State<PointsGraphPage> createState() => _PointsGraphPageState();
@@ -27,7 +30,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
   }
 
   Future<void> _loadPointsHistory() async {
-    final history = await CacheService.loadPointsHistory();
+    final history = await CacheService.loadPointsHistory(widget.uid);
     setState(() {
       pointsHistory = history;
       isLoading = false;
@@ -83,7 +86,7 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                 ? Center(
               child: Text(
                 t.noData,
-                style: const TextStyle(color: textSecondary, fontSize: 16),
+                style:  TextStyle(color: textSecondary, fontSize: logScale(context, 16)),
               ),
             )
                 : Padding(
@@ -107,9 +110,9 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                   children: [
                     Text(
                       t.pointsEvolution,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: textPrimary,
-                        fontSize: 20,
+                        fontSize: logScale(context, 20),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -134,9 +137,9 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                                 reservedSize: 35,
                                 getTitlesWidget: (value, _) => Text(
                                   value.toInt().toString(),
-                                  style: const TextStyle(
+                                  style:  TextStyle(
                                     color: textSecondary,
-                                    fontSize: 10,
+                                    fontSize: logScale(context, 10),
                                   ),
                                 ),
                               ),
@@ -153,9 +156,9 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                                   final date = pointsHistory[index]['date'] as DateTime;
                                   return Text(
                                     "${date.day}/${date.month}",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: textSecondary,
-                                      fontSize: 10,
+                                      fontSize: logScale(context, 10),
                                     ),
                                   );
                                 },

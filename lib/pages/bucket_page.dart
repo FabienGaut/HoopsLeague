@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:hoopsleague/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/services/cache_service.dart';
+import 'package:hoopsleague/theme/utils.dart';
+import '../theme/app_colors.dart';
+import '../theme/widgets_theme.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -31,7 +34,10 @@ class _BucketPageState extends State<BucketPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
   }
 
   @override
@@ -128,7 +134,7 @@ class _BucketPageState extends State<BucketPage> {
           .from('usersdata')
           .update({'points': newPoints.toInt()})
           .eq('id', widget.uid);
-      await CacheService.saveUserPoints(newPoints);
+      await CacheService.saveUserPoints(widget.uid, newPoints);
 
       if (!mounted) return;
 
@@ -176,19 +182,24 @@ class _BucketPageState extends State<BucketPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context, widget.bets),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo.png', height: 28),
-            const SizedBox(width: 8),
-            Text(
-              "HoopsLeague",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
               ),
-            ),
-          ],
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                "HoopsLeague",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: Stack(
@@ -216,8 +227,8 @@ class _BucketPageState extends State<BucketPage> {
                     children: [
                       Text(
                         t.noBetsSelected,
-                        style: const TextStyle(
-                            fontSize: 26, color: textSecondary),
+                        style:  TextStyle(
+                            fontSize: logScale(context, 26), color: textSecondary),
                       ),
                       const Icon(Icons.shopping_cart,
                           color: Colors.grey, size: 36),
@@ -230,21 +241,7 @@ class _BucketPageState extends State<BucketPage> {
                   itemBuilder: (context, index) {
                     final bet = widget.bets[index];
 
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: surfaceDark,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: surfaceDark, width: 0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
+                    return HoopsCard(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -255,9 +252,9 @@ class _BucketPageState extends State<BucketPage> {
                               children: [
                                 Text(
                                   bet['pickedTeam'],
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 18,
+                                    fontSize: logScale(context, 18),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -267,9 +264,9 @@ class _BucketPageState extends State<BucketPage> {
                                     bet['odd'],
                                     bet['start_time'].toString(),
                                   ),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white70,
-                                    fontSize: 13,
+                                    fontSize: logScale(context, 13),
                                   ),
                                 ),
                               ],
@@ -284,14 +281,14 @@ class _BucketPageState extends State<BucketPage> {
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF222F49),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: accentPrimary, width: 1),
+                                  border: Border.all(color: AppColors.accentPrimary, width: 1),
                                 ),
                                 child: Text(
                                   bet['odd'].toStringAsFixed(2),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 15,
+                                    fontSize: logScale(context, 15),
                                   ),
                                 ),
                               ),
@@ -304,6 +301,7 @@ class _BucketPageState extends State<BucketPage> {
                         ],
                       ),
                     );
+
 
                   },
                 ),
@@ -327,10 +325,10 @@ class _BucketPageState extends State<BucketPage> {
                     children: [
                       Text(
                         t.combinedOdd(combinedOdd.toStringAsFixed(2)),
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: textSecondary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: logScale(context, 16),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -373,9 +371,9 @@ class _BucketPageState extends State<BucketPage> {
                           ),
                           child: Text(
                             t.payout(totalPayout),
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontSize: logScale(context, 18),
                               color: Colors.white,
                             ),
                           ),

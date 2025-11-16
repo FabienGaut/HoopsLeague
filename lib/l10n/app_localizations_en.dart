@@ -113,15 +113,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formatsDesCotes => 'Odds formats:';
 
   @override
-  String get formatsDesCotesDescription =>
-      '- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)';
+  String get formatsDesCotesDescription => '- FR: decimal odds (e.g., 2.5) → win = stake × odds\n- US: American odds (e.g., +150 / -200) → win depends on stake\n- UK: fractional odds (e.g., 5/2) → win = stake × (numerator / denominator)';
 
   @override
   String get cgu => 'Terms & Conditions:';
 
   @override
-  String get cguDescription =>
-      '- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.';
+  String get cguDescription => '- You must be 18 years or older.\n- Bets are at your own risk.\n- Information provided must be accurate.\n- HoopsBets/Supabase is not responsible for financial losses.';
 
   @override
   String get firstConnection => 'First connection';
@@ -148,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myGraph => 'My statistics';
 
   @override
-  String pointsAdded(int value) {
+  String pointsAdded(String value) {
     return '$value points earned !';
   }
 
@@ -201,8 +199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinLeague => 'Join a league';
 
   @override
-  String get enterLeagueName =>
-      'Please type the name of the league you want to join';
+  String get enterLeagueName => 'Please type the name of the league you want to join';
 
   @override
   String get join => 'Join';
@@ -319,4 +316,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pointsSuffix => 'pts';
+
+  @override
+  String get leagueNotFound => 'League not found';
 }

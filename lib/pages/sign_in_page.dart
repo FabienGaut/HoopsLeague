@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:hoopsleague/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/utils.dart';
 import 'first_connection_page.dart';
 import 'games_page.dart';
 
@@ -203,7 +204,7 @@ class _SignInPageState extends State<SignInPage> {
                     maxLines: 1,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
                     ),
@@ -328,9 +329,9 @@ class _SignInPageState extends State<SignInPage> {
                     },
                     child: Text(
                       AppLocalizations.of(context)!.createAccount,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: logScale(context, 14),
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -341,7 +342,7 @@ class _SignInPageState extends State<SignInPage> {
                     "© 2025 HoopsLeague. All rights reserved.",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      fontSize: logScale(context, 12),
                     ),
                   ),
                 ],

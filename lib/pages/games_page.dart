@@ -11,6 +11,11 @@ import '../l10n/app_localizations.dart';
 import 'graph_page.dart';
 import 'package:hoopsleague/pages/manage_account_page.dart';
 import 'leagues_page.dart';
+import 'package:hoopsleague/theme/utils.dart';
+import 'package:hoopsleague/theme/app_colors.dart';
+
+
+
 
 final supabase = Supabase.instance.client;
 class BasketballJerseyClipper extends CustomClipper<Path> {
@@ -72,12 +77,6 @@ class _GamesPageState extends State<GamesPage> {
   bool isLoading = true;
 
 
-  static  Color backgroundDark = Color(0xFF101622);
-  static  Color surfaceDark = Color(0xFF182134);
-  static  Color borderDark = Color(0xFF314368);
-  static  Color primaryBlue = Color(0xFF256af4);
-  static  Color textPrimary = Colors.white;
-  static  Color textSecondary = Color(0xFF90A4CB);
 
 
   static const Map<String, String> teamEmojis = {
@@ -151,7 +150,7 @@ class _GamesPageState extends State<GamesPage> {
     for (var entry in teamColors.entries) {
       if (teamName.contains(entry.key)) return entry.value;
     }
-    return primaryBlue;
+    return AppColors.primaryBlue;
   }
 
   String getTeamEmoji(String teamName) {
@@ -234,7 +233,7 @@ class _GamesPageState extends State<GamesPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 30),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   decoration: BoxDecoration(
-                    color: surfaceDark,
+                    color: AppColors.surfaceDark,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: Colors.amber, width: 2.5),
                     boxShadow: [
@@ -251,12 +250,12 @@ class _GamesPageState extends State<GamesPage> {
                       const Icon(Icons.emoji_events, color: Colors.amber, size: 60),
                       const SizedBox(height: 16),
                       Text(
-                        AppLocalizations.of(context)!.pointsAdded(totalWon.toInt()),
+                        AppLocalizations.of(context)!.pointsAdded(totalWon as String),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 22,
+                          fontSize: logScale(context, 22),
                           height: 1.3,
                         ),
                       ),
@@ -287,7 +286,7 @@ class _GamesPageState extends State<GamesPage> {
 
 
       // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
-      await CacheService.saveUserPoints(newPoints);
+      await CacheService.saveUserPoints(widget.uid, newPoints);
 
     } catch (e) {
       debugPrint('Erreur syncUserPoints: $e');
@@ -296,7 +295,7 @@ class _GamesPageState extends State<GamesPage> {
 
 
   Future<void> _loadCachedPoints() async {
-    final cachedPoints = await CacheService.loadLastPoints();
+    final cachedPoints = await CacheService.loadLastPoints(widget.uid);
     setState(() {
       userData = {'points': cachedPoints};
       isLoading = false;
@@ -428,18 +427,30 @@ class _GamesPageState extends State<GamesPage> {
     return Scaffold(
 
       extendBodyBehindAppBar: true,
-      backgroundColor: backgroundDark,
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
         backgroundColor: Colors.black.withValues(alpha: 0.2),
         centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo.png', height: 30),
-            const SizedBox(width: 8),
-            const Text("HoopsLeague", style: TextStyle(color: Colors.white),),
-          ],
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
+              ),
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                "HoopsLeague",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
+          ),
         ),
+
         iconTheme: const IconThemeData(color: Colors.white),
       ),
 
@@ -553,9 +564,9 @@ class _GamesPageState extends State<GamesPage> {
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: surfaceDark,
+                    color: AppColors.surfaceDark,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: surfaceDark, width: 0),
+                    border: Border.all(color: AppColors.surfaceDark, width: 0),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.3),
@@ -575,8 +586,8 @@ class _GamesPageState extends State<GamesPage> {
                             child : Text(
                             formatGameTime(game['start_time']),
                             style: TextStyle(
-                              color: textSecondary,
-                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                              fontSize: logScale(context, 13),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -620,10 +631,10 @@ class _GamesPageState extends State<GamesPage> {
                                       child: Center(
                                         child: AutoSizeText(
                                           '${getTeamEmoji(homeTeam)}\n$homeTeamShort',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: logScale(context, 14),
                                           ),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
@@ -631,13 +642,13 @@ class _GamesPageState extends State<GamesPage> {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                   SizedBox(height: 8),
                                   Text(
                                     homeTeam,
                                     style: TextStyle(
-                                      color: textPrimary,
+                                      color: AppColors.textPrimary,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: logScale(context, 16),
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
@@ -653,8 +664,8 @@ class _GamesPageState extends State<GamesPage> {
                               child: Text(
                                 "VS",
                                 style: TextStyle(
-                                  color: textSecondary,
-                                  fontSize: 18,
+                                  color: AppColors.textSecondary,
+                                  fontSize: logScale(context, 18),
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
                                 ),
@@ -694,10 +705,10 @@ class _GamesPageState extends State<GamesPage> {
                                       child: Center(
                                         child: AutoSizeText(
                                           '${getTeamEmoji(awayTeam)}\n$awayTeamShort',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: logScale(context, 14),
                                           ),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
@@ -709,9 +720,9 @@ class _GamesPageState extends State<GamesPage> {
                                   Text(
                                     awayTeam,
                                     style: TextStyle(
-                                      color: textPrimary,
+                                      color: AppColors.textPrimary,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: logScale(context, 16),
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
@@ -739,10 +750,10 @@ class _GamesPageState extends State<GamesPage> {
                                 child: Center(
                                   child: Text(
                                     oddHome,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: logScale(context, 14),
                                     ),
                                   ),
                                 ),
@@ -759,10 +770,10 @@ class _GamesPageState extends State<GamesPage> {
                                 child: Center(
                                   child: Text(
                                     oddAway,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: logScale(context, 14),
                                     ),
                                   ),
                                 ),
@@ -775,13 +786,13 @@ class _GamesPageState extends State<GamesPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.swipe, size: 14, color: textSecondary),
+                          Icon(Icons.swipe, size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 6),
                           Text(
                             'Glissez pour parier',
                             style: TextStyle(
-                              color: textSecondary,
-                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                              fontSize: logScale(context, 11),
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -831,7 +842,7 @@ class _GamesPageState extends State<GamesPage> {
             icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 36),
             label: Text("(${bets.length})", style: TextStyle(color: Colors.white),),
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryBlue,
+              backgroundColor: AppColors.primaryBlue,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -853,21 +864,21 @@ class _GamesPageState extends State<GamesPage> {
 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
-      backgroundColor: surfaceDark,
+      backgroundColor: AppColors.surfaceDark,
       child: isLoading
-          ?  Center(child: CircularProgressIndicator(color: primaryBlue))
+          ?  Center(child: CircularProgressIndicator(color: AppColors.primaryBlue))
           : ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [backgroundDark, surfaceDark],
+                colors: [AppColors.backgroundDark, AppColors.surfaceDark],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               border: Border(
-                bottom: BorderSide(color: borderDark, width: 1),
+                bottom: BorderSide(color: AppColors.borderDark, width: 1),
               ),
             ),
             child: FittedBox( // <-- Ajout
@@ -880,16 +891,16 @@ class _GamesPageState extends State<GamesPage> {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: primaryBlue, width: 2),
+                      border: Border.all(color: AppColors.primaryBlue, width: 2),
                     ),
                     child: CircleAvatar(
                       radius: 28,
-                      backgroundColor: surfaceDark,
+                      backgroundColor: AppColors.surfaceDark,
                       child: Text(
                         (userData?['user_name'] ?? 'U')[0].toUpperCase(),
                         style:  TextStyle(
-                          color: primaryBlue,
-                          fontSize: 24,
+                          color: AppColors.primaryBlue,
+                          fontSize: logScale(context, 24),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -900,8 +911,8 @@ class _GamesPageState extends State<GamesPage> {
                     userData?['user_name'] ?? 'No name',
                     maxLines: 1,
                     style:  TextStyle(
-                      color: textPrimary,
-                      fontSize: 20,
+                      color: AppColors.textPrimary,
+                      fontSize: logScale(context, 20),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -910,16 +921,16 @@ class _GamesPageState extends State<GamesPage> {
                     userData?['email'] ?? 'No email',
                     maxLines: 1,
                     style:  TextStyle(
-                      color: textSecondary,
-                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      fontSize: logScale(context, 13),
                     ),
                   ),
                   AutoSizeText(
                     'Points : ${userData?['points'] ?? 0}',
                     maxLines: 1,
                     style:  TextStyle(
-                      color: textSecondary,
-                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      fontSize: logScale(context, 13),
                     ),
                   ),
                 ],
@@ -1020,12 +1031,12 @@ class _GamesPageState extends State<GamesPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PointsGraphPage(),
+                  builder: (_) => PointsGraphPage(uid: widget.uid,),
                 ),
               );
             },
           ),
-          Divider(color: borderDark, height: 32, indent: 16, endIndent: 16),
+          Divider(color: AppColors.borderDark, height: 32, indent: 16, endIndent: 16),
           _buildDrawerItem(
             icon: Icons.logout_rounded,
             title: AppLocalizations.of(context)!.logout,
@@ -1049,13 +1060,13 @@ class _GamesPageState extends State<GamesPage> {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? primaryBlue),
+      leading: Icon(icon, color: iconColor ?? AppColors.primaryBlue),
       title: Text(
         title,
         style: TextStyle(
-          color: textColor ?? textPrimary,
+          color: textColor ?? AppColors.textPrimary,
           fontWeight: FontWeight.w600,
-          fontSize: 15,
+          fontSize: logScale(context, 15),
         ),
       ),
       onTap: onTap,
