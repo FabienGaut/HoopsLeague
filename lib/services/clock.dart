@@ -5,11 +5,13 @@ import 'package:timezone/timezone.dart' as tz;
 /// to return a fixed time for tests.
 class Clock {
   DateTime now() => DateTime.now();
+  DateTime toLocalTime(DateTime utcTime) => utcTime.toLocal();
 }
 
 
 class LAClock extends Clock {
   final tz.Location _laLocation;
+  tz.Location get location => _laLocation;
 
   LAClock() : _laLocation = _initLocation();
 
@@ -19,7 +21,8 @@ class LAClock extends Clock {
   }
 
   @override
-  DateTime now() {
-    return tz.TZDateTime.now(_laLocation);
-  }
+  DateTime now() => tz.TZDateTime.now(_laLocation);
+
+  @override
+  DateTime toLocalTime(DateTime utcTime) => tz.TZDateTime.from(utcTime, _laLocation);
 }

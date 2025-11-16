@@ -42,15 +42,15 @@ Future<void> main() async {
     final lang = userData['language'] ?? 'fr';
     appState.setLocale(lang);
   }
-
+  final clock = Clock();
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AppState>.value(value: appState),
-        Provider<Clock>(create: (_) => Clock()),
-      ],
-      child: MyApp(initialSession: session, uid: uid),
-    ),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AppState>.value(value: appState),
+          Provider<Clock>.value(value: clock),
+        ],
+        child: MyApp(initialSession: session, uid: uid),
+      ),
   );
 }
 

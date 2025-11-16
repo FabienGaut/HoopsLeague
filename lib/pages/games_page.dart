@@ -17,43 +17,45 @@ import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
 
 
-
-
 final supabase = Supabase.instance.client;
+
 class BasketballJerseyClipper extends CustomClipper<Path> {
+  final BuildContext context;
+
+  BasketballJerseyClipper(this.context);
+
   @override
   Path getClip(Size size) {
     final path = Path();
 
-    // Largeur des bretelles
-    double strapWidth = size.width * 0.20;
+    // Largeur des bretelles proportionnelle à la taille de l'écran
+    double strapWidth = logScale(context, size.width * 0.2);
+    double arcRadius = size.width * 0.31;
+    double topHeight = logScale(context, size.height * 0.15);
+    double bottomHeight = logScale(context, size.height * 0.85);
 
     // Épaule gauche (bretelle large)
-    path.lineTo(0, size.height * 0.15);
+    path.lineTo(0, topHeight);
     path.moveTo(0, 0);
     path.lineTo(strapWidth, 0);
 
     // Faire un col rond vers la bretelle droite
     path.arcToPoint(
       Offset(size.width - strapWidth, 0),
-      radius: Radius.circular(size.width * 0.31), // rayon pour arrondi
+      radius: Radius.circular(arcRadius),
       clockwise: false,
     );
 
-
     // Épaule droite (bretelle large)
     path.lineTo(size.width - strapWidth, 0);
-    path.lineTo(size.width,  0);
-
-
-
+    path.lineTo(size.width, 0);
 
     // Côtés du débardeur
-    path.lineTo(size.width*0.97, size.height * 0.85);
-    path.lineTo(size.width*0.03, size.height * 0.85);
+    path.lineTo(size.width * 0.97, bottomHeight);
+    path.lineTo(size.width * 0.03, bottomHeight);
 
     // Fermeture du path
-    path.lineTo(0, size.height * 0.15);
+    path.lineTo(0, topHeight);
 
     path.close();
     return path;
@@ -62,7 +64,6 @@ class BasketballJerseyClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-
 class GamesPage extends StatefulWidget {
   final String uid;
 
@@ -162,18 +163,21 @@ class _GamesPageState extends State<GamesPage> {
     return '🏀'; // fallback
   }
 
-  String formatGameTime(String utcString) {
+  String formatGameTime(String utcString, Clock clock) {
     try {
       final utcTime = DateTime.parse(utcString).toUtc();
-      final localTime = utcTime.toLocal();
+      final localTime = clock.toLocalTime(utcTime);
       return DateFormat('EEE d MMM - HH:mm').format(localTime);
     } catch (_) {
       return utcString;
     }
   }
 
+
+
   Future<void> syncUserPoints(String uid) async {
     final nav = Navigator.of(context);
+    final ctx = context.read<Clock>();
     try {
       // 1️⃣ Récupérer tous les paris du joueur
       final bets = await supabase
@@ -289,7 +293,7 @@ class _GamesPageState extends State<GamesPage> {
 
       // 5️⃣ Sauvegarder le solde + timestamp uniquement dans le cache
       await CacheService.saveUserPoints(
-          widget.uid, newPoints, context.read<Clock>().now());
+          widget.uid, newPoints, ctx.now());
 
     } catch (e) {
       debugPrint('Erreur syncUserPoints: $e');
@@ -488,13 +492,13 @@ class _GamesPageState extends State<GamesPage> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noData));
           }
-          final nowLocal = Provider.of<Clock>(context, listen: false).now();
+          final clock = Provider.of<Clock>(context, listen: false);
+          final nowLocal = clock.now();
           final games = snapshot.data!;
 
           final filteredGames = games.where((game) {
             try {
-              final startUtc = DateTime.parse(game['start_time']).toUtc();
-              final startLocal = startUtc.toLocal();
+              final startLocal = clock.toLocalTime(DateTime.parse(game['start_time']).toUtc());
 
               if (startLocal.isBefore(nowLocal)) return false;
             } catch (_) {
@@ -515,6 +519,7 @@ class _GamesPageState extends State<GamesPage> {
           return ListView.builder(
             itemCount: filteredGames.length,
             itemBuilder: (context, index) {
+              final clock = Provider.of<Clock>(context, listen: false);
               final game = filteredGames[index];
               final homeTeam = game['home_team'];
               final awayTeam = game['away_team'];
@@ -587,7 +592,7 @@ class _GamesPageState extends State<GamesPage> {
                           padding: const EdgeInsets.all(16),
                           child: Center(
                             child : Text(
-                            formatGameTime(game['start_time']),
+                            formatGameTime(game['start_time'], clock),
                             style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: logScale(context, 13),
@@ -606,7 +611,7 @@ class _GamesPageState extends State<GamesPage> {
                               child: Column(
                                 children: [
                                   ClipPath(
-                                    clipper: BasketballJerseyClipper(),
+                                    clipper: BasketballJerseyClipper(context),
                                     child: Container(
                                       width: 48,
                                       height: 64,
@@ -680,7 +685,7 @@ class _GamesPageState extends State<GamesPage> {
                               child: Column(
                                 children: [
                                   ClipPath(
-                                    clipper: BasketballJerseyClipper(),
+                                    clipper: BasketballJerseyClipper(context),
                                     child: Container(
                                       width: 48,
                                       height: 64,

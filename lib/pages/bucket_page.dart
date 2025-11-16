@@ -97,8 +97,8 @@ class _BucketPageState extends State<BucketPage> {
   }
 
   Future<void> _sendBetToSupabase() async {
-    final gameIds =
-    widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
+    final ctx = context.read<Clock>();
+    final gameIds =  widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
     final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
 
     if (widget.uid.isEmpty) {
@@ -148,7 +148,7 @@ class _BucketPageState extends State<BucketPage> {
           .update({'points': newPoints.toInt()})
           .eq('id', widget.uid);
       await CacheService.saveUserPoints(
-          widget.uid, newPoints, context.read<Clock>().now());
+          widget.uid, newPoints, ctx.now());
 
       if (!mounted) return;
 

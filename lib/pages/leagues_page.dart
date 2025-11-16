@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
@@ -82,7 +83,6 @@ class _LeaguesPageState extends State<LeaguesPage> {
   }
 
   Future<void> _joinLeague() async {
-
     final t = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
 
@@ -90,7 +90,6 @@ class _LeaguesPageState extends State<LeaguesPage> {
     if (leagueName.isEmpty) return;
 
     try {
-
       final league = await supabase
           .from('leagues')
           .select()
@@ -101,7 +100,8 @@ class _LeaguesPageState extends State<LeaguesPage> {
       List users = List.from(league['users_id'] ?? []);
       if (!users.contains(widget.uid)) users.add(widget.uid);
 
-      await supabase.from('leagues').update({'users_id': users}).eq('id', leagueId);
+      await supabase.from('leagues').update({'users_id': users}).eq(
+          'id', leagueId);
 
       final user = await supabase
           .from('usersdata')
@@ -181,14 +181,15 @@ class _LeaguesPageState extends State<LeaguesPage> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator(color: accentPrimary))
+                  ? const Center(
+                  child: CircularProgressIndicator(color: accentPrimary))
                   : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 🔹 Création de ligue
                   Text(
                     t.createLeague,
-                    style:  TextStyle(
+                    style: TextStyle(
                       color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: logScale(context, 18),
@@ -206,7 +207,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
                   // 🔹 Rejoindre une ligue
                   Text(
                     t.joinLeague,
-                    style:  TextStyle(
+                    style: TextStyle(
                       color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: logScale(context, 18),
@@ -246,7 +247,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: AppColors.primaryBlue.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: Colors.white.withValues(alpha: 0.2),
@@ -297,36 +298,62 @@ class _LeaguesPageState extends State<LeaguesPage> {
       children: [
         Expanded(
           child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Color(0xFF222F49), // même fond que GamesPage
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+              border: Border.all(color: Color(0xFF222F49), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: TextField(
-              controller: controller,
-              style: const TextStyle(color: textPrimary),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: const TextStyle(color: textSecondary),
-                border: InputBorder.none,
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            child: Center(
+              child: TextField(
+                controller: controller,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: logScale(context, 14),
+                ),
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: TextStyle(
+                    color: Colors.white70,
+                    fontSize: logScale(context, 14),
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: accentPrimary.withValues(alpha: 0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        SizedBox(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue, // couleur GamesPage
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 6,
             ),
-          ),
-          child: Text(
-            buttonText,
-            style: const TextStyle(color: Colors.white),
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: logScale(context, 14),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ],

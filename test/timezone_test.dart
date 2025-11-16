@@ -45,8 +45,7 @@ void main() {
               final clock = Provider.of<Clock>(context);
               final nowUtc = clock.now();
               final nowInLA = tz.TZDateTime.from(nowUtc, location);
-              print('UTC time: ${nowUtc.toIso8601String()}');
-              print('LA time: ${nowInLA.toIso8601String()}');
+
 
               final formattedTime = DateFormat('HH:mm').format(nowInLA);
 

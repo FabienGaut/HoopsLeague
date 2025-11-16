@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hoopsleague/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/pages/password_change_page.dart';
 import '../l10n/app_localizations.dart';
@@ -106,12 +107,12 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
 
   Widget _glassCard({required Widget child}) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppColors.surfaceDark, // couleur sombre type surfaceDark
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Color(0xFF2C2C3E), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
