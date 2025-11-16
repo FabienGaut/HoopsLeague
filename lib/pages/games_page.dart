@@ -15,9 +15,7 @@ import 'package:hoopsleague/pages/manage_account_page.dart';
 import 'leagues_page.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
-
-
-
+import 'package:hoopsleague/utils/time_formatter.dart';
 
 final supabase = Supabase.instance.client;
 class BasketballJerseyClipper extends CustomClipper<Path> {
@@ -160,16 +158,6 @@ class _GamesPageState extends State<GamesPage> {
       if (teamName.contains(entry.key)) return entry.value;
     }
     return '🏀'; // fallback
-  }
-
-  String formatGameTime(String utcString) {
-    try {
-      final utcTime = DateTime.parse(utcString).toUtc();
-      final localTime = utcTime.toLocal();
-      return DateFormat('EEE d MMM - HH:mm').format(localTime);
-    } catch (_) {
-      return utcString;
-    }
   }
 
   Future<void> syncUserPoints(String uid) async {
