@@ -8,6 +8,7 @@ import 'package:hoopsleague/services/cache_service.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import '../theme/app_colors.dart';
 import '../theme/widgets_theme.dart';
+import 'package:intl/intl.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -78,6 +79,16 @@ class _BucketPageState extends State<BucketPage> {
       prod *= odd;
     }
     return prod;
+  }
+
+  String formatIsoDateWithLocale(BuildContext context, String isoDate, {String format = 'EEEE, dd/MM/yyyy – HH:mm'}) {
+    try {
+      DateTime parsedDate = DateTime.parse(isoDate).toLocal();
+      final locale = Localizations.localeOf(context).toString();
+      return DateFormat(format, locale).format(parsedDate);
+    } catch (e) {
+      return isoDate;
+    }
   }
 
   double get totalPayout {
@@ -265,7 +276,7 @@ class _BucketPageState extends State<BucketPage> {
                                 Text(
                                   t.oddAndStartTime(
                                     bet['odd'],
-                                    bet['start_time'].toString(),
+                                    formatIsoDateWithLocale(context, bet['start_time'].toString()),
                                   ),
                                   style: TextStyle(
                                     color: Colors.white70,
