@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:responsive_framework/responsive_framework.dart';
 
+import 'services/clock.dart';
+
 Future<void> main() async {
   tz.initializeTimeZones();
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,14 +44,15 @@ Future<void> main() async {
   }
 
   runApp(
-    ChangeNotifierProvider<AppState>.value(
-      value: appState,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppState>.value(value: appState),
+        Provider<Clock>(create: (_) => Clock()),
+      ],
       child: MyApp(initialSession: session, uid: uid),
     ),
   );
 }
-
-DateTime getNow() => DateTime.now();
 
 class MyApp extends StatefulWidget {
   final Session? initialSession;

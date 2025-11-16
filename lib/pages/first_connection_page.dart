@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hoopsleague/services/clock.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import 'games_page.dart';
@@ -43,7 +45,7 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
       return;
     }
 
-    final now = DateTime.now();
+    final now = context.read<Clock>().now();
     final timezone = now.timeZoneName;
 
     try {
