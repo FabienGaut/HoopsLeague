@@ -4,10 +4,8 @@ class CacheService {
   static const _pointsBox = 'user_points';
 
   /// Sauvegarde un nouveau point avec la date dans le même tableau (double avec 2 décimales)
-  static Future<void> saveUserPoints(String uid, double points) async {
+  static Future<void> saveUserPoints(String uid, double points, DateTime now) async {
     final box = await Hive.openBox(_pointsBox);
-
-    final today = DateTime.now();
 
     // Récupérer l’historique pour cet utilisateur
     final rawHistory = box.get(uid, defaultValue: []) as List<dynamic>;
@@ -18,7 +16,7 @@ class CacheService {
 
     final roundedPoints = double.parse(points.toStringAsFixed(2));
 
-    history.add({'date': today.toIso8601String(), 'points': roundedPoints});
+    history.add({'date': now.toIso8601String(), 'points': roundedPoints});
 
     await box.put(uid, history);
   }

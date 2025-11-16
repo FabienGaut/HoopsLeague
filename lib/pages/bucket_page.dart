@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hoopsleague/l10n/app_localizations.dart';
+import 'package:hoopsleague/services/clock.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/services/cache_service.dart';
 import 'package:hoopsleague/theme/utils.dart';
@@ -136,7 +138,7 @@ class _BucketPageState extends State<BucketPage> {
         'odd': combinedOdd,
         'points_betted': pointsBetted,
         'selection': widget.bets.map((b) => b['pickedTeam'] ?? '').toList(),
-        'timestamp': DateTime.now().toIso8601String(),
+        'timestamp': context.read<Clock>().now().toIso8601String(),
       });
 
       final double newPoints = (currentPoints - parsedAmount);
@@ -145,7 +147,8 @@ class _BucketPageState extends State<BucketPage> {
           .from('usersdata')
           .update({'points': newPoints.toInt()})
           .eq('id', widget.uid);
-      await CacheService.saveUserPoints(widget.uid, newPoints);
+      await CacheService.saveUserPoints(
+          widget.uid, newPoints, context.read<Clock>().now());
 
       if (!mounted) return;
 
