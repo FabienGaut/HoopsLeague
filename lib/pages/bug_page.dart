@@ -117,7 +117,6 @@ class _BugReportPageState extends State<BugPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-
         backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
         centerTitle: true,
