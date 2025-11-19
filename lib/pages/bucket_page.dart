@@ -120,6 +120,7 @@ class _BucketPageState extends State<BucketPage> {
 
     try {
       final pointsBetted = parsedAmount.toInt();
+
       final currentPoints = (userData?['points'] ?? 0).toDouble();
 
       if (parsedAmount > currentPoints) {

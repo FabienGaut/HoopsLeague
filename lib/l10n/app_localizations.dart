@@ -357,7 +357,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{value} points earned !'**
-  String pointsAdded(String value);
+  String pointsAdded(double value);
 
   /// No description provided for @myBets.
   ///
@@ -682,6 +682,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'League not found'**
   String get leagueNotFound;
+
+  /// No description provided for @slideToBet.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to bet'**
+  String get slideToBet;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back to HoopsLeague'**
+  String get welcomeBack;
+
+  /// No description provided for @bugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get bugReport;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBug;
+
+  /// No description provided for @describeBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the bug'**
+  String get describeBug;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @bugEmptyError.
+  ///
+  /// In en, this message translates to:
+  /// **'The description cannot be empty'**
+  String get bugEmptyError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

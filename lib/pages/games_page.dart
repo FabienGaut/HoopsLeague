@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/services/cache_service.dart';
 import '../l10n/app_localizations.dart';
+import 'bug_page.dart';
 import 'graph_page.dart';
 import 'package:hoopsleague/pages/manage_account_page.dart';
 import 'leagues_page.dart';
@@ -256,7 +257,7 @@ class _GamesPageState extends State<GamesPage> {
                       const Icon(Icons.emoji_events, color: Colors.amber, size: 60),
                       const SizedBox(height: 16),
                       Text(
-                        AppLocalizations.of(context)!.pointsAdded(totalWon as String),
+                        AppLocalizations.of(context)!.pointsAdded(double.parse(totalWon.toStringAsFixed(2))),
                         textAlign: TextAlign.center,
                         style:  TextStyle(
                           color: Colors.white,
@@ -419,6 +420,7 @@ class _GamesPageState extends State<GamesPage> {
 
       setState(() {
         userData!['points'] = newPoints;
+        _loadUserData();
       });
 
       messenger.showSnackBar(
@@ -797,7 +799,7 @@ class _GamesPageState extends State<GamesPage> {
                           Icon(Icons.swipe, size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 6),
                           Text(
-                            'Glissez pour parier',
+                            AppLocalizations.of(context)!.slideToBet,
                             style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: logScale(context, 11),
@@ -925,14 +927,7 @@ class _GamesPageState extends State<GamesPage> {
                     ),
                   ),
                    SizedBox(height: 4),
-                  AutoSizeText(
-                    userData?['email'] ?? 'No email',
-                    maxLines: 1,
-                    style:  TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: logScale(context, 13),
-                    ),
-                  ),
+
                   AutoSizeText(
                     'Points : ${userData?['points'] ?? 0}',
                     maxLines: 1,
@@ -1043,6 +1038,20 @@ class _GamesPageState extends State<GamesPage> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 8),
+          _buildDrawerItem(
+          icon: Icons.bug_report,
+          title: AppLocalizations.of(context)!.bugReport,
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BugPage(uid: widget.uid),
+              ),
+            );
+           },
           ),
           Divider(color: AppColors.borderDark, height: 32, indent: 16, endIndent: 16),
           _buildDrawerItem(

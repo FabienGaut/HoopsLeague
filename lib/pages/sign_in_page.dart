@@ -200,7 +200,7 @@ class _SignInPageState extends State<SignInPage> {
                   SizedBox(height: spacing),
 
                   AutoSizeText(
-                    "Welcome back to HoopsLeague",
+                    AppLocalizations.of(context)!.welcomeBack,
                     maxLines: 1,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),

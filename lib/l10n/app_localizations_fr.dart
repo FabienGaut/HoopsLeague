@@ -146,7 +146,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myGraph => 'Mes statistiques';
 
   @override
-  String pointsAdded(String value) {
+  String pointsAdded(double value) {
     return '$value points gagnés !';
   }
 
@@ -319,4 +319,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get leagueNotFound => 'Ligue non trouvée';
+
+  @override
+  String get slideToBet => 'Glissez pour parier';
+
+  @override
+  String get welcomeBack => 'Bon retour sur HoopsLeague';
+
+  @override
+  String get bugReport => 'Remonter un bug';
+
+  @override
+  String get reportBug => 'Signaler un bug';
+
+  @override
+  String get describeBug => 'Décris le bug';
+
+  @override
+  String get send => 'Envoyer';
+
+  @override
+  String get bugEmptyError => 'La description ne peut pas être vide.';
 }

@@ -60,3 +60,27 @@ Ce document détaille la stratégie de test pour l'application HoopsLeague, afin
 | **Performance**            | Mesurer les temps de chargement, la fluidité des animations, et l'utilisation de la batterie.             |
 | **Sécurité**               | Vérifier que les clés d'API sont bien chargées depuis le `.env` et non exposées, et que les communications sont en HTTPS. |
 | **Connectivité**           | Tester le comportement de l'application en mode hors-ligne, avec une connexion lente (3G) ou instable.    |
+### Tests manuels :
+ajouter un match au bucket
+retirer un match du bucket
+ajouter plusieurs matchs, retirer 1+ matchs
+ajouter tous les paris au bucket
+retirer tous les paris du bucket
+récupérer son bonus quotidien
+valider plusieurs paris
+tester pour aller sur chaque page du menu, et depuis ces pages aller sur chaque autre
+créer un compte avec des mauvaise puis bonnes info
+connexion avec mauvaises et bonnes infos
+tester la page de première connexion avec toutes les configurations
+tester la déonnexion
+tester la reconnexion avec différents comptes
+créer une ligue
+rejoindre plusieurs ligues
+tester les fonctionnalités pour gérer mon compte : vider la cache, changer mdp/user, la langue le format de cote
+tester ecrire nptq dans les montants de paris 
+taille max pseudo
+rafraichir les données
+remonter un bug
+tester ce qu'il se passe hors ligne : handle l'exception au demarrage hors ligne
+demarrer en ligne switcher hors ligne 
+demarrer hors ligne switcher en ligne 

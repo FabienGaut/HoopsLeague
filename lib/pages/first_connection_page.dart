@@ -52,7 +52,7 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
       await supabase.from('usersdata').upsert({
         'id': user.id,
         'user_name': userNameController.text.trim(),
-        'email': user.email,
+        //'email': user.email,
         'points': 100,
         'daily_points_used': false,
         'status': 'active',
@@ -99,6 +99,7 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
                   children: [
                     TextFormField(
                       controller: userNameController,
+                      maxLength: 20,
                       style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.userName,

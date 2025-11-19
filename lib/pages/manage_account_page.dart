@@ -205,6 +205,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                           ),
                           child: TextField(
                             controller: _usernameController,
+                            maxLength: 20,
                             style:
                             const TextStyle(color: textPrimary),
                             decoration: InputDecoration(

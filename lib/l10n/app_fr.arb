@@ -100,6 +100,13 @@
       "noMembersInLeague": "Aucun membre dans cette ligue",
       "unknownUser": "Inconnu",
       "pointsSuffix": "pts",
-  "leagueNotFound" : "Ligue non trouvée"
+  "leagueNotFound" : "Ligue non trouvée",
+  "slideToBet" : "Glissez pour parier",
+  "welcomeBack" : "Bon retour sur HoopsLeague",
+  "bugReport" : "Remonter un bug",
+  "reportBug": "Signaler un bug",
+  "describeBug": "Décris le bug",
+  "send": "Envoyer",
+  "bugEmptyError": "La description ne peut pas être vide."
 
 }

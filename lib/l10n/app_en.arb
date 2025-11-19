@@ -82,7 +82,7 @@
         "description": "Displays the points added by the winning bets",
         "placeholders": {
           "value": {
-          "type": "String"
+          "type": "double"
           }
         }
       },
@@ -150,6 +150,13 @@
       "noMembersInLeague": "No members in this league",
       "unknownUser": "Unknown",
       "pointsSuffix": "pts",
-  "leagueNotFound" : "League not found"
+  "leagueNotFound" : "League not found",
+  "slideToBet": "Slide to bet",
+  "welcomeBack" : "Welcome back to HoopsLeague",
+  "bugReport" : "Report a bug",
+  "reportBug": "Report a bug",
+  "describeBug": "Describe the bug",
+  "send": "Send",
+  "bugEmptyError": "The description cannot be empty"
 
 }

@@ -314,6 +314,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
             ),
             child: Center(
               child: TextField(
+                maxLength: 30,
                 controller: controller,
                 style: TextStyle(
                   color: Colors.white,
