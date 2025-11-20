@@ -140,11 +140,11 @@ class _GamesPageState extends State<GamesPage> {
     'Jazz': Color(0xFF002B5C),
     'Warriors': Color(0xFF1D428A),
     'Clippers': Color(0xFFC8102E),
-    'Lakers': Color(0xFF552583),
+    'Lakers': Color(0xFF6A2C91),
     'Suns': Color(0xFF1D1160),
     'Kings': Color(0xFF5A2D81),
     'Mavericks': Color(0xFF00538C),
-    'Rockets': Color(0xFFCF001C),
+    'Rockets': Color(0xFFE03A3E),
     'Grizzlies': Color(0xFF5D76A9),
     'Pelicans': Color(0xFF0C2340),
     'Spurs': Color(0xFF000000),
@@ -482,11 +482,10 @@ class _GamesPageState extends State<GamesPage> {
     SafeArea(
     child:
     StreamBuilder<List<Map<String, dynamic>>>(
-        stream: supabase
-            .from('gamesdata')
-            .stream(primaryKey: ['id'])
-            .eq('status', 'scheduled')
-            .order('start_time', ascending: true),
+      stream: supabase
+          .from('upcoming_scheduled_games')
+          .stream(primaryKey: ['id'])
+          .order('start_time', ascending: true),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
