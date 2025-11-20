@@ -301,6 +301,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
             ),
             child: Center(
               child: TextField(
+                textAlignVertical: TextAlignVertical.center,
                 maxLength: 30,
                 controller: controller,
                 style: TextStyle(
@@ -308,15 +309,16 @@ class _LeaguesPageState extends State<LeaguesPage> {
                   fontSize: logScale(context, 14),
                 ),
                 decoration: InputDecoration(
-                  hintText: hint,
-                  hintStyle: TextStyle(
-                    color: Colors.white70,
-                    fontSize: logScale(context, 14),
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                hintText: hint,
+                hintStyle: TextStyle(
+                  color: Colors.white70,
+                  fontSize: logScale(context, 14),
                 ),
+                border: InputBorder.none,
+                isCollapsed: true, // <-- pour un centrage parfait
+                contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              ),
+
               ),
             ),
           ),

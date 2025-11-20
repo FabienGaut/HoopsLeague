@@ -40,3 +40,6 @@ jobs:
       - name: Analyze project source
         run: flutter analyze
 
+      # 6️⃣ Lance les tests Flutter
+      - name: Run Flutter tests
+        run: flutter test --coverage
