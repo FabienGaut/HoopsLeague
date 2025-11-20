@@ -30,9 +30,14 @@ Future<void> main() async {
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
   final session = Supabase.instance.client.auth.currentSession;
+
   String? uid = session?.user.id;
 
+
+
   if (uid != null) {
+
+
     final userData = await Supabase.instance.client
         .from('usersdata')
         .select('language')

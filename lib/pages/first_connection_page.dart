@@ -48,6 +48,7 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
     final now = context.read<Clock>().now();
     final timezone = now.timeZoneName;
 
+
     try {
       await supabase.from('usersdata').upsert({
         'id': user.id,
@@ -55,10 +56,9 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
         //'email': user.email,
         'points': 100,
         'daily_points_used': false,
-        'status': 'active',
         'timezone': timezone,
         'oddsformat': selectedFormat,
-        'created_at': now.toIso8601String(),
+
         'language' : selectedLanguage,
       });
       if (!mounted) return;

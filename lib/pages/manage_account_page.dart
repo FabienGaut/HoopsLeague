@@ -31,6 +31,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   static const Color accentGlow = Color(0xFF9C9CFF);
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.white70;
+  static const Color successGreen = Color(0xFF4CAF50);
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     try {
       await supabase.from('usersdata').update({field: value}).eq('id', widget.uid);
       messenger.showSnackBar(
-        SnackBar(content: Text(t.updateSuccess)),
+        SnackBar(content: Text(t.updateSuccess), backgroundColor: successGreen,),
       );
       await _loadUserData();
     } catch (e) {

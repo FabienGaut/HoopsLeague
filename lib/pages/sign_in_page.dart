@@ -77,8 +77,7 @@ class _SignInPageState extends State<SignInPage> {
         }
 
         if (!mounted) return;
-
-        Navigator.pushReplacement(
+          Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => GamesPage(uid: user.id)),
         );

@@ -80,11 +80,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         return;
       }
 
-      final response = await supabase
-          .from('users_public')
-          .select()
-          .filter('id', 'in', leagueUsersIds)
-          .order('points', ascending: false);
+      final response = await supabase.rpc(
+          'get_league_members',
+          params: {'league_id': selectedLeague!['id']}
+          
+      );
+      print(response);
+
+
 
       setState(() => users = List<Map<String, dynamic>>.from(response));
     } catch (e) {

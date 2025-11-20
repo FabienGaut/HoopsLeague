@@ -90,34 +90,17 @@ class _LeaguesPageState extends State<LeaguesPage> {
     if (leagueName.isEmpty) return;
 
     try {
+      // Récupérer la ligue par son nom
       final league = await supabase
           .from('leagues')
-          .select()
+          .select('id')
           .eq('name', leagueName)
           .single();
 
       final leagueId = league['id'];
-      List users = List.from(league['users_id'] ?? []);
-      if (!users.contains(widget.uid)) users.add(widget.uid);
 
-      await supabase.from('leagues').update({'users_id': users}).eq(
-          'id', leagueId);
-
-      final user = await supabase
-          .from('usersdata')
-          .select('leagues')
-          .eq('id', widget.uid)
-          .single();
-
-      List<String> userLeagues = List<String>.from(user['leagues'] ?? []);
-      if (!userLeagues.contains(leagueId)) {
-        userLeagues.add(leagueId);
-
-        await supabase
-            .from('usersdata')
-            .update({'leagues': userLeagues})
-            .eq('id', widget.uid);
-      }
+      // Appel de la fonction RPC join_league
+      await supabase.rpc('join_league', params: {'league_id': leagueId});
 
       _joinLeagueController.clear();
       _loadLeagues();
@@ -126,8 +109,12 @@ class _LeaguesPageState extends State<LeaguesPage> {
       );
     } catch (e) {
       debugPrint('Erreur join league: $e');
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.enterLeagueName)),
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

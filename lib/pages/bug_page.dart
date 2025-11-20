@@ -173,7 +173,8 @@ class _BugReportPageState extends State<BugPage> {
                       children: [
                         TextField(
                           controller: _descController,
-                          maxLines: 6,
+                          maxLength: 200,
+                          maxLines: 7,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!.describeBug,

@@ -290,16 +290,31 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                       crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          bet['pickedTeam'] ??
-                                              "Multiple Bet",
-                                          style:  TextStyle(
-                                            color: textPrimary,
-                                            fontSize: logScale(context, 18),
-                                            fontWeight:
-                                            FontWeight.bold,
+                                        if(bet.length > 1)
+                                          Text(
+                                            bet['pickedTeam'] ??
+                                                "Single Bet",
+                                            style:  TextStyle(
+                                              color: textPrimary,
+                                              fontSize: logScale(context, 18),
+                                              fontWeight:
+                                              FontWeight.bold,
+                                            ),
+                                          )
+
+                                        else
+                                          Text(
+                                            bet['pickedTeam'] ??
+                                                "Multiple Bets",
+                                            style:  TextStyle(
+                                              color: textPrimary,
+                                              fontSize: logScale(context, 18),
+                                              fontWeight:
+                                              FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
+
+
                                         const SizedBox(height: 4),
                                         Text(
                                           DateFormat.yMd()
