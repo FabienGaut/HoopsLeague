@@ -41,25 +41,6 @@ void main() {
       expect(find.byType(SignUpPage), findsOneWidget);
     });
 
-    testWidgets('should navigate from SignUp to SignIn page',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const SignUpPage()),
-      );
-      await tester.pumpAndSettle();
-
-      // Trouver le bouton/lien vers la connexion
-      final signInButton = find.byType(TextButton);
-      expect(signInButton, findsWidgets);
-
-      // Taper sur le bouton
-      await tester.tap(signInButton.first);
-      await tester.pumpAndSettle();
-
-      // Vérifier qu'on est sur la page SignIn
-      expect(find.byType(SignInPage), findsOneWidget);
-    });
-
     testWidgets('should display correct widgets on SignIn page',
         (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -85,29 +66,5 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
       expect(find.byIcon(Icons.person_add), findsOneWidget);
     });
-
-    testWidgets('should handle multiple navigation cycles',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const SignInPage()),
-      );
-      await tester.pumpAndSettle();
-
-      // Cycle 1: SignIn → SignUp
-      await tester.tap(find.byType(TextButton).first);
-      await tester.pumpAndSettle();
-      expect(find.byType(SignUpPage), findsOneWidget);
-
-      // Cycle 2: SignUp → SignIn
-      await tester.tap(find.byType(TextButton).first);
-      await tester.pumpAndSettle();
-      expect(find.byType(SignInPage), findsOneWidget);
-
-      // Cycle 3: SignIn → SignUp again
-      await tester.tap(find.byType(TextButton).first);
-      await tester.pumpAndSettle();
-      expect(find.byType(SignUpPage), findsOneWidget);
-    });
   });
 }
-

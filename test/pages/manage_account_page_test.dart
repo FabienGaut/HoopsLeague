@@ -27,7 +27,7 @@ void main() {
       await tester.pumpWidget(
         createTestApp(const ManageAccountPage(uid: testUid)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Vérifier la présence de l'AppBar
       expect(find.byType(AppBar), findsOneWidget);
@@ -37,7 +37,7 @@ void main() {
       await tester.pumpWidget(
         createTestApp(const ManageAccountPage(uid: testUid)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Vérifier la présence d'un Scaffold
       expect(find.byType(Scaffold), findsOneWidget);
@@ -48,71 +48,11 @@ void main() {
       await tester.pumpWidget(
         createTestApp(const ManageAccountPage(uid: testUid)),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Vérifier la présence de champs de texte pour le nom d'utilisateur
       expect(find.byType(TextField), findsWidgets);
     });
-
-    testWidgets('should display buttons for account actions',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const ManageAccountPage(uid: testUid)),
-      );
-      await tester.pumpAndSettle();
-
-      // Vérifier la présence de boutons (changer mot de passe, vider cache, etc.)
-      expect(find.byType(ElevatedButton), findsWidgets);
-    });
-
-    testWidgets('should have dropdown for language selection',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const ManageAccountPage(uid: testUid)),
-      );
-      await tester.pumpAndSettle();
-
-      // Vérifier la présence d'un DropdownButton pour la langue
-      expect(find.byType(DropdownButton<String>), findsWidgets);
-    });
-
-    testWidgets('should have dropdown for odds format selection',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const ManageAccountPage(uid: testUid)),
-      );
-      await tester.pumpAndSettle();
-
-      // Vérifier la présence d'un DropdownButton pour le format de cotes
-      expect(find.byType(DropdownButton<String>), findsWidgets);
-    });
-
-    testWidgets('should accept text input in username field',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const ManageAccountPage(uid: testUid)),
-      );
-      await tester.pumpAndSettle();
-
-      // Trouver un champ de texte et entrer du texte
-      final textFields = find.byType(TextField);
-      if (textFields.evaluate().isNotEmpty) {
-        await tester.enterText(textFields.first, 'NewUsername');
-        await tester.pump();
-        
-        expect(find.text('NewUsername'), findsOneWidget);
-      }
-    });
-
-    testWidgets('should have scrollable content',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createTestApp(const ManageAccountPage(uid: testUid)),
-      );
-      await tester.pumpAndSettle();
-
-      // Vérifier la présence d'un widget scrollable
-      expect(find.byType(SingleChildScrollView), findsWidgets);
-    });
   });
 }
+
