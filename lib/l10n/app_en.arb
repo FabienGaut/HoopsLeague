@@ -157,6 +157,7 @@
   "reportBug": "Report a bug",
   "describeBug": "Describe the bug",
   "send": "Send",
-  "bugEmptyError": "The description cannot be empty"
+  "bugEmptyError": "The description cannot be empty",
+  "connectionSuccess" : "Connection successful"
 
 }

@@ -107,6 +107,7 @@
   "reportBug": "Signaler un bug",
   "describeBug": "Décris le bug",
   "send": "Envoyer",
-  "bugEmptyError": "La description ne peut pas être vide."
+  "bugEmptyError": "La description ne peut pas être vide.",
+  "connectionSuccess" : "Connexion réussie"
 
 }

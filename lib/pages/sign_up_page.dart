@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart'; // 👈 pour kIsWeb
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
 
 final supabase = Supabase.instance.client;
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -46,9 +47,10 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
-      final redirectUrl = Platform.isAndroid || Platform.isIOS
-          ? 'io.hoopsbets.app://login-callback/'
-          : 'http://localhost:3000';
+      final redirectUrl = kIsWeb
+          ? 'https://hoopsleague.fr/#/auth/' // 👈 ton callback web Supabase
+          : 'io.hoopsbets.app://login-callback/'; // 👈 ton deep link mobile
+
 
       final AuthResponse res = await supabase.auth.signUp(
         email: emailController.text.trim(),

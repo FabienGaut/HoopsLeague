@@ -724,6 +724,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The description cannot be empty'**
   String get bugEmptyError;
+
+  /// No description provided for @connectionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get connectionSuccess;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

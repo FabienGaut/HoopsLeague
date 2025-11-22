@@ -101,6 +101,11 @@ class _LeaguesPageState extends State<LeaguesPage> {
 
       // Appel de la fonction RPC join_league
       await supabase.rpc('join_league', params: {'league_id': leagueId});
+      await supabase.rpc('add_to_array', params: {
+        'uid': widget.uid,
+        'new_league': leagueId
+      });
+
 
       _joinLeagueController.clear();
       _loadLeagues();

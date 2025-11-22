@@ -340,4 +340,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bugEmptyError => 'The description cannot be empty';
+
+  @override
+  String get connectionSuccess => 'Connection successful';
 }

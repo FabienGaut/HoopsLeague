@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hoopsleague/pages/first_connection_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'pages/games_page.dart';
 import 'pages/home_page.dart';
+import 'pages/auth_redirect_page.dart'; // page que tu as créée
 import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:responsive_framework/responsive_framework.dart';
-
+import 'package:flutter/foundation.dart';
 import 'services/clock.dart';
 
 Future<void> main() async {
@@ -29,48 +31,61 @@ Future<void> main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
-  final session = Supabase.instance.client.auth.currentSession;
-
-  String? uid = session?.user.id;
-
-
-
-  if (uid != null) {
-
-
-    final userData = await Supabase.instance.client
-        .from('usersdata')
-        .select('language')
-        .eq('id', uid)
-        .single();
-
-    final lang = userData['language'] ?? 'fr';
-    appState.setLocale(lang);
-  }
   final clock = Clock();
+
+  // Détermination du user ID uniquement si pas sur web avec fragment
+  String? uid;
+  if (!(kIsWeb && Uri.base.fragment.isNotEmpty)) {
+    uid = Supabase.instance.client.auth.currentSession?.user.id;
+    if (uid != null) {
+      final userData = await Supabase.instance.client
+          .from('usersdata')
+          .select('language')
+          .eq('id', uid)
+          .maybeSingle();
+      final lang = userData?['language'] ?? 'fr';
+      appState.setLocale(lang);
+    }
+  }
+
   runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<AppState>.value(value: appState),
-          Provider<Clock>.value(value: clock),
-        ],
-        child: MyApp(initialSession: session, uid: uid),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppState>.value(value: appState),
+        Provider<Clock>.value(value: clock),
+      ],
+      child: MyApp(uid: uid),
+    ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  final Session? initialSession;
+class MyApp extends StatelessWidget {
   final String? uid;
 
-  const MyApp({super.key, required this.initialSession, this.uid});
+  const MyApp({super.key, this.uid});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
 
-class _MyAppState extends State<MyApp> {
-  @override
+  Future<Widget> _determineHome() async {
+    if (uid == null) return const HomePage(); // pas connecté
+
+    try {
+      final userData = await Supabase.instance.client
+          .from('usersdata')
+          .select('user_name')
+          .eq('id', uid as Object)
+          .maybeSingle();
+
+      if (userData != null && userData['user_name'] != null && userData['user_name'].isNotEmpty) {
+        return GamesPage(uid: uid!);
+      } else {
+        return FirstConnectionPage();
+      }
+    } catch (e) {
+      debugPrint('Erreur récupération user_data: $e');
+      return const HomePage();
+    }
+  }
+ @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) => MaterialApp(
@@ -86,8 +101,6 @@ class _MyAppState extends State<MyApp> {
           Locale('fr', ''),
           Locale('en', ''),
         ],
-
-        // 🔹 ResponsiveFramework juste pour breakpoints
         builder: (context, child) => ResponsiveBreakpoints.builder(
           child: child!,
           breakpoints: const [
@@ -97,10 +110,17 @@ class _MyAppState extends State<MyApp> {
             Breakpoint(start: 1921, end: double.infinity, name: '4K'),
           ],
         ),
-
-        home: widget.uid != null
-            ? GamesPage(uid: widget.uid!)
-            : const HomePage(),
+        home: FutureBuilder<Widget>(
+          future: _determineHome(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return snapshot.data!;
+          },
+        ),
       ),
     );
   }
