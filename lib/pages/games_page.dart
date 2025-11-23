@@ -981,19 +981,6 @@ class _GamesPageState extends State<GamesPage> {
             },
           ),
           const SizedBox(height: 8),
-          _buildDrawerItem(
-            icon: Icons.science,
-            title: 'Design Alternatif (Test)',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TestPage(uid: widget.uid),
-                ),
-              );
-            },
-          ),
           Divider(color: AppColors.borderDark, height: 32, indent: 16, endIndent: 16),
           _buildDrawerItem(
             icon: Icons.logout_rounded,
