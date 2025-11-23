@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
 
@@ -38,6 +37,8 @@ class _BugReportPageState extends State<BugPage> {
       errorMessage = null;
     });
 
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final user = supabase.auth.currentUser;
 
@@ -49,9 +50,11 @@ class _BugReportPageState extends State<BugPage> {
 
       _descController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bug envoyé, merci !")),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text("Bug envoyé, merci !")),
+        );
+      }
     } catch (e) {
       setState(() => errorMessage = "Erreur : $e");
     } finally {

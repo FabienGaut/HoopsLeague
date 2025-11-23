@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'pages/games_page.dart';
 import 'pages/home_page.dart';
-import 'pages/auth_redirect_page.dart'; // page que tu as créée
 import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';

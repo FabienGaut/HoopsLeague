@@ -21,10 +21,11 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
     try {
       // Récupérer la session depuis l'URL
       final res = await Supabase.instance.client.auth.getSessionFromUrl(Uri.base);
-      final user = res.session?.user;
+      final user = res.session.user;
 
-      if (user != null && mounted) {
+      if (mounted) {
         final uid = user.id;
+        final navigator = Navigator.of(context);
 
         // Vérifier si l'utilisateur a un username dans la base de données
         final userData = await Supabase.instance.client
@@ -39,14 +40,13 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
                            userName.trim().isNotEmpty;
 
         // Redirection selon la présence d'un username
+        if (!mounted) return;
         if (hasUsername) {
-          Navigator.pushReplacement(
-            context,
+          navigator.pushReplacement(
             MaterialPageRoute(builder: (_) => GamesPage(uid: uid)),
           );
         } else {
-          Navigator.pushReplacement(
-            context,
+          navigator.pushReplacement(
             MaterialPageRoute(builder: (_) => const FirstConnectionPage()),
           );
         }
@@ -54,8 +54,7 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
     } catch (e) {
       // En cas d'erreur, rediriger vers FirstConnectionPage par sécurité
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const FirstConnectionPage()),
         );
       }

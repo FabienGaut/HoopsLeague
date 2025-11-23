@@ -85,9 +85,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           params: {'league_id': selectedLeague!['id']}
           
       );
-      print(response);
-
-
+      debugPrint('League members response: $response');
 
       setState(() => users = List<Map<String, dynamic>>.from(response));
     } catch (e) {
