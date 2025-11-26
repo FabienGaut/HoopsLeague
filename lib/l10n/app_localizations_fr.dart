@@ -409,4 +409,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get quit => 'Quitter';
+
+  @override
+  String get allRightsReserved => '© 2025 HoopsLeague. Tous droits réservés.';
 }

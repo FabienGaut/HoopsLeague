@@ -103,7 +103,7 @@ class HomePage extends StatelessWidget {
 
                   // --- Footer petit texte ---
                   Text(
-                    "© 2025 HoopsLeague. All rights reserved.",
+                    AppLocalizations.of(context)!.allRightsReserved,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: logScale(context, 12),

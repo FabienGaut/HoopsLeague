@@ -24,7 +24,7 @@ Cette suite de tests couvre l'ensemble de l'application HoopsLeague avec **18 fi
 ### Statistiques
 
 ```
-📁 18 fichiers de tests
+📁 18 fichiers de tests 
 ✅ ~82 tests au total
 🎯 100% des tests unitaires passent
 📱 Toutes les pages ont des tests

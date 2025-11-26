@@ -316,7 +316,7 @@ class _BugReportPageState extends State<BugPage> {
                     const SizedBox(height: 32),
                     // Footer
                     Text(
-                      "© 2025 HoopsLeague. All rights reserved.",
+                      AppLocalizations.of(context)!.allRightsReserved,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: logScale(context, 12),
