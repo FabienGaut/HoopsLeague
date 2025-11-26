@@ -4,7 +4,7 @@ import 'package:hoopsleague/pages/bucket_page.dart';
 import 'package:hoopsleague/pages/passed_bets.dart';
 import 'package:hoopsleague/pages/ranking_page.dart';
 import 'package:hoopsleague/pages/sign_in_page.dart';
-import 'package:hoopsleague/pages/test_page.dart';
+import 'package:hoopsleague/pages/game_stats_page.dart';
 import 'package:hoopsleague/services/clock.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import '../services/cache_service.dart';
 import 'bug_page.dart';
 import 'graph_page.dart';
@@ -70,35 +70,35 @@ class _GamesPageState extends State<GamesPage> {
   };
 
   static const Map<String, Color> teamColors = {
-    'Celtics': Color(0xFF059A44),
+    'Celtics': Color(0xFF007A38),
     'Nets': Color(0xFF000000),
-    '76ers': Color(0xFF002AB3),
-    'Knicks': Color(0xFF006BB6),
-    'Raptors': Color(0xFF73007E),
-    'Bulls': Color(0xFFD30C23),
-    'Cavaliers': Color(0xFF860038),
-    'Pistons': Color(0xFFC8102E),
-    'Pacers': Color(0xFF002D62),
-    'Bucks': Color(0xFF00471B),
-    'Hawks': Color(0xFFE03A3E),
-    'Heat': Color(0xFF98002E),
-    'Hornets': Color(0xFF1D1160),
-    'Magic': Color(0xFF0077C0),
-    'Wizards': Color(0xFF002B5C),
-    'Nuggets': Color(0xFF0E2240),
-    'Timberwolves': Color(0xFF0C2340),
-    'Thunder': Color(0xFF007AC1),
-    'Trail Blazers': Color(0xFFFF0005),
-    'Jazz': Color(0xFF002B5C),
-    'Warriors': Color(0xFF1D428A),
-    'Clippers': Color(0xFFC8102E),
-    'Lakers': Color(0xFF6A2C91),
-    'Suns': Color(0xFF1D1160),
-    'Kings': Color(0xFF5A2D81),
-    'Mavericks': Color(0xFF00538C),
-    'Rockets': Color(0xFFE03A3E),
-    'Grizzlies': Color(0xFF5D76A9),
-    'Pelicans': Color(0xFF0C2340),
+    '76ers': Color(0xFF002AB8),
+    'Knicks': Color(0xFF006BBD),
+    'Raptors': Color(0xFF78007E),
+    'Bulls': Color(0xFFD80C28),
+    'Cavaliers': Color(0xFF8B003D),
+    'Pistons': Color(0xFFCC1033),
+    'Pacers': Color(0xFFF1D018),
+    'Bucks': Color(0xFF004720),
+    'Hawks': Color(0xFFE53A43),
+    'Heat': Color(0xFF9D0033),
+    'Hornets': Color(0xFF1D1165),
+    'Magic': Color(0xFF0077C5),
+    'Wizards': Color(0xFF002B61),
+    'Nuggets': Color(0xFF0E2245),
+    'Timberwolves': Color(0xFF0C2345),
+    'Thunder': Color(0xFF007AC6),
+    'Trail Blazers': Color(0xFFFF000A),
+    'Jazz': Color(0xFF046002),
+    'Warriors': Color(0xFF1D428F),
+    'Clippers': Color(0xFFCC1033),
+    'Lakers': Color(0xFF6F2C96),
+    'Suns': Color(0xFF3F1170),
+    'Kings': Color(0xFF5F2D86),
+    'Mavericks': Color(0xFF005391),
+    'Rockets': Color(0xFFE53A43),
+    'Grizzlies': Color(0xFF6276AE),
+    'Pelicans': Color(0xFF0C2345),
     'Spurs': Color(0xFF000000),
   };
 
@@ -114,6 +114,49 @@ class _GamesPageState extends State<GamesPage> {
       if (teamName.contains(entry.key)) return entry.value;
     }
     return '🏀';
+  }
+
+  /// Convertit un nom court d'équipe (ex: 'LAL', 'BOS') en code de ville (ex: 'LA', 'BOS')
+  /// Utile pour afficher uniquement le code de la ville sans le nom de l'équipe
+  String shortNameToCity(String shortName) {
+    // Map des noms courts vers les codes de ville
+    const Map<String, String> cityMap = {
+      // Équipes avec codes de ville différents
+      'LAL': 'LA',  // Los Angeles Lakers
+      'LAC': 'LA',  // Los Angeles Clippers
+      'GSW': 'GS',  // Golden State Warriors
+      'NYK': 'NY',  // New York Knicks
+      'BKN': 'BKN',  // Brooklyn Nets
+      'NOP': 'NO',  // New Orleans Pelicans
+
+      // Équipes où le code de ville est identique au nom court
+      'BOS': 'BOS', // Boston Celtics
+      'MIA': 'MIA', // Miami Heat
+      'PHI': 'PHI', // Philadelphia 76ers
+      'TOR': 'TOR', // Toronto Raptors
+      'CHI': 'CHI', // Chicago Bulls
+      'CLE': 'CLE', // Cleveland Cavaliers
+      'DET': 'DET', // Detroit Pistons
+      'IND': 'IND', // Indiana Pacers
+      'MIL': 'MIL', // Milwaukee Bucks
+      'ATL': 'ATL', // Atlanta Hawks
+      'CHA': 'CHA', // Charlotte Hornets
+      'ORL': 'ORL', // Orlando Magic
+      'WAS': 'WAS', // Washington Wizards
+      'DEN': 'DEN', // Denver Nuggets
+      'MIN': 'MIN', // Minnesota Timberwolves
+      'OKC': 'OKC', // Oklahoma City Thunder
+      'POR': 'POR', // Portland Trail Blazers
+      'UTA': 'UTA', // Utah Jazz
+      'PHX': 'PHX', // Phoenix Suns
+      'SAC': 'SAC', // Sacramento Kings
+      'DAL': 'DAL', // Dallas Mavericks
+      'HOU': 'HOU', // Houston Rockets
+      'MEM': 'MEM', // Memphis Grizzlies
+      'SAS': 'SAS', // San Antonio Spurs
+    };
+
+    return cityMap[shortName] ?? shortName;
   }
 
   String formatGameTime(String utcString, Clock clock) {
@@ -476,7 +519,7 @@ class _GamesPageState extends State<GamesPage> {
                             Icon(Icons.check_circle, color: Colors.white, size: 48),
                             SizedBox(height: 8),
                             Text(
-                              homeTeamShort,
+                              shortNameToCity(homeTeamShort),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: logScale(context, 20),
@@ -507,7 +550,7 @@ class _GamesPageState extends State<GamesPage> {
                             Icon(Icons.check_circle, color: Colors.white, size: 48),
                             SizedBox(height: 8),
                             Text(
-                              awayTeamShort,
+                              shortNameToCity(awayTeamShort),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: logScale(context, 20),
@@ -562,9 +605,12 @@ class _GamesPageState extends State<GamesPage> {
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Column(
+                        child: GestureDetector(
+                          onTap: () {
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Column(
                             children: [
                               // En-tête moderne avec date
                               Container(
@@ -596,24 +642,7 @@ class _GamesPageState extends State<GamesPage> {
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'NBA',
-                                        style: TextStyle(
-                                          color: AppColors.primaryBlue,
-                                          fontSize: logScale(context, 11),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
+
                                   ],
                                 ),
                               ),
@@ -627,7 +656,7 @@ class _GamesPageState extends State<GamesPage> {
                                       child: _buildTeamCard(
                                         context,
                                         homeTeam,
-                                        homeTeamShort,
+                                        shortNameToCity(homeTeamShort),
                                         oddHome,
                                         getTeamColor(homeTeam),
                                         getTeamEmoji(homeTeam),
@@ -671,7 +700,7 @@ class _GamesPageState extends State<GamesPage> {
                                       child: _buildTeamCard(
                                         context,
                                         awayTeam,
-                                        awayTeamShort,
+                                        shortNameToCity(awayTeamShort),
                                         oddAway,
                                         getTeamColor(awayTeam),
                                         getTeamEmoji(awayTeam),
@@ -714,6 +743,7 @@ class _GamesPageState extends State<GamesPage> {
                             ],
                           ),
                         ),
+                        ),
                       ),
                     );
                   },
@@ -727,7 +757,7 @@ class _GamesPageState extends State<GamesPage> {
         valueListenable: betsNotifier,
         builder: (context, bets, _) {
           if (bets.isEmpty) return const SizedBox.shrink();
-          
+
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
@@ -1054,9 +1084,13 @@ class _GamesPageState extends State<GamesPage> {
               ),
             ],
           ),
-          child: Text(
+          child:
+
+          Text(
             emoji,
-            style: TextStyle(fontSize: logScale(context, 32)),
+            style: TextStyle(fontSize: logScale(context, 28),
+              fontFamily: GoogleFonts.notoColorEmoji().fontFamily,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -1068,7 +1102,7 @@ class _GamesPageState extends State<GamesPage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            teamShort,
+            shortNameToCity(teamShort),
             style: TextStyle(
               color: teamColor,
               fontWeight: FontWeight.bold,

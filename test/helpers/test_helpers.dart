@@ -116,4 +116,32 @@ class TestData {
     username: 'testplayer',
     points: 1500.0,
   );
+
+  /// Helper pour créer des données de ligue
+  static Map<String, dynamic> createLeague({
+    required String id,
+    required String name,
+    List<String> usersId = const [],
+    List<String> pendingUsers = const [],
+  }) {
+    return {
+      'id': id,
+      'name': name,
+      'users_id': usersId,
+      'pending_users': pendingUsers,
+    };
+  }
+
+  /// Helper pour créer des données utilisateur (usersdata table)
+  static Map<String, dynamic> createUserData({
+    required String id,
+    String userName = 'testuser',
+    List<String> leagues = const [],
+  }) {
+    return {
+      'id': id,
+      'user_name': userName,
+      'leagues': leagues,
+    };
+  }
 }

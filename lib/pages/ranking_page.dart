@@ -35,15 +35,23 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   Future<void> fetchUserLeagues() async {
     setState(() => isLoading = true);
     try {
+      debugPrint('=== FETCHING USER LEAGUES ===');
+      debugPrint('User ID: ${widget.uid}');
+      
       final userData = await supabase
           .from('usersdata')
           .select('leagues')
           .eq('id', widget.uid)
           .single();
 
+      debugPrint('User data retrieved: $userData');
+
       final List<String> leagueIds = List<String>.from(userData['leagues'] ?? []);
+      debugPrint('League IDs found: $leagueIds');
+      debugPrint('Number of leagues: ${leagueIds.length}');
 
       if (leagueIds.isEmpty) {
+        debugPrint('No leagues found for user');
         setState(() {
           leagues = [];
           selectedLeague = null;
@@ -52,17 +60,32 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         return;
       }
 
+      debugPrint('Fetching league data for IDs: $leagueIds');
       final leaguesData =
-      await supabase.from('leagues').select().filter('id', 'in', leagueIds);
+      await supabase.from('leagues').select().inFilter('id', leagueIds);
+
+      debugPrint('Leagues data retrieved: $leaguesData');
+      debugPrint('Number of leagues retrieved: ${(leaguesData as List).length}');
 
       setState(() {
         leagues = List<Map<String, dynamic>>.from(leaguesData);
-        if (leagues.isNotEmpty) selectedLeague = leagues.first;
+        debugPrint('Leagues stored in state: ${leagues.length}');
+        for (var league in leagues) {
+          debugPrint('  - ${league['name']} (ID: ${league['id']})');
+        }
+        
+        if (leagues.isNotEmpty) {
+          selectedLeague = leagues.first;
+          debugPrint('Selected league: ${selectedLeague!['name']}');
+        }
       });
 
       if (selectedLeague != null) fetchLeaderboard();
-    } catch (e) {
-      debugPrint('Erreur fetch user leagues: $e');
+      debugPrint('=== FETCH USER LEAGUES COMPLETE ===');
+    } catch (e, stackTrace) {
+      debugPrint('=== ERREUR FETCH USER LEAGUES ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
     } finally {
       setState(() => isLoading = false);
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
+import '../theme/app_colors.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -52,7 +53,10 @@ class _BugReportPageState extends State<BugPage> {
 
       if (mounted) {
         messenger.showSnackBar(
-          const SnackBar(content: Text("Bug envoyé, merci !")),
+          SnackBar(
+            content: const Text("Bug envoyé, merci !"),
+            backgroundColor: AppColors.primaryBlue,
+          ),
         );
       }
     } catch (e) {
@@ -62,63 +66,11 @@ class _BugReportPageState extends State<BugPage> {
     }
   }
 
-  Widget _buildGlassButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-    required double fontSize,
-    required double width,
-    required double height,
-  }) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(height / 2),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white, size: fontSize * 1.2),
-        label: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: fontSize,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(height / 2),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final double fieldWidth = ((screenWidth * 0.75).clamp(200, 340)).toDouble();
-    final double buttonWidth = ((screenWidth * 0.7).clamp(160, 300)).toDouble();
-    final double buttonHeight = ((screenHeight * 0.07).clamp(45, 60)).toDouble();
-    final double fontSize = ((screenWidth * 0.045).clamp(14, 18)).toDouble();
-    final double spacing = ((screenHeight * 0.03).clamp(10, 25)).toDouble();
-
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
         backgroundColor: Colors.black.withValues(alpha: 0.2),
         elevation: 0,
@@ -128,103 +80,250 @@ class _BugReportPageState extends State<BugPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: FittedBox(
-          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          fit: BoxFit.scaleDown,
           child: Row(
             children: [
               Image.asset(
                 'assets/images/logo.png',
-                height: kToolbarHeight * 0.6, // proportion de l’AppBar
+                height: kToolbarHeight * 0.6,
               ),
               SizedBox(width: kToolbarHeight * 0.2),
               Text(
                 AppLocalizations.of(context)!.reportBug,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                  fontSize: kToolbarHeight * 0.4,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
+          // Background gradient - même style que games_page
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF314368), Colors.black],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.backgroundDark,
+                  AppColors.surfaceDark.withValues(alpha: 0.5),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
-          Container(color: Colors.black.withValues(alpha: 0.3)),
-          Center(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(height: spacing * 2),
-                  Container(
-                    width: fieldWidth,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                    ),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _descController,
-                          maxLength: 200,
-                          maxLines: 7,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)!.describeBug,
-                            labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Container principal avec style glassmorphism
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.surfaceDark,
+                            AppColors.surfaceDark.withValues(alpha: 0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // En-tête avec icône
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withValues(alpha: 0.4),
+                                  Colors.black.withValues(alpha: 0.2),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.white),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.bug_report,
+                                  color: AppColors.primaryBlue,
+                                  size: 32,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    AppLocalizations.of(context)!.describeBug,
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: logScale(context, 18),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        if (errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Text(
-                              errorMessage!,
-                              style: const TextStyle(color: Colors.redAccent),
-                              textAlign: TextAlign.center,
+                          const SizedBox(height: 24),
+                          // Champ de texte
+                          TextField(
+                            controller: _descController,
+                            maxLength: 200,
+                            maxLines: 7,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: logScale(context, 14),
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Décrivez le bug rencontré...",
+                              hintStyle: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: logScale(context, 14),
+                              ),
+                              filled: true,
+                              fillColor: Colors.black.withValues(alpha: 0.3),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryBlue,
+                                  width: 2,
+                                ),
+                              ),
+                              counterStyle: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: logScale(context, 12),
+                              ),
                             ),
                           ),
-                        SizedBox(height: spacing),
-                        _loading
-                            ? const CircularProgressIndicator()
-                            : _buildGlassButton(
-                          label: AppLocalizations.of(context)!.send,
-                          icon: Icons.send,
-                          fontSize: fontSize,
-                          width: buttonWidth,
-                          height: buttonHeight,
-                          onPressed: _submitBug,
-                        ),
-                      ],
+                          if (errorMessage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.red.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.redAccent,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        errorMessage!,
+                                        style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 24),
+                          // Bouton d'envoi - style games_page
+                          _loading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primaryBlue,
+                                  ),
+                                )
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primaryBlue,
+                                        AppColors.primaryBlue.withValues(alpha: 0.8),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                                        blurRadius: 12,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: ElevatedButton.icon(
+                                    onPressed: _submitBug,
+                                    icon: const Icon(
+                                      Icons.send,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    label: Text(
+                                      AppLocalizations.of(context)!.send,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: logScale(context, 16),
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: spacing * 2),
-                  Text(
-                    "© 2025 HoopsLeague. All rights reserved.",
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: logScale(context, 12),
+                    const SizedBox(height: 32),
+                    // Footer
+                    Text(
+                      "© 2025 HoopsLeague. All rights reserved.",
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: logScale(context, 12),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: spacing),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

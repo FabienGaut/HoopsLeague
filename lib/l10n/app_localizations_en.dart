@@ -343,4 +343,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectionSuccess => 'Connection successful';
+
+  @override
+  String get suggestedLeagues => 'Suggested leagues';
+
+  @override
+  String get leagueNotFoundWithName => 'League not found';
+
+  @override
+  String get requestAlreadySent => 'Request already sent';
+
+  @override
+  String get requestSentPending => 'Request sent, pending approval';
+
+  @override
+  String get errorSendingRequest => 'Error sending request';
+
+  @override
+  String get userAcceptedInLeague => 'has been accepted in the league';
+
+  @override
+  String get errorAcceptingUser => 'Error accepting user';
+
+  @override
+  String get userRejected => 'has been rejected';
+
+  @override
+  String get errorRejectingUser => 'Error rejecting user';
+
+  @override
+  String get leftLeague => 'You left the league:';
+
+  @override
+  String get errorLeavingLeague => 'Error leaving league';
+
+  @override
+  String get leaveLeague => 'Leave league';
+
+  @override
+  String get leaveLeagueConfirm => 'Do you really want to leave this league?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String get pendingRequests => 'Pending requests';
+
+  @override
+  String get noPendingRequests => 'No pending requests';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get leagueNotFoundPreview => 'League not found';
+
+  @override
+  String get alreadyMember => 'Already a member';
+
+  @override
+  String get quit => 'Quit';
 }

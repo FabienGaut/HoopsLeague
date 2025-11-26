@@ -343,4 +343,70 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get connectionSuccess => 'Connexion réussie';
+
+  @override
+  String get suggestedLeagues => 'Ligues suggérées';
+
+  @override
+  String get leagueNotFoundWithName => 'Ligue introuvable';
+
+  @override
+  String get requestAlreadySent => 'Demande déjà envoyée';
+
+  @override
+  String get requestSentPending => 'Demande envoyée, en attente d\'approbation';
+
+  @override
+  String get errorSendingRequest => 'Erreur lors de l\'envoi de la demande';
+
+  @override
+  String get userAcceptedInLeague => 'a été accepté dans la ligue';
+
+  @override
+  String get errorAcceptingUser => 'Erreur lors de l\'acceptation';
+
+  @override
+  String get userRejected => 'a été refusé';
+
+  @override
+  String get errorRejectingUser => 'Erreur lors du refus';
+
+  @override
+  String get leftLeague => 'Vous avez quitté la ligue:';
+
+  @override
+  String get errorLeavingLeague => 'Erreur lors de la sortie de la ligue';
+
+  @override
+  String get leaveLeague => 'Quitter la ligue';
+
+  @override
+  String get leaveLeagueConfirm => 'Voulez-vous vraiment quitter cette ligue ?';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get leave => 'Quitter';
+
+  @override
+  String get pendingRequests => 'Demandes en attente';
+
+  @override
+  String get noPendingRequests => 'Aucune demande en attente';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get reject => 'Refuser';
+
+  @override
+  String get leagueNotFoundPreview => 'Ligue introuvable';
+
+  @override
+  String get alreadyMember => 'Déjà membre';
+
+  @override
+  String get quit => 'Quitter';
 }

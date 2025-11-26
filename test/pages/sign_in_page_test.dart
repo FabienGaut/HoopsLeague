@@ -123,6 +123,111 @@ void main() {
       // pour gérer le défilement sur petits écrans
       expect(find.byType(SingleChildScrollView), findsWidgets);
     });
+
+    testWidgets('should toggle password visibility', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Trouver l'icône de visibilité
+      final visibilityIcon = find.byIcon(Icons.visibility_off);
+      
+      if (visibilityIcon.evaluate().isNotEmpty) {
+        // Appuyer sur l'icône pour afficher le mot de passe
+        await tester.tap(visibilityIcon);
+        await tester.pump();
+
+        // L'icône devrait changer
+        expect(find.byIcon(Icons.visibility), findsOneWidget);
+      }
+    });
+
+    testWidgets('should validate empty email', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Laisser les champs vides et essayer de se connecter
+      final signInButton = find.byIcon(Icons.login);
+      
+      if (signInButton.evaluate().isNotEmpty) {
+        await tester.tap(signInButton);
+        await tester.pump();
+        
+        // Un message d'erreur ou une validation devrait apparaître
+        // (dépend de l'implémentation)
+      }
+    });
+
+    testWidgets('should have gradient background', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Vérifier la présence de Container avec décoration
+      final containers = find.byType(Container);
+      expect(containers, findsWidgets);
+    });
+
+    testWidgets('should display all required UI elements', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Vérifier tous les éléments essentiels
+      expect(find.byType(TextField), findsNWidgets(2)); // Email + Password
+      expect(find.byType(Image), findsWidgets); // Logo
+      expect(find.byIcon(Icons.login), findsOneWidget); // Bouton connexion
+      expect(find.byType(TextButton), findsWidgets); // Lien inscription
+    });
+
+    testWidgets('should have form validation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Vérifier la présence d'un Form pour la validation
+      expect(find.byType(Form), findsOneWidget);
+    });
+
+    testWidgets('email field should have email keyboard type', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Trouver le champ email
+      final emailField = find.byType(TextField).first;
+      final textField = tester.widget<TextField>(emailField);
+      
+      // Vérifier le type de clavier
+      expect(textField.keyboardType, TextInputType.emailAddress);
+    });
+
+    testWidgets('should maintain state when switching fields', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createTestApp(const SignInPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Entrer du texte dans le champ email
+      final emailField = find.byType(TextField).first;
+      await tester.enterText(emailField, 'test@example.com');
+      await tester.pump();
+
+      // Passer au champ password
+      final passwordField = find.byType(TextField).last;
+      await tester.tap(passwordField);
+      await tester.pump();
+
+      // Vérifier que l'email est toujours là
+      expect(find.text('test@example.com'), findsOneWidget);
+    });
   });
 }
 

@@ -730,6 +730,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection successful'**
   String get connectionSuccess;
+
+  /// No description provided for @suggestedLeagues.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested leagues'**
+  String get suggestedLeagues;
+
+  /// No description provided for @leagueNotFoundWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'League not found'**
+  String get leagueNotFoundWithName;
+
+  /// No description provided for @requestAlreadySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request already sent'**
+  String get requestAlreadySent;
+
+  /// No description provided for @requestSentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent, pending approval'**
+  String get requestSentPending;
+
+  /// No description provided for @errorSendingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending request'**
+  String get errorSendingRequest;
+
+  /// No description provided for @userAcceptedInLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'has been accepted in the league'**
+  String get userAcceptedInLeague;
+
+  /// No description provided for @errorAcceptingUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting user'**
+  String get errorAcceptingUser;
+
+  /// No description provided for @userRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'has been rejected'**
+  String get userRejected;
+
+  /// No description provided for @errorRejectingUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error rejecting user'**
+  String get errorRejectingUser;
+
+  /// No description provided for @leftLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the league:'**
+  String get leftLeague;
+
+  /// No description provided for @errorLeavingLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Error leaving league'**
+  String get errorLeavingLeague;
+
+  /// No description provided for @leaveLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave league'**
+  String get leaveLeague;
+
+  /// No description provided for @leaveLeagueConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to leave this league?'**
+  String get leaveLeagueConfirm;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @leave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leave;
+
+  /// No description provided for @pendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending requests'**
+  String get pendingRequests;
+
+  /// No description provided for @noPendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get noPendingRequests;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @leagueNotFoundPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'League not found'**
+  String get leagueNotFoundPreview;
+
+  /// No description provided for @alreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Already a member'**
+  String get alreadyMember;
+
+  /// No description provided for @quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get quit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
