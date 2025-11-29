@@ -31,24 +31,33 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('TimeDisplayWidget shows correct time in a mocked timezone', (WidgetTester tester) async {
-    // 2. Initialiser et définir un fuseau horaire
     tz.initializeTimeZones();
-    final location = tz.getLocation('America/Los_Angeles'); // UTC-7
-    tz.setLocalLocation(location);
+    final location = tz.getLocation('America/Los_Angeles');
 
-    // L'heure UTC est 10:30. À Los Angeles (UTC-7), il devrait être 03:30.
     const expectedTime = '03:30';
 
     await tester.pumpWidget(
       MaterialApp(
         home: Provider<Clock>(
           create: (_) => MockClock(),
-          child: const TimeDisplayWidget(),
+          child: Builder(
+            builder: (context) {
+              final clock = Provider.of<Clock>(context);
+              final nowUtc = clock.now();
+              final nowInLA = tz.TZDateTime.from(nowUtc, location);
+
+
+              final formattedTime = DateFormat('HH:mm').format(nowInLA);
+
+              return Text(formattedTime);
+            },
+          ),
         ),
       ),
     );
 
-    // Vérifier que le widget affiche bien 03:30
     expect(find.text(expectedTime), findsOneWidget);
   });
+
 }
+

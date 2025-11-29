@@ -50,19 +50,24 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo.png', height: 28),
-            const SizedBox(width: 8),
-            Text(
-              "HoopsLeague",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        title: FittedBox(
+          fit: BoxFit.scaleDown, // rétrécit si nécessaire
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: kToolbarHeight * 0.6, // proportion de l’AppBar
               ),
-            ),
-          ],
+              SizedBox(width: kToolbarHeight * 0.2),
+              Text(
+                t.myGraph,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: kToolbarHeight * 0.4, // proportion de l’AppBar
+                ),
+              ),
+            ],
+          ),
         ),
         centerTitle: true,
       ),
@@ -163,6 +168,12 @@ class _PointsGraphPageState extends State<PointsGraphPage> {
                                   );
                                 },
                               ),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
                             ),
                           ),
                           borderData: FlBorderData(show: false),

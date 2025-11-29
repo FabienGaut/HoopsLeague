@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../theme/utils.dart';
+import '../utils/no_special_characters_formatter.dart';
+import '../utils/error_sanitizer.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -64,7 +67,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       confirmPasswordController.clear();
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text(ErrorSanitizer.getSafeErrorMessage(e, context: 'le changement de mot de passe'))),
       );
     } finally {
       setState(() => isLoading = false);
@@ -211,6 +214,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           TextFormField(
                             controller: oldPasswordController,
                             obscureText: true,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: t.oldPasswordLabel,
@@ -235,6 +239,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           TextFormField(
                             controller: newPasswordController,
                             obscureText: true,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: t.newPasswordLabel,
@@ -259,6 +264,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           TextFormField(
                             controller: confirmPasswordController,
                             obscureText: true,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: t.confirmPasswordLabel,

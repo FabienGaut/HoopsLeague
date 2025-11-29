@@ -357,7 +357,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{value} points earned !'**
-  String pointsAdded(String value);
+  String pointsAdded(double value);
 
   /// No description provided for @myBets.
   ///
@@ -682,6 +682,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'League not found'**
   String get leagueNotFound;
+
+  /// No description provided for @slideToBet.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to bet'**
+  String get slideToBet;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back to HoopsLeague'**
+  String get welcomeBack;
+
+  /// No description provided for @bugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get bugReport;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBug;
+
+  /// No description provided for @describeBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the bug'**
+  String get describeBug;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @bugEmptyError.
+  ///
+  /// In en, this message translates to:
+  /// **'The description cannot be empty'**
+  String get bugEmptyError;
+
+  /// No description provided for @connectionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get connectionSuccess;
+
+  /// No description provided for @suggestedLeagues.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested leagues'**
+  String get suggestedLeagues;
+
+  /// No description provided for @leagueNotFoundWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'League not found'**
+  String get leagueNotFoundWithName;
+
+  /// No description provided for @requestAlreadySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request already sent'**
+  String get requestAlreadySent;
+
+  /// No description provided for @requestSentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent, pending approval'**
+  String get requestSentPending;
+
+  /// No description provided for @errorSendingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending request'**
+  String get errorSendingRequest;
+
+  /// No description provided for @userAcceptedInLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'has been accepted in the league'**
+  String get userAcceptedInLeague;
+
+  /// No description provided for @errorAcceptingUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting user'**
+  String get errorAcceptingUser;
+
+  /// No description provided for @userRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'has been rejected'**
+  String get userRejected;
+
+  /// No description provided for @errorRejectingUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error rejecting user'**
+  String get errorRejectingUser;
+
+  /// No description provided for @leftLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the league:'**
+  String get leftLeague;
+
+  /// No description provided for @errorLeavingLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Error leaving league'**
+  String get errorLeavingLeague;
+
+  /// No description provided for @leaveLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave league'**
+  String get leaveLeague;
+
+  /// No description provided for @leaveLeagueConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to leave this league?'**
+  String get leaveLeagueConfirm;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @leave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leave;
+
+  /// No description provided for @pendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending requests'**
+  String get pendingRequests;
+
+  /// No description provided for @noPendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get noPendingRequests;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @leagueNotFoundPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'League not found'**
+  String get leagueNotFoundPreview;
+
+  /// No description provided for @alreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Already a member'**
+  String get alreadyMember;
+
+  /// No description provided for @quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get quit;
+
+  /// No description provided for @allRightsReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'© 2025 HoopsLeague. All rights reserved.'**
+  String get allRightsReserved;
+
+  /// No description provided for @noGamesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No games played today'**
+  String get noGamesToday;
+
+  /// No description provided for @securityError.
+  ///
+  /// In en, this message translates to:
+  /// **'Security error'**
+  String get securityError;
+
+  /// No description provided for @unauthorizedAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized access'**
+  String get unauthorizedAccess;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please log in again.'**
+  String get sessionExpired;
+
+  /// No description provided for @uidError.
+  ///
+  /// In en, this message translates to:
+  /// **'UID Error'**
+  String get uidError;
+
+  /// No description provided for @userLoadingError.
+  ///
+  /// In en, this message translates to:
+  /// **'User loading error'**
+  String get userLoadingError;
+
+  /// No description provided for @multipleBets.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Bets'**
+  String get multipleBets;
+
+  /// No description provided for @singleBet.
+  ///
+  /// In en, this message translates to:
+  /// **'Single Bet'**
+  String get singleBet;
+
+  /// No description provided for @joinedLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined the league'**
+  String get joinedLeague;
+
+  /// No description provided for @alreadyInPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request already sent'**
+  String get alreadyInPending;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get requestSent;
+
+  /// No description provided for @nbaDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This application is independent and has no official connection with the NBA.'**
+  String get nbaDisclaimer;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This action is irreversible.'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Account successfully deleted'**
+  String get accountDeleted;
+
+  /// No description provided for @errorDeletingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting account'**
+  String get errorDeletingAccount;
+
+  /// No description provided for @howToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use the app'**
+  String get howToUse;
+
+  /// No description provided for @swipeToSelectTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to select the winning team:'**
+  String get swipeToSelectTeam;
+
+  /// No description provided for @errorDeletingAuthUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting authentication account'**
+  String get errorDeletingAuthUser;
+
+  /// No description provided for @errorDeletingUserData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error cleaning up user data'**
+  String get errorDeletingUserData;
+
+  /// No description provided for @captchaRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete the CAPTCHA verification'**
+  String get captchaRequired;
+
+  /// No description provided for @captchaError.
+  ///
+  /// In en, this message translates to:
+  /// **'CAPTCHA verification failed. Please try again.'**
+  String get captchaError;
+
+  /// No description provided for @termsAndConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get termsAndConditions;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @legalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Notice'**
+  String get legalNotice;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -8,6 +8,8 @@ import 'package:hoopsleague/services/cache_service.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import '../theme/app_colors.dart';
 import '../theme/widgets_theme.dart';
+import '../utils/no_special_characters_formatter.dart';
+import '../utils/security_utils.dart';
 import 'package:intl/intl.dart';
 
 final supabase = Supabase.instance.client;
@@ -51,6 +53,21 @@ class _BucketPageState extends State<BucketPage> {
 
   Future<void> _loadUserData() async {
     final messenger = ScaffoldMessenger.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      setState(() => isLoading = false);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     try {
       final data = await supabase
           .from('usersdata')
@@ -58,14 +75,15 @@ class _BucketPageState extends State<BucketPage> {
           .eq('id', widget.uid)
           .single();
 
-      setState(() {
-        userData = data;
-        isLoading = false;
-      });
+      if (!mounted) return; // <-- évite le crash
+        setState(() {
+          userData = data;
+          isLoading = false;
+        });
     } catch (e) {
       setState(() => isLoading = false);
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur chargement utilisateur: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context)!.userLoadingError}: $e')),
       );
     }
   }
@@ -97,13 +115,26 @@ class _BucketPageState extends State<BucketPage> {
   }
 
   Future<void> _sendBetToSupabase() async {
-    final gameIds =
-    widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
+    final ctx = context.read<Clock>();
+    final gameIds =  widget.bets.map((bet) => bet['game_id'] as String? ?? '').toList();
     final parsedAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     if (widget.uid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ UID Error !"), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.uidError), backgroundColor: Colors.red),
       );
       return;
     }
@@ -120,6 +151,7 @@ class _BucketPageState extends State<BucketPage> {
 
     try {
       final pointsBetted = parsedAmount.toInt();
+
       final currentPoints = (userData?['points'] ?? 0).toDouble();
 
       if (parsedAmount > currentPoints) {
@@ -148,7 +180,7 @@ class _BucketPageState extends State<BucketPage> {
           .update({'points': newPoints.toInt()})
           .eq('id', widget.uid);
       await CacheService.saveUserPoints(
-          widget.uid, newPoints, context.read<Clock>().now());
+          widget.uid, newPoints, ctx.now());
 
       if (!mounted) return;
 
@@ -350,7 +382,10 @@ class _BucketPageState extends State<BucketPage> {
                         controller: _amountController,
                         keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          NoSpecialCharactersFormatter(),
+                        ],
                         decoration: InputDecoration(
                           labelText: t.totalAmount,
                           labelStyle: const TextStyle(color: textSecondary),

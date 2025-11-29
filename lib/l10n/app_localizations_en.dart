@@ -146,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myGraph => 'My statistics';
 
   @override
-  String pointsAdded(String value) {
+  String pointsAdded(double value) {
     return '$value points earned !';
   }
 
@@ -319,4 +319,172 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leagueNotFound => 'League not found';
+
+  @override
+  String get slideToBet => 'Slide to bet';
+
+  @override
+  String get welcomeBack => 'Welcome back to HoopsLeague';
+
+  @override
+  String get bugReport => 'Report a bug';
+
+  @override
+  String get reportBug => 'Report a bug';
+
+  @override
+  String get describeBug => 'Describe the bug';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get bugEmptyError => 'The description cannot be empty';
+
+  @override
+  String get connectionSuccess => 'Connection successful';
+
+  @override
+  String get suggestedLeagues => 'Suggested leagues';
+
+  @override
+  String get leagueNotFoundWithName => 'League not found';
+
+  @override
+  String get requestAlreadySent => 'Request already sent';
+
+  @override
+  String get requestSentPending => 'Request sent, pending approval';
+
+  @override
+  String get errorSendingRequest => 'Error sending request';
+
+  @override
+  String get userAcceptedInLeague => 'has been accepted in the league';
+
+  @override
+  String get errorAcceptingUser => 'Error accepting user';
+
+  @override
+  String get userRejected => 'has been rejected';
+
+  @override
+  String get errorRejectingUser => 'Error rejecting user';
+
+  @override
+  String get leftLeague => 'You left the league:';
+
+  @override
+  String get errorLeavingLeague => 'Error leaving league';
+
+  @override
+  String get leaveLeague => 'Leave league';
+
+  @override
+  String get leaveLeagueConfirm => 'Do you really want to leave this league?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String get pendingRequests => 'Pending requests';
+
+  @override
+  String get noPendingRequests => 'No pending requests';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get leagueNotFoundPreview => 'League not found';
+
+  @override
+  String get alreadyMember => 'Already a member';
+
+  @override
+  String get quit => 'Quit';
+
+  @override
+  String get allRightsReserved => '© 2025 HoopsLeague. All rights reserved.';
+
+  @override
+  String get noGamesToday => 'No games played today';
+
+  @override
+  String get securityError => 'Security error';
+
+  @override
+  String get unauthorizedAccess => 'Unauthorized access';
+
+  @override
+  String get sessionExpired => 'Session expired. Please log in again.';
+
+  @override
+  String get uidError => 'UID Error';
+
+  @override
+  String get userLoadingError => 'User loading error';
+
+  @override
+  String get multipleBets => 'Multiple Bets';
+
+  @override
+  String get singleBet => 'Single Bet';
+
+  @override
+  String get joinedLeague => 'You joined the league';
+
+  @override
+  String get alreadyInPending => 'Request already sent';
+
+  @override
+  String get requestSent => 'Request sent';
+
+  @override
+  String get nbaDisclaimer => 'This application is independent and has no official connection with the NBA.';
+
+  @override
+  String get deleteAccount => 'Delete my account';
+
+  @override
+  String get deleteAccountConfirm => 'Are you sure you want to delete your account? This action is irreversible.';
+
+  @override
+  String get accountDeleted => 'Account successfully deleted';
+
+  @override
+  String get errorDeletingAccount => 'Error deleting account';
+
+  @override
+  String get howToUse => 'How to use the app';
+
+  @override
+  String get swipeToSelectTeam => 'Swipe left or right to select the winning team:';
+
+  @override
+  String get errorDeletingAuthUser => 'Error deleting authentication account';
+
+  @override
+  String get errorDeletingUserData => 'Error cleaning up user data';
+
+  @override
+  String get captchaRequired => 'Please complete the CAPTCHA verification';
+
+  @override
+  String get captchaError => 'CAPTCHA verification failed. Please try again.';
+
+  @override
+  String get termsAndConditions => 'Terms & Conditions';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get legalNotice => 'Legal Notice';
 }

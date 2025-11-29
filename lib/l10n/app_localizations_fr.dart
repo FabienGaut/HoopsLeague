@@ -146,7 +146,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myGraph => 'Mes statistiques';
 
   @override
-  String pointsAdded(String value) {
+  String pointsAdded(double value) {
     return '$value points gagnés !';
   }
 
@@ -319,4 +319,172 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get leagueNotFound => 'Ligue non trouvée';
+
+  @override
+  String get slideToBet => 'Glissez pour parier';
+
+  @override
+  String get welcomeBack => 'Bon retour sur HoopsLeague';
+
+  @override
+  String get bugReport => 'Remonter un bug';
+
+  @override
+  String get reportBug => 'Signaler un bug';
+
+  @override
+  String get describeBug => 'Décris le bug';
+
+  @override
+  String get send => 'Envoyer';
+
+  @override
+  String get bugEmptyError => 'La description ne peut pas être vide.';
+
+  @override
+  String get connectionSuccess => 'Connexion réussie';
+
+  @override
+  String get suggestedLeagues => 'Ligues suggérées';
+
+  @override
+  String get leagueNotFoundWithName => 'Ligue introuvable';
+
+  @override
+  String get requestAlreadySent => 'Demande déjà envoyée';
+
+  @override
+  String get requestSentPending => 'Demande envoyée, en attente d\'approbation';
+
+  @override
+  String get errorSendingRequest => 'Erreur lors de l\'envoi de la demande';
+
+  @override
+  String get userAcceptedInLeague => 'a été accepté dans la ligue';
+
+  @override
+  String get errorAcceptingUser => 'Erreur lors de l\'acceptation';
+
+  @override
+  String get userRejected => 'a été refusé';
+
+  @override
+  String get errorRejectingUser => 'Erreur lors du refus';
+
+  @override
+  String get leftLeague => 'Vous avez quitté la ligue:';
+
+  @override
+  String get errorLeavingLeague => 'Erreur lors de la sortie de la ligue';
+
+  @override
+  String get leaveLeague => 'Quitter la ligue';
+
+  @override
+  String get leaveLeagueConfirm => 'Voulez-vous vraiment quitter cette ligue ?';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get leave => 'Quitter';
+
+  @override
+  String get pendingRequests => 'Demandes en attente';
+
+  @override
+  String get noPendingRequests => 'Aucune demande en attente';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get reject => 'Refuser';
+
+  @override
+  String get leagueNotFoundPreview => 'Ligue introuvable';
+
+  @override
+  String get alreadyMember => 'Déjà membre';
+
+  @override
+  String get quit => 'Quitter';
+
+  @override
+  String get allRightsReserved => '© 2025 HoopsLeague. Tous droits réservés.';
+
+  @override
+  String get noGamesToday => 'Aucun match joué aujourd\'hui';
+
+  @override
+  String get securityError => 'Erreur de sécurité';
+
+  @override
+  String get unauthorizedAccess => 'Accès non autorisé';
+
+  @override
+  String get sessionExpired => 'Session expirée. Veuillez vous reconnecter.';
+
+  @override
+  String get uidError => 'Erreur UID';
+
+  @override
+  String get userLoadingError => 'Erreur chargement utilisateur';
+
+  @override
+  String get multipleBets => 'Paris multiples';
+
+  @override
+  String get singleBet => 'Pari simple';
+
+  @override
+  String get joinedLeague => 'Vous avez rejoint la ligue';
+
+  @override
+  String get alreadyInPending => 'Demande déjà envoyée';
+
+  @override
+  String get requestSent => 'Demande envoyée';
+
+  @override
+  String get nbaDisclaimer => 'Cette application est indépendante et n\'a aucun lien officiel avec la NBA.';
+
+  @override
+  String get deleteAccount => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountConfirm => 'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.';
+
+  @override
+  String get accountDeleted => 'Compte supprimé avec succès';
+
+  @override
+  String get errorDeletingAccount => 'Erreur lors de la suppression du compte';
+
+  @override
+  String get howToUse => 'Comment utiliser l\'application';
+
+  @override
+  String get swipeToSelectTeam => 'Glissez vers la gauche ou la droite pour sélectionner l\'équipe gagnante :';
+
+  @override
+  String get errorDeletingAuthUser => 'Erreur lors de la suppression du compte d\'authentification';
+
+  @override
+  String get errorDeletingUserData => 'Erreur lors du nettoyage des données utilisateur';
+
+  @override
+  String get captchaRequired => 'Veuillez compléter la vérification CAPTCHA';
+
+  @override
+  String get captchaError => 'La vérification CAPTCHA a échoué. Veuillez réessayer.';
+
+  @override
+  String get termsAndConditions => 'Conditions Générales';
+
+  @override
+  String get privacyPolicy => 'Politique de Confidentialité';
+
+  @override
+  String get legalNotice => 'Mentions Légales';
 }

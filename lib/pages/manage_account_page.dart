@@ -1,11 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hoopsleague/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hoopsleague/pages/password_change_page.dart';
+import 'package:hoopsleague/pages/home_page.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
 import 'app_state.dart';
 import 'package:hoopsleague/services/cache_service.dart';
+import '../utils/no_special_characters_formatter.dart';
+import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -30,6 +34,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   static const Color accentGlow = Color(0xFF9C9CFF);
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Colors.white70;
+  static const Color successGreen = Color(0xFF4CAF50);
 
   @override
   void initState() {
@@ -44,6 +49,20 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   Future<void> _loadUserData() async {
     final t = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(t.loadingError(t.unauthorizedAccess)),
+        ),
+      );
+      setState(() => isLoading = false);
+      return;
+    }
+    
     try {
       final data =
       await supabase.from('usersdata').select().eq('id', widget.uid).single();
@@ -69,10 +88,23 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
   Future<void> _updateUserField(String field, dynamic value) async {
     final t = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(t.updateError(t.unauthorizedAccess)),
+        ),
+      );
+      return;
+    }
+    
     try {
       await supabase.from('usersdata').update({field: value}).eq('id', widget.uid);
       messenger.showSnackBar(
-        SnackBar(content: Text(t.updateSuccess)),
+        SnackBar(content: Text(t.updateSuccess), backgroundColor: successGreen,),
       );
       await _loadUserData();
     } catch (e) {
@@ -98,6 +130,101 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
     );
   }
 
+  Future<void> _deleteAccount() async {
+    final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(t.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceDark,
+        title: Text(
+          t.deleteAccount,
+          style: const TextStyle(color: textPrimary),
+        ),
+        content: Text(
+          t.deleteAccountConfirm,
+          style: const TextStyle(color: textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              t.cancel,
+              style: const TextStyle(color: textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red.withValues(alpha: 0.2),
+            ),
+            child: Text(
+              t.deleteAccount,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true) return;
+    
+    try {
+      // Call the secure RPC function to delete the user account
+      // This function uses SECURITY DEFINER to delete from auth.users
+      // and ensures only the authenticated user can delete their own account
+      if (kDebugMode) print('Calling RPC delete_user_account...');
+      
+      await supabase.rpc('delete_user_account');
+      
+      if (kDebugMode) print('Account deleted successfully via RPC');
+      
+      // Sign out the user locally
+      await supabase.auth.signOut();
+      
+      // Show success message
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(t.accountDeleted),
+          backgroundColor: successGreen,
+        ),
+      );
+      
+      // Navigate to home page and remove all previous routes
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomePage()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Error deleting account: $e');
+      
+      // Show error message
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${t.errorDeletingAccount}: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -106,12 +233,12 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
 
   Widget _glassCard({required Widget child}) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppColors.surfaceDark, // couleur sombre type surfaceDark
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Color(0xFF2C2C3E), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -204,6 +331,8 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                           ),
                           child: TextField(
                             controller: _usernameController,
+                            maxLength: 20,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style:
                             const TextStyle(color: textPrimary),
                             decoration: InputDecoration(
@@ -372,6 +501,21 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                         const TextStyle(color: textPrimary),
                       ),
                       onTap: _clearCache,
+                    ),
+                  ),
+
+                  _glassCard(
+                    child: ListTile(
+                      leading: const Icon(Icons.delete_forever,
+                          color: Colors.red),
+                      title: Text(
+                        t.deleteAccount,
+                        style:
+                        const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                      trailing: const Icon(Icons.warning,
+                          size: 20, color: Colors.red),
+                      onTap: _deleteAccount,
                     ),
                   ),
                 ],

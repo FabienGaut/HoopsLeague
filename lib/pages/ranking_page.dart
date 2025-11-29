@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../theme/utils.dart';
+import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -29,21 +31,48 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   @override
   void initState() {
     super.initState();
-    fetchUserLeagues();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLeagues();
+    });
   }
 
-  Future<void> fetchUserLeagues() async {
+
+  Future<void> _loadLeagues() async {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      setState(() => isLoading = false);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     setState(() => isLoading = true);
     try {
+      debugPrint('=== FETCHING USER LEAGUES ===');
+      debugPrint('User ID: ${widget.uid}');
+      
       final userData = await supabase
           .from('usersdata')
           .select('leagues')
           .eq('id', widget.uid)
           .single();
 
+      debugPrint('User data retrieved: $userData');
+
       final List<String> leagueIds = List<String>.from(userData['leagues'] ?? []);
+      debugPrint('League IDs found: $leagueIds');
+      debugPrint('Number of leagues: ${leagueIds.length}');
 
       if (leagueIds.isEmpty) {
+        debugPrint('No leagues found for user');
         setState(() {
           leagues = [];
           selectedLeague = null;
@@ -52,17 +81,32 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         return;
       }
 
+      debugPrint('Fetching league data for IDs: $leagueIds');
       final leaguesData =
-      await supabase.from('leagues').select().filter('id', 'in', leagueIds);
+      await supabase.from('leagues').select().inFilter('id', leagueIds);
+
+      debugPrint('Leagues data retrieved: $leaguesData');
+      debugPrint('Number of leagues retrieved: ${(leaguesData as List).length}');
 
       setState(() {
         leagues = List<Map<String, dynamic>>.from(leaguesData);
-        if (leagues.isNotEmpty) selectedLeague = leagues.first;
+        debugPrint('Leagues stored in state: ${leagues.length}');
+        for (var league in leagues) {
+          debugPrint('  - ${league['name']} (ID: ${league['id']})');
+        }
+        
+        if (leagues.isNotEmpty) {
+          selectedLeague = leagues.first;
+          debugPrint('Selected league: ${selectedLeague!['name']}');
+        }
       });
 
       if (selectedLeague != null) fetchLeaderboard();
-    } catch (e) {
-      debugPrint('Erreur fetch user leagues: $e');
+      debugPrint('=== FETCH USER LEAGUES COMPLETE ===');
+    } catch (e, stackTrace) {
+      debugPrint('=== ERREUR FETCH USER LEAGUES ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
     } finally {
       setState(() => isLoading = false);
     }
@@ -80,11 +124,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         return;
       }
 
-      final response = await supabase
-          .from('users_public')
-          .select()
-          .filter('id', 'in', leagueUsersIds)
-          .order('points', ascending: false);
+      final response = await supabase.rpc(
+          'get_league_members',
+          params: {'league_id': selectedLeague!['id']}
+          
+      );
+      debugPrint('League members response: $response');
 
       setState(() => users = List<Map<String, dynamic>>.from(response));
     } catch (e) {
