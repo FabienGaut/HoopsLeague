@@ -43,3 +43,5 @@ jobs:
       # 6️⃣ Lance les tests Flutter
       - name: Run Flutter tests
         run: flutter test --coverage
+      - name: Build App
+        run: flutter build web --release --base-href "/"
