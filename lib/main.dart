@@ -13,19 +13,26 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart';
 import 'services/clock.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
 
 Future<void> main() async {
   tz.initializeTimeZones();
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Google Mobile Ads only on mobile platforms
+  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || 
+                  defaultTargetPlatform == TargetPlatform.iOS)) {
+    await MobileAds.instance.initialize();
+  }
+
   await Hive.initFlutter();
   await dotenv.load(fileName: 'assets/.env');
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
+  final supabaseKey = dotenv.env['PUBLISHABLE_KEY'];
 
   if (supabaseUrl == null || supabaseKey == null) {
-    throw Exception("Supabase URL ou ANON KEY manquante dans le .env");
+    throw Exception("Supabase URL ou PUBLISHABLE_KEY manquante dans le .env");
   }
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
@@ -87,7 +94,7 @@ class MyApp extends StatelessWidget {
  @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
-      builder: (context, state, _) => MaterialApp(
+      builder: (context, AppState state, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         locale: state.locale,
         localizationsDelegates: const [

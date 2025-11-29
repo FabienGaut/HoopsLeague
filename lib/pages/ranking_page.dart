@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../theme/utils.dart';
+import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -29,10 +31,29 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   @override
   void initState() {
     super.initState();
-    fetchUserLeagues();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLeagues();
+    });
   }
 
-  Future<void> fetchUserLeagues() async {
+
+  Future<void> _loadLeagues() async {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      setState(() => isLoading = false);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     setState(() => isLoading = true);
     try {
       debugPrint('=== FETCHING USER LEAGUES ===');

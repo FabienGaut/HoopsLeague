@@ -412,4 +412,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allRightsReserved => '© 2025 HoopsLeague. All rights reserved.';
+
+  @override
+  String get noGamesToday => 'No games played today';
+
+  @override
+  String get securityError => 'Security error';
+
+  @override
+  String get unauthorizedAccess => 'Unauthorized access';
+
+  @override
+  String get sessionExpired => 'Session expired. Please log in again.';
+
+  @override
+  String get uidError => 'UID Error';
+
+  @override
+  String get userLoadingError => 'User loading error';
+
+  @override
+  String get multipleBets => 'Multiple Bets';
+
+  @override
+  String get singleBet => 'Single Bet';
+
+  @override
+  String get joinedLeague => 'You joined the league';
+
+  @override
+  String get alreadyInPending => 'Request already sent';
+
+  @override
+  String get requestSent => 'Request sent';
+
+  @override
+  String get nbaDisclaimer => 'This application is independent and has no official connection with the NBA.';
+
+  @override
+  String get deleteAccount => 'Delete my account';
+
+  @override
+  String get deleteAccountConfirm => 'Are you sure you want to delete your account? This action is irreversible.';
+
+  @override
+  String get accountDeleted => 'Account successfully deleted';
+
+  @override
+  String get errorDeletingAccount => 'Error deleting account';
+
+  @override
+  String get howToUse => 'How to use the app';
+
+  @override
+  String get swipeToSelectTeam => 'Swipe left or right to select the winning team:';
+
+  @override
+  String get errorDeletingAuthUser => 'Error deleting authentication account';
+
+  @override
+  String get errorDeletingUserData => 'Error cleaning up user data';
+
+  @override
+  String get captchaRequired => 'Please complete the CAPTCHA verification';
+
+  @override
+  String get captchaError => 'CAPTCHA verification failed. Please try again.';
+
+  @override
+  String get termsAndConditions => 'Terms & Conditions';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get legalNotice => 'Legal Notice';
 }

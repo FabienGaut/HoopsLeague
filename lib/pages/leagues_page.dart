@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/utils.dart';
+import '../utils/no_special_characters_formatter.dart';
+import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -64,6 +66,14 @@ class _LeaguesPageState extends State<LeaguesPage> {
   }
 
   Future<void> _loadLeagues() async {
+    // Security: Validate user ID before loading leagues
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      setState(() => isLoading = false);
+      return;
+    }
+    
     setState(() => isLoading = true);
     try {
       final data = await supabase.from('leagues')
@@ -86,6 +96,19 @@ class _LeaguesPageState extends State<LeaguesPage> {
     final messenger = ScaffoldMessenger.of(context);
     final name = _leagueNameController.text.trim();
     if (name.isEmpty) return;
+
+    // Security: Validate user ID before creating league
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.securityError),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     try {
       debugPrint('=== CREATE LEAGUE START ===');
@@ -148,7 +171,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
       debugPrint('Error: $e');
       debugPrint('Stack trace: $stackTrace');
       messenger.showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context)!.errorMessage}: $e')),
       );
     }
   }
@@ -156,15 +179,27 @@ class _LeaguesPageState extends State<LeaguesPage> {
   Future<void> _joinLeague() async {
     final t = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
-
     final leagueName = _joinLeagueController.text.trim();
     if (leagueName.isEmpty) return;
+
+    // Security: Validate user ID before joining league
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.securityError),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     try {
       // Récupérer la ligue par son nom
       final league = await supabase
           .from('leagues')
-          .select('id, pending_users')
+          .select()
           .eq('name', leagueName)
           .maybeSingle();
 
@@ -172,7 +207,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
         messenger.showSnackBar(
           SnackBar(content: Text('${t.leagueNotFoundWithName} "$leagueName"')),
         );
-        return; 
+        return;
       }
 
       final leagueId = league['id'];
@@ -181,25 +216,71 @@ class _LeaguesPageState extends State<LeaguesPage> {
       // Vérifier si l'utilisateur est déjà en attente
       if (pendingUsers.contains(widget.uid)) {
         messenger.showSnackBar(
-          SnackBar(content: Text(t.requestAlreadySent)),
+          SnackBar(content: Text(t.alreadyInPending)),
         );
         return;
       }
-      // Ajouter l'utilisateur à la liste d'attente
-      pendingUsers.add(widget.uid);
-      await supabase
-          .from('leagues')
-          .update({'pending_users': pendingUsers})
-          .eq('id', leagueId);
 
-      _joinLeagueController.clear();
-      messenger.showSnackBar(
-        SnackBar(content: Text(t.requestSentPending)),
-      );
+      // Auto-join pour la ligue "HoopsLeague"
+      if (leagueName.toLowerCase() == 'hoopsleague') {
+        // Ajouter directement l'utilisateur à la ligue
+        final usersId = List<String>.from(league['users_id'] ?? []);
+        
+        // Vérifier si déjà membre
+        if (usersId.contains(widget.uid)) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(t.alreadyMember)),
+          );
+          return;
+        }
+        
+        // Ajouter à la liste des membres
+        usersId.add(widget.uid);
+        
+        // Mettre à jour la ligue
+        await supabase
+            .from('leagues')
+            .update({'users_id': usersId})
+            .eq('id', leagueId);
+        
+        // Ajouter la ligue au profil utilisateur
+        final userData = await supabase
+            .from('usersdata')
+            .select('leagues')
+            .eq('id', widget.uid)
+            .single();
+        
+        final userLeagues = List<String>.from(userData['leagues'] ?? []);
+        if (!userLeagues.contains(leagueId)) {
+          userLeagues.add(leagueId);
+          await supabase
+              .from('usersdata')
+              .update({'leagues': userLeagues})
+              .eq('id', widget.uid);
+        }
+        
+        _joinLeagueController.clear();
+        _loadLeagues();
+        messenger.showSnackBar(
+          SnackBar(content: Text('${t.joinedLeague} $leagueName !')),
+        );
+      } else {
+        // Pour les autres ligues, ajouter en pending comme avant
+        pendingUsers.add(widget.uid);
+
+        await supabase
+            .from('leagues')
+            .update({'pending_users': pendingUsers})
+            .eq('id', leagueId);
+
+        _joinLeagueController.clear();
+        messenger.showSnackBar(
+          SnackBar(content: Text(t.requestSent)),
+        );
+      }
     } catch (e) {
-      debugPrint('Erreur join league: $e');
       messenger.showSnackBar(
-        SnackBar(content: Text(t.errorSendingRequest)),
+        SnackBar(content: Text('${t.errorMessage}: $e')),
       );
     }
   }
@@ -909,7 +990,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
   }
 
   Widget _buildLeagueSuggestions() {
-    final suggestedLeagues = ['HoopsLeague', 'FrenchLeague'];
+    final suggestedLeagues = ['HoopsLeague'];
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -412,4 +412,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get allRightsReserved => '© 2025 HoopsLeague. Tous droits réservés.';
+
+  @override
+  String get noGamesToday => 'Aucun match joué aujourd\'hui';
+
+  @override
+  String get securityError => 'Erreur de sécurité';
+
+  @override
+  String get unauthorizedAccess => 'Accès non autorisé';
+
+  @override
+  String get sessionExpired => 'Session expirée. Veuillez vous reconnecter.';
+
+  @override
+  String get uidError => 'Erreur UID';
+
+  @override
+  String get userLoadingError => 'Erreur chargement utilisateur';
+
+  @override
+  String get multipleBets => 'Paris multiples';
+
+  @override
+  String get singleBet => 'Pari simple';
+
+  @override
+  String get joinedLeague => 'Vous avez rejoint la ligue';
+
+  @override
+  String get alreadyInPending => 'Demande déjà envoyée';
+
+  @override
+  String get requestSent => 'Demande envoyée';
+
+  @override
+  String get nbaDisclaimer => 'Cette application est indépendante et n\'a aucun lien officiel avec la NBA.';
+
+  @override
+  String get deleteAccount => 'Supprimer mon compte';
+
+  @override
+  String get deleteAccountConfirm => 'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.';
+
+  @override
+  String get accountDeleted => 'Compte supprimé avec succès';
+
+  @override
+  String get errorDeletingAccount => 'Erreur lors de la suppression du compte';
+
+  @override
+  String get howToUse => 'Comment utiliser l\'application';
+
+  @override
+  String get swipeToSelectTeam => 'Glissez vers la gauche ou la droite pour sélectionner l\'équipe gagnante :';
+
+  @override
+  String get errorDeletingAuthUser => 'Erreur lors de la suppression du compte d\'authentification';
+
+  @override
+  String get errorDeletingUserData => 'Erreur lors du nettoyage des données utilisateur';
+
+  @override
+  String get captchaRequired => 'Veuillez compléter la vérification CAPTCHA';
+
+  @override
+  String get captchaError => 'La vérification CAPTCHA a échoué. Veuillez réessayer.';
+
+  @override
+  String get termsAndConditions => 'Conditions Générales';
+
+  @override
+  String get privacyPolicy => 'Politique de Confidentialité';
+
+  @override
+  String get legalNotice => 'Mentions Légales';
 }

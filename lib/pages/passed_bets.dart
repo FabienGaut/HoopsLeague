@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../theme/utils.dart';
+import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -17,6 +19,7 @@ class MyBetsPage extends StatefulWidget {
 }
 
 class _MyBetsPageState extends State<MyBetsPage> {
+  bool _initialized = false;
   Map<String, dynamic>? userData;
   List<Map<String, dynamic>> bets = [];
   bool isLoadingUser = true;
@@ -30,13 +33,39 @@ class _MyBetsPageState extends State<MyBetsPage> {
   static const Color successGreen = Color(0xFF4CAF50);
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _loadUserData(); // Ici c’est safe
+    }
+  }
+
+
+  @override
   void initState() {
     super.initState();
-    _loadUserData();
+   // _loadUserData();
     _listenToBets();
   }
 
   Future<void> _loadUserData() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      setState(() => isLoadingUser = false);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
       final response = await supabase
           .from('usersdata')
@@ -290,32 +319,28 @@ class _MyBetsPageState extends State<MyBetsPage> {
                                       crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                       children: [
-                                        if(bet.length > 1)
+                                        if (selections.length > 1)
                                           Text(
-                                            bet['pickedTeam'] ??
-                                                "Single Bet",
-                                            style:  TextStyle(
-                                              color: textPrimary,
-                                              fontSize: logScale(context, 18),
-                                              fontWeight:
-                                              FontWeight.bold,
-                                            ),
-                                          )
-
-                                        else
-                                          Text(
-                                            bet['pickedTeam'] ??
-                                                "Multiple Bets",
-                                            style:  TextStyle(
-                                              color: textPrimary,
-                                              fontSize: logScale(context, 18),
-                                              fontWeight:
-                                              FontWeight.bold,
-                                            ),
+                                          AppLocalizations.of(context)!.multipleBets,
+                                          style: TextStyle(
+                                            color: textPrimary,
+                                            fontSize: logScale(context, 18),
+                                            fontWeight: FontWeight.bold,
                                           ),
+                                        )
+                                        else
+                                        Text(
+                                        bet['pickedTeam'] ?? AppLocalizations.of(context)!.singleBet,
+                                        style: TextStyle(
+                                          color: textPrimary,
+                                          fontSize: logScale(context, 18),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
 
 
-                                        const SizedBox(height: 4),
+
+                      const SizedBox(height: 4),
                                         Text(
                                           DateFormat.yMd()
                                               .add_jm()

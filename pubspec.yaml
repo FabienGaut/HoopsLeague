@@ -51,6 +51,9 @@ dependencies:
   google_fonts: ^6.1.0
   responsive_framework: ^1.2.0
   http: ^1.1.0
+  google_mobile_ads: ^5.2.0
+  cloudflare_turnstile: ^3.6.0
+  flutter_markdown: ^0.7.4
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +82,7 @@ flutter:
   assets:
     - assets/images/
     - assets/.env
+    - assets/legal_docs/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

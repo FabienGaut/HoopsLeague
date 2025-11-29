@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
 import '../theme/app_colors.dart';
+import '../utils/no_special_characters_formatter.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -192,6 +193,7 @@ class _BugReportPageState extends State<BugPage> {
                             controller: _descController,
                             maxLength: 200,
                             maxLines: 7,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: logScale(context, 14),

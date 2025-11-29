@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:hoopsleague/pages/sign_up_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
 import 'first_connection_page.dart';
 import 'games_page.dart';
+import '../utils/no_special_characters_formatter.dart';
+import '../utils/error_sanitizer.dart';
+import 'legal_document_page.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -23,6 +30,22 @@ class _SignInPageState extends State<SignInPage> {
   String? errorMessage;
   bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
+  String? _captchaToken;
+  
+  // Check if Turnstile is supported on this platform
+  bool get _isCaptchaSupported {
+    if (kIsWeb) return true;
+    try {
+      return Platform.isAndroid || Platform.isIOS;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -33,6 +56,14 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<void> signIn() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Check if captcha is completed (only on supported platforms)
+    if (_isCaptchaSupported && (_captchaToken == null || _captchaToken!.isEmpty)) {
+      setState(() {
+        errorMessage = AppLocalizations.of(context)!.captchaRequired;
+      });
+      return;
+    }
 
     if (!mounted) return;
     setState(() {
@@ -89,22 +120,12 @@ class _SignInPageState extends State<SignInPage> {
         });
       }
     } on AuthException catch (e) {
-      if (!mounted) return;
-
       setState(() {
-        if (e.message.contains('Invalid login credentials')) {
-          errorMessage = AppLocalizations.of(context)!.wrongPassword;
-        } else if (e.message.contains('email')) {
-          errorMessage = AppLocalizations.of(context)!.wrongEmail;
-        } else {
-          errorMessage = 'Error : ${e.message}';
-        }
+        errorMessage = ErrorSanitizer.getAuthErrorMessage(e);
       });
     } catch (e) {
-      if (!mounted) return;
-
       setState(() {
-        errorMessage = 'Error : $e';
+        errorMessage = ErrorSanitizer.getSafeErrorMessage(e, context: 'la connexion');
       });
     } finally {
 
@@ -226,6 +247,7 @@ class _SignInPageState extends State<SignInPage> {
                           TextFormField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Email',
@@ -259,6 +281,7 @@ class _SignInPageState extends State<SignInPage> {
                           TextFormField(
                             controller: passwordController,
                             obscureText: true,
+                            inputFormatters: [NoSpecialCharactersFormatter()],
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText:
@@ -295,6 +318,40 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                   ),
                   SizedBox(height: spacing),
+
+                  // Cloudflare Turnstile (only on mobile and web)
+                  if (_isCaptchaSupported)
+                    Container(
+                      width: fieldWidth,
+                      height: 65,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      ),
+                      child: CloudflareTurnstile(
+                        siteKey: dotenv.env['TURNSTILE_SITE_KEY'] ?? '1x00000000000000000000AA',
+                        baseUrl: kIsWeb ? 'http://localhost' : 'https://hoopsleague.fr',
+                        onTokenReceived: (token) {
+                          setState(() {
+                            _captchaToken = token;
+                            errorMessage = null;
+                          });
+                        },
+                        onError: (error) {
+                          setState(() {
+                            _captchaToken = null;
+                            errorMessage = AppLocalizations.of(context)!.captchaError;
+                          });
+                        },
+                        onTokenExpired: () {
+                          setState(() {
+                            _captchaToken = null;
+                          });
+                        },
+                      ),
+                    ),
+                  if (_isCaptchaSupported) SizedBox(height: spacing),
 
                   if (errorMessage != null)
                     Padding(
@@ -337,12 +394,89 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   SizedBox(height: spacing * 2),
 
-                  Text(
-                    AppLocalizations.of(context)!.allRightsReserved,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: logScale(context, 12),
-                    ),
+                  // Legal links
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/cgu.md',
+                                title: AppLocalizations.of(context)!.termsAndConditions,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.termsAndConditions,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: logScale(context, 11),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/privacy_policy.md',
+                                title: AppLocalizations.of(context)!.privacyPolicy,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.privacyPolicy,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: logScale(context, 11),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/mentions_legales.md',
+                                title: AppLocalizations.of(context)!.legalNotice,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.legalNotice,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

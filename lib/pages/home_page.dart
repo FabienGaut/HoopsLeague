@@ -4,6 +4,7 @@ import 'package:hoopsleague/pages/sign_in_page.dart';
 import 'package:hoopsleague/pages/sign_up_page.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
+import 'legal_document_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -100,15 +101,107 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: spacing * 2),
-
-                  // --- Footer petit texte ---
-                  Text(
-                    AppLocalizations.of(context)!.allRightsReserved,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: logScale(context, 12),
+                  
+                  // Legal links
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/cgu.md',
+                                title: AppLocalizations.of(context)!.termsAndConditions,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.termsAndConditions,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: logScale(context, 11),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/privacy_policy.md',
+                                title: AppLocalizations.of(context)!.privacyPolicy,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.privacyPolicy,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: logScale(context, 11),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LegalDocumentPage(
+                                documentPath: 'assets/legal_docs/mentions_legales.md',
+                                title: AppLocalizations.of(context)!.legalNotice,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.legalNotice,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: logScale(context, 11),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 3*spacing),
+                  // --- NBA Disclaimer ---
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                    child: Text(
+                      AppLocalizations.of(context)!.nbaDisclaimer,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: logScale(context, 10),
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   )
+
+  
                 ],
               ),
             ),

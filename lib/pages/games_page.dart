@@ -14,6 +14,8 @@ import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/cache_service.dart';
+import '../utils/security_utils.dart';
+import '../widgets/ad_banner_widget.dart';
 import 'bug_page.dart';
 import 'graph_page.dart';
 import 'leagues_page.dart';
@@ -226,6 +228,20 @@ class _GamesPageState extends State<GamesPage> {
   Future<void> _addPoints(int points) async {
     final messenger = ScaffoldMessenger.of(context);
     if (userData == null) return;
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.unauthorizedAccess),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     final response = await supabase
         .from('usersdata')
         .select('daily_points_used')
@@ -257,6 +273,15 @@ class _GamesPageState extends State<GamesPage> {
   Future<void> syncUserPoints(String uid) async {
     final nav = Navigator.of(context);
     final ctx = context.read<Clock>();
+    
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(uid);
+    } catch (e) {
+      debugPrint('Security error in syncUserPoints: $e');
+      return;
+    }
+    
     try {
       // 1️⃣ Récupérer tous les paris du joueur
       final bets = await supabase
@@ -380,6 +405,15 @@ class _GamesPageState extends State<GamesPage> {
   }
 
   Future<void> _loadUserData() async {
+    // Security: Validate user ID
+    try {
+      SecurityUtils.requireCurrentUser(widget.uid);
+    } catch (e) {
+      debugPrint('Security error in _loadUserData: $e');
+      setState(() => isLoading = false);
+      return;
+    }
+    
     try {
       final data = await supabase
           .from('usersdata')
@@ -454,7 +488,30 @@ class _GamesPageState extends State<GamesPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text(AppLocalizations.of(context)!.noData));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        Image.asset(
+                          'assets/images/logo.png',
+                          width: 200,
+                          height: 200,
+                          opacity: const AlwaysStoppedAnimation(0.3),
+                        ),
+                        const SizedBox(height: 32),
+                        // Message
+                        Text(
+                          AppLocalizations.of(context)!.noGamesToday,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: logScale(context, 20),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 final clock = Provider.of<Clock>(context, listen: false);
                 final nowLocal = clock.now();
@@ -478,11 +535,35 @@ class _GamesPageState extends State<GamesPage> {
                   });
                 }).toList();
 
+                // Calculate total items: games + ads (1 ad every 5 games)
+                final int totalGames = filteredGames.length;
+                final int numberOfAds = totalGames ~/ 5;
+                final int totalItems = totalGames + numberOfAds;
+
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: filteredGames.length,
+                  itemCount: totalItems,
                   itemBuilder: (context, index) {
-                    final game = filteredGames[index];
+                    // Determine if this position should show an ad
+                    // Ad positions: 5, 11, 17, 23... (after every 5 games)
+                    final int adFrequency = 6; // 5 games + 1 ad
+                    final bool isAdPosition = (index + 1) % adFrequency == 0 && index > 0;
+
+                    if (isAdPosition) {
+                      // Display ad
+                      return const AdBannerWidget();
+                    }
+
+                    // Calculate the actual game index (accounting for ads before this position)
+                    final int adsBeforeThisIndex = index ~/ adFrequency;
+                    final int gameIndex = index - adsBeforeThisIndex;
+
+                    // Safety check
+                    if (gameIndex >= filteredGames.length) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final game = filteredGames[gameIndex];
                     final homeTeam = game['home_team'];
                     final awayTeam = game['away_team'];
                     final homeTeamShort = game['home_team_short'] ?? '';

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import 'games_page.dart';
+import '../utils/no_special_characters_formatter.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/widgets_theme.dart';
@@ -100,6 +101,7 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
                     TextFormField(
                       controller: userNameController,
                       maxLength: 20,
+                      inputFormatters: [NoSpecialCharactersFormatter()],
                       style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.userName,
@@ -171,6 +173,47 @@ class FirstConnectionPageState extends State<FirstConnectionPage> {
                         child: isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
                             : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontSize: logScale(context, 18), color:  Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Tutorial section with animated demo
+              HoopsCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.help_outline, color: AppColors.accentPrimary, size: 24),
+                        const SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context)!.howToUse,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            fontSize: logScale(context, 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      AppLocalizations.of(context)!.swipeToSelectTeam,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: logScale(context, 14),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Animated GIF demo
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/anim_demo.gif',
+                        fit: BoxFit.contain,
+                        width: double.infinity,
                       ),
                     ),
                   ],
