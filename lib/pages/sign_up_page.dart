@@ -7,7 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/utils.dart';
-import 'first_connection_page.dart';
+
 import 'sign_in_page.dart';
 import '../utils/no_special_characters_formatter.dart';
 import '../utils/error_sanitizer.dart';

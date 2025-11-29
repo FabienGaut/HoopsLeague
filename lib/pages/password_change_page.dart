@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
-import '../theme/app_colors.dart';
+
 import '../theme/utils.dart';
 import '../utils/no_special_characters_formatter.dart';
 import '../utils/error_sanitizer.dart';

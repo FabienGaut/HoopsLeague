@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/utils.dart';
-import '../utils/no_special_characters_formatter.dart';
+
 import '../utils/security_utils.dart';
 
 final supabase = Supabase.instance.client;
@@ -170,9 +170,11 @@ class _LeaguesPageState extends State<LeaguesPage> {
       debugPrint('=== ERREUR CRÉATION LEAGUE ===');
       debugPrint('Error: $e');
       debugPrint('Stack trace: $stackTrace');
-      messenger.showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context)!.errorMessage}: $e')),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('${t.errorMessage}: $e')),
+        );
+      }
     }
   }
 

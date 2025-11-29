@@ -4,7 +4,7 @@ import 'package:hoopsleague/pages/bucket_page.dart';
 import 'package:hoopsleague/pages/passed_bets.dart';
 import 'package:hoopsleague/pages/ranking_page.dart';
 import 'package:hoopsleague/pages/sign_in_page.dart';
-import 'package:hoopsleague/pages/game_stats_page.dart';
+
 import 'package:hoopsleague/services/clock.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

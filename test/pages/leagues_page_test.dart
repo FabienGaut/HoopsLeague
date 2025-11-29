@@ -1,25 +1,12 @@
-import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hoopsleague/pages/leagues_page.dart';
-import 'package:hoopsleague/l10n/app_localizations.dart';
+
+
+
 import '../helpers/test_helpers.dart';
 
 void main() {
-  Widget createTestApp(Widget child) {
-    return MaterialApp(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('fr', ''),
-      ],
-      home: child,
-    );
-  }
+
 
   group('LeaguesPage - Data Structure Tests', () {
     test('createLeague helper should create proper league structure', () {

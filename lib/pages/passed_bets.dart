@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
-import '../theme/app_colors.dart';
+
 import '../theme/utils.dart';
 import '../utils/security_utils.dart';
 
