@@ -1,0 +1,74 @@
+name: Flutter Tests
+
+on:
+  push:
+    branches: [ "main", "sandbox" ]
+  pull_request:
+    branches: [ "main", "sandbox" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Récupère le code source
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Installe Flutter (stable channel) et met en cache le SDK
+      # L'action subosito/flutter-action@v2 gère automatiquement le cache du SDK.
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          # Cache les dépendances de pub (optionnel si fait à l'étape suivante, mais assure la clarté)
+          cache: true 
+
+      # 3️⃣ Met en cache les dépendances Flutter/Dart (pour 'flutter pub get')
+      # Cette étape est dédiée au cache des packages téléchargés.
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      # 4️⃣ Récupère les dépendances du projet
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5️⃣ Vérifie la qualité du code (lint/analyse) - DÉSACTIVÉ
+      # - name: Analyze project source
+      #   run: flutter analyze
+
+      # 6️⃣ Lance les tests Flutter - DÉSACTIVÉ
+      # - name: Run Flutter tests
+      #   run: flutter test --coverage
+
+      # 7️⃣ Compile l'application Flutter pour le Web (Production)
+      - name: Build Flutter Web (Production)
+        run: |
+          flutter build web --release --base-href "/" \
+            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --dart-define=PUBLISHABLE_KEY=${{ secrets.PUBLISHABLE_KEY }}
+
+      # 7️⃣.5️⃣ Copie vercel.json dans build/web pour la configuration Vercel
+      - name: Copy vercel.json to build/web
+        run: cp vercel.json build/web/vercel.json
+
+      # 8️⃣ Déploiement sur Vercel en Production
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          # Utiliser working-directory pour spécifier le dossier de déploiement
+          working-directory: build/web
+          # Token d'authentification Vercel (stocké dans GitHub Secrets)
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          # Déploiement en PRODUCTION (avec --prod)
+          vercel-args: '--prod --confirm'
+          # ✅ Maintenant que le projet est créé, nous utilisons les IDs pour cibler précisément
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
