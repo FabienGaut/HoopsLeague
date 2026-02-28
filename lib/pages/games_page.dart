@@ -10,7 +10,6 @@ import '../l10n/app_localizations.dart';
 import 'package:hoopsleague/theme/utils.dart';
 import 'package:hoopsleague/theme/app_colors.dart';
 import 'package:hoopsleague/services/cache_service.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../utils/security_utils.dart';
 import '../widgets/flip_card_widget.dart';
 import '../widgets/game_stats_card.dart';
@@ -189,7 +188,6 @@ class _GamesPageState extends State<GamesPage> {
         emoji,
         style: TextStyle(
           fontSize: emojiSize,
-          fontFamily: GoogleFonts.notoColorEmoji().fontFamily,
         ),
       );
     }

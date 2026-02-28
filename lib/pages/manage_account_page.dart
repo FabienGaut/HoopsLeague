@@ -12,7 +12,6 @@ import 'app_state.dart';
 import 'package:provider/provider.dart';
 import '../utils/no_special_characters_formatter.dart';
 import '../utils/security_utils.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -292,7 +291,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                   ? Image.asset('assets/images/tank.png', width: emojiSize, height: emojiSize, fit: BoxFit.contain)
                   : Text(
                       emoji!,
-                      style: TextStyle(fontSize: emojiSize, fontFamily: GoogleFonts.notoColorEmoji().fontFamily),
+                      style: TextStyle(fontSize: emojiSize),
                     ),
             ),
           ),

@@ -65,6 +65,18 @@
   <script>
     window.flutterWebRenderer = "html";
     window.flutterServiceWorkerVersion = null;
+
+    // Force page reload when a new service worker takes control,
+    // so users automatically get the latest version after a deployment.
+    if ('serviceWorker' in navigator) {
+      var _refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!_refreshing) {
+          _refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
   </script>
 
   <script src="flutter_bootstrap.js" async></script>

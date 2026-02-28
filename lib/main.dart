@@ -10,7 +10,6 @@ import 'pages/auth_redirect_page.dart';
 import 'l10n/app_localizations.dart';
 import 'pages/app_state.dart';
 import 'package:provider/provider.dart';
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart';
 import 'services/clock.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'widgets/loading_screen.dart';
 
 Future<void> main() async {
-  tz.initializeTimeZones();
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kReleaseMode || kIsWeb) {
@@ -80,20 +78,11 @@ class MyApp extends StatelessWidget {
       return const GamesPreviewPage();
     }
 
-    try {
-      final userData = await Supabase.instance.client
-          .from('usersdata')
-          .select('user_name')
-          .eq('id', uid as Object)
-          .maybeSingle();
-
-      if (userData != null && userData['user_name'] != null && userData['user_name'].isNotEmpty) {
-        return MainNavigation(uid: uid!);
-      } else {
-        return FirstConnectionPage();
-      }
-    } catch (e) {
-      return const GamesPreviewPage();
+    final userData = appState.userData;
+    if (userData != null && userData['user_name'] != null && (userData['user_name'] as String).isNotEmpty) {
+      return MainNavigation(uid: uid!);
+    } else {
+      return FirstConnectionPage();
     }
   }
  @override
