@@ -37,6 +37,40 @@ Expected result:
 }
 ```
 
+### Step 3: Create the `request_join_league` function
+
+This function handles league membership requests. It either auto-joins the user (for the
+public "HoopsLeague" league) or places them in a pending queue for admin approval.
+
+#### How to deploy:
+
+1. Go to your Supabase Dashboard
+2. Navigate to **SQL Editor**
+3. Click **New Query**
+4. Copy and paste the contents of `supabase/functions/request_join_league.sql`
+5. Click **Run** to execute the SQL
+
+#### What it does:
+
+- Checks that the caller is authenticated via `auth.uid()`
+- Raises `Already a member` if the user is already in the league
+- Raises `Already pending` if the user has a pending request
+- Auto-joins the user (adds to `leagues.users_id` **and** `usersdata.leagues`) when the
+  league name is `hoopsleague` (case-insensitive)
+- Otherwise adds the user to `leagues.pending_users` for admin review
+- Returns `{"status": "joined"}` or `{"status": "pending"}`
+
+#### Verify it works:
+
+```sql
+-- Should return {"status": "pending"} for a normal league
+SELECT request_join_league('<your-league-uuid-here>');
+```
+
+> **Note:** PostgREST caches the database schema. After deploying this function, call
+> `NOTIFY pgrst, 'reload schema'` in the SQL Editor (or restart the PostgREST service) so
+> that the endpoint `/rest/v1/rpc/request_join_league` becomes available immediately.
+
 ## Additional Security Recommendations
 
 ### Optional: Add a database trigger (Server-side validation)
