@@ -250,7 +250,7 @@ class _SignInPageState extends State<SignInPage> {
 
                           try {
                             final redirectUrl = kIsWeb
-                                ? 'https://hoopsleague.fr/auth/reset'
+                                ? 'https://hoopsleague.fr'
                                 : 'io.hoopsleague.app://reset-password/';
 
                             await supabase.auth.resetPasswordForEmail(
