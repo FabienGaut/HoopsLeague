@@ -86,3 +86,14 @@ CREATE TABLE public.usersdata (
   leagues ARRAY,
   CONSTRAINT usersdata_pkey PRIMARY KEY (id)
 );
+
+-- ─── Scalability indexes (see supabase/migrations/20260313000000_add_scalability_indexes.sql) ───
+CREATE INDEX IF NOT EXISTS idx_bets_user_id ON public.bets (user_id);
+CREATE INDEX IF NOT EXISTS idx_bets_user_status_reward ON public.bets (user_id, status, reward_given);
+CREATE INDEX IF NOT EXISTS idx_bets_timestamp_desc ON public.bets (timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_leagues_users_id_gin ON public.leagues USING GIN (users_id);
+CREATE INDEX IF NOT EXISTS idx_leagues_pending_users_gin ON public.leagues USING GIN (pending_users);
+CREATE INDEX IF NOT EXISTS idx_usersdata_leagues_gin ON public.usersdata USING GIN (leagues);
+CREATE INDEX IF NOT EXISTS idx_gamesdata_status ON public.gamesdata (status);
+CREATE INDEX IF NOT EXISTS idx_gamesdata_start_time ON public.gamesdata (start_time);
+CREATE INDEX IF NOT EXISTS idx_teams_name ON public.teams (name);
