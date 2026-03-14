@@ -852,7 +852,7 @@ class _GamesPageState extends State<GamesPage> {
           child: Row(
             children: [
               Image.asset(
-                'assets/images/logo_black.png',
+                AppColors.logoAsset,
                 height: kToolbarHeight * 0.5,
               ),
               SizedBox(width: kToolbarHeight * 0.15),

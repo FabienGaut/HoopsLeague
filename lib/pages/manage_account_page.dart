@@ -323,7 +323,7 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
           fit: BoxFit.scaleDown,
           child: Row(
             children: [
-              Image.asset('assets/images/logo_black.png', height: kToolbarHeight * 0.5),
+              Image.asset(AppColors.logoAsset, height: kToolbarHeight * 0.5),
               SizedBox(width: kToolbarHeight * 0.15),
               Text(t.manageAccount, style: TextStyle(color: AppColors.textPrimary, fontSize: kToolbarHeight * 0.38, fontWeight: FontWeight.w600)),
             ],
@@ -393,6 +393,26 @@ class _ManageAccountPageState extends State<ManageAccountPage> {
                     _buildCard(
                       child: Column(
                         children: [
+                          _buildPreferenceRow(
+                            icon: Icons.dark_mode_outlined,
+                            label: 'Dark Mode',
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    context.watch<AppState>().isDarkMode ? 'On' : 'Off',
+                                    style: TextStyle(color: AppColors.textPrimary, fontSize: logScale(context, 14)),
+                                  ),
+                                ),
+                                Switch(
+                                  value: context.watch<AppState>().isDarkMode,
+                                  onChanged: (_) => context.read<AppState>().toggleDarkMode(),
+                                  activeTrackColor: AppColors.primaryBlue,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(color: AppColors.borderDark, height: 32),
                           _buildPreferenceRow(
                             icon: Icons.language_outlined,
                             label: t.languageLabel,

@@ -159,7 +159,7 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                Image.asset("assets/images/logo_black.png", width: logoSize, height: logoSize),
+                Image.asset(AppColors.logoAsset, width: logoSize, height: logoSize),
                 SizedBox(height: spacing),
 
                 AutoSizeText(

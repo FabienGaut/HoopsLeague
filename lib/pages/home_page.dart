@@ -32,7 +32,7 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset("assets/images/logo_black.png", width: logoSize, height: logoSize),
+                Image.asset(AppColors.logoAsset, width: logoSize, height: logoSize),
                 SizedBox(height: spacing),
 
                 // Slogan

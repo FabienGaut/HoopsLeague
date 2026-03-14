@@ -21,7 +21,7 @@ class GamesPreviewPage extends StatelessWidget {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/logo_black.png', height: 28),
+            Image.asset(AppColors.logoAsset, height: 28),
             const SizedBox(width: 8),
             Text(
               "HoopsLeague",

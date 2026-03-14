@@ -119,7 +119,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset("assets/images/logo_black.png", width: logoSize, height: logoSize),
+                Image.asset(AppColors.logoAsset, width: logoSize, height: logoSize),
                 SizedBox(height: spacing),
 
                 Container(

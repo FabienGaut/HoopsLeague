@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../utils/odds_converter.dart';
 import '../services/cache_service.dart';
+import '../theme/app_colors.dart';
 
 class AppState extends ChangeNotifier {
   Locale _locale = const Locale('fr');
   Map<String, dynamic>? _userData;
   StreamSubscription? _userDataSubscription;
   String? _currentUserId;
+  bool _isDarkMode = false;
 
   Locale get locale => _locale;
   Map<String, dynamic>? get userData => _userData;
   String get oddsFormat => (_userData?['oddsformat'] ?? 'FR') as String;
+  bool get isDarkMode => _isDarkMode;
+
+  Future<void> loadDarkMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    AppColors.isDarkMode = _isDarkMode;
+    notifyListeners();
+  }
+
+  Future<void> toggleDarkMode() async {
+    _isDarkMode = !_isDarkMode;
+    AppColors.isDarkMode = _isDarkMode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', _isDarkMode);
+    notifyListeners();
+  }
 
   void setLocale(String langCode) {
     _locale = Locale(langCode);

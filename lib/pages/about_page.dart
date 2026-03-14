@@ -50,7 +50,7 @@ class AboutPage extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 8),
-                    Image.asset('assets/images/logo_black.png', height: 80),
+                    Image.asset(AppColors.logoAsset, height: 80),
                     const SizedBox(height: 16),
                     Text(
                       'HoopsLeague',

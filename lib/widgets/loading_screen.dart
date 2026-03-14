@@ -14,7 +14,7 @@ class LoadingScreen extends StatelessWidget {
           children: [
             // Logo
             Image.asset(
-              'assets/images/logo_black.png',
+              AppColors.logoAsset,
               height: 80,
               width: 80,
             ),

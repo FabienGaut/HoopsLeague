@@ -439,7 +439,7 @@ class _TestPageState extends State<TestPage> {
           child: Row(
             children: [
               Image.asset(
-                'assets/images/logo_black.png',
+                AppColors.logoAsset,
                 height: kToolbarHeight * 0.6, // proportion de l’AppBar
               ),
               SizedBox(width: kToolbarHeight * 0.2),
@@ -466,7 +466,7 @@ class _TestPageState extends State<TestPage> {
                 child: Opacity(
                   opacity: 0.1, // 🔸 Transparence pour effet watermark
                   child: Image.asset(
-                    "assets/images/logo_black.png",
+                    AppColors.logoAsset,
                     width: 250,
                     height: 250,
                   ),

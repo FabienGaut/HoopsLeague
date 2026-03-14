@@ -586,7 +586,7 @@ class _LeaguesPageState extends State<LeaguesPage> {
           fit: BoxFit.scaleDown,
           child: Row(
             children: [
-              Image.asset('assets/images/logo_black.png', height: kToolbarHeight * 0.5),
+              Image.asset(AppColors.logoAsset, height: kToolbarHeight * 0.5),
               SizedBox(width: kToolbarHeight * 0.15),
               Text(
                 t.myLeagues,

@@ -38,6 +38,8 @@ Future<void> main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
+  await appState.loadDarkMode();
+
   final clock = Clock();
 
   String? uid;
