@@ -747,4 +747,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emojiDefault => 'Default team emoji';
+
+  @override
+  String get playoffBracket => 'Playoff Bracket';
+
+  @override
+  String get playoffBracketSubtitle => 'Pick your winners from Play-In to the Finals!';
+
+  @override
+  String get playIn => 'Play-In';
+
+  @override
+  String get firstRound => '1st Round';
+
+  @override
+  String get confSemis => 'Conf. Semis';
+
+  @override
+  String get confFinals => 'Conf. Finals';
+
+  @override
+  String get finals => 'Finals';
+
+  @override
+  String get champion => 'Champion';
+
+  @override
+  String get eastConference => 'East';
+
+  @override
+  String get westConference => 'West';
+
+  @override
+  String get selectWinner => 'Tap to select a winner';
+
+  @override
+  String get bracketReset => 'Bracket reset';
+
+  @override
+  String get playoffEvent => 'Playoffs';
+
+  @override
+  String get pickYourChampion => 'Pick your champion!';
 }

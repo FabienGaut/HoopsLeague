@@ -15,6 +15,7 @@ import '../widgets/flip_card_widget.dart';
 import '../widgets/game_stats_card.dart';
 import '../widgets/tutorial_overlay.dart';
 import 'app_state.dart';
+import 'playoff_bracket_page.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -544,6 +545,84 @@ class _GamesPageState extends State<GamesPage> {
     }
   }
 
+  Widget _buildPlayoffBanner(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PlayoffBracketPage()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1A3A5C), Color(0xFF5C1A1A)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.amber.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withValues(alpha: 0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Text('\u{1F3C6}', style: TextStyle(fontSize: 28)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.playoffEvent.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.amber,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    loc.playoffBracket,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    loc.pickYourChampion,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: Colors.white.withValues(alpha: 0.7),
+              size: 24,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildGamesList() {
     // Show loading state only on initial load (when list is empty and refreshing)
     if (_isRefreshingGames && _upcomingGames.isEmpty) {
@@ -586,15 +665,25 @@ class _GamesPageState extends State<GamesPage> {
       });
     }).toList();
 
+    // Show playoff banner between March 15 and June 30
+    final now = DateTime.now();
+    final showPlayoffBanner = (now.month == 3 && now.day >= 15) ||
+        (now.month >= 4 && now.month <= 6);
+    final bannerOffset = showPlayoffBanner ? 1 : 0;
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      itemCount: filteredGames.length,
+      itemCount: filteredGames.length + bannerOffset,
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: true,
       addSemanticIndexes: false,
       cacheExtent: 500,
       itemBuilder: (context, index) {
-        final game = filteredGames[index];
+        // First item: Playoff bracket banner (only during playoff season)
+        if (showPlayoffBanner && index == 0) {
+          return _buildPlayoffBanner(context);
+        }
+        final game = filteredGames[index - bannerOffset];
         final homeTeam = game['home_team'];
         final awayTeam = game['away_team'];
         final homeTeamShort = game['home_team_short'] ?? '';

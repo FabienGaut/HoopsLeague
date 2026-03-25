@@ -1522,6 +1522,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default team emoji'**
   String get emojiDefault;
+
+  /// No description provided for @playoffBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Playoff Bracket'**
+  String get playoffBracket;
+
+  /// No description provided for @playoffBracketSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your winners from Play-In to the Finals!'**
+  String get playoffBracketSubtitle;
+
+  /// No description provided for @playIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Play-In'**
+  String get playIn;
+
+  /// No description provided for @firstRound.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Round'**
+  String get firstRound;
+
+  /// No description provided for @confSemis.
+  ///
+  /// In en, this message translates to:
+  /// **'Conf. Semis'**
+  String get confSemis;
+
+  /// No description provided for @confFinals.
+  ///
+  /// In en, this message translates to:
+  /// **'Conf. Finals'**
+  String get confFinals;
+
+  /// No description provided for @finals.
+  ///
+  /// In en, this message translates to:
+  /// **'Finals'**
+  String get finals;
+
+  /// No description provided for @champion.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion'**
+  String get champion;
+
+  /// No description provided for @eastConference.
+  ///
+  /// In en, this message translates to:
+  /// **'East'**
+  String get eastConference;
+
+  /// No description provided for @westConference.
+  ///
+  /// In en, this message translates to:
+  /// **'West'**
+  String get westConference;
+
+  /// No description provided for @selectWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select a winner'**
+  String get selectWinner;
+
+  /// No description provided for @bracketReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Bracket reset'**
+  String get bracketReset;
+
+  /// No description provided for @playoffEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Playoffs'**
+  String get playoffEvent;
+
+  /// No description provided for @pickYourChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your champion!'**
+  String get pickYourChampion;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

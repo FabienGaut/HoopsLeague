@@ -8,6 +8,7 @@ workflows:
       groups:
         - google_play          # CM_GOOGLE_PLAY_JSON_KEY (service account JSON)
         - android_signing      # CM_KEYSTORE, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS, CM_KEY_PASSWORD
+        - supabase             # SUPABASE_URL, PUBLISHABLE_KEY
       vars:
         PACKAGE_NAME: com.hoopsleague.app
     triggering:
@@ -32,7 +33,9 @@ workflows:
         script: |
           flutter build appbundle \
             --release \
-            --build-number=$PROJECT_BUILD_NUMBER
+            --build-number=$PROJECT_BUILD_NUMBER \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=PUBLISHABLE_KEY=$PUBLISHABLE_KEY
     artifacts:
       - build/app/outputs/bundle/release/*.aab
       - build/app/outputs/mapping/release/mapping.txt
@@ -53,6 +56,7 @@ workflows:
       groups:
         - app_store_connect    # APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_PRIVATE_KEY
         - ios_signing          # CERTIFICATE_PRIVATE_KEY
+        - supabase             # SUPABASE_URL, PUBLISHABLE_KEY
       vars:
         BUNDLE_ID: com.hoopsleague.app
         XCODE_WORKSPACE: ios/Runner.xcworkspace
@@ -83,6 +87,8 @@ workflows:
           flutter build ipa \
             --release \
             --build-number=$PROJECT_BUILD_NUMBER \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=PUBLISHABLE_KEY=$PUBLISHABLE_KEY \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
