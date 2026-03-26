@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -198,7 +199,7 @@ class PlayoffBracketPage extends StatefulWidget {
   State<PlayoffBracketPage> createState() => _PlayoffBracketPageState();
 }
 
-class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
+class _PlayoffBracketPageState extends State<PlayoffBracketPage> with TickerProviderStateMixin {
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -215,12 +216,103 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   final List<String?> _defaultEastSeeds = List.filled(10, null);
   final List<String?> _defaultWestSeeds = List.filled(10, null);
 
+  // Animation controllers
+  late AnimationController _pulseController;
+  late AnimationController _championController;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _championScale;
+
+  // Bounce animation for winner selection
+  late AnimationController _bounceController;
+
+  /// Calculate bracket completion progress (0.0 to 1.0)
+  double get _progress {
+    int total = 0;
+    int filled = 0;
+
+    for (final conf in [_east, _west]) {
+      // Play-In winners: 3 per conference
+      total += 3;
+      if (conf.playIn7v8Winner != null) filled++;
+      if (conf.playIn9v10Winner != null) filled++;
+      if (conf.playInFinalWinner != null) filled++;
+
+      // Round 1 winners: 4 per conference
+      total += 4;
+      for (final w in conf.round1Winners) {
+        if (w != null) filled++;
+      }
+
+      // Semis winners: 2 per conference
+      total += 2;
+      for (final w in conf.semisWinners) {
+        if (w != null) filled++;
+      }
+
+      // Conf Finals winner: 1 per conference
+      total += 1;
+      if (conf.confFinalsWinner != null) filled++;
+    }
+
+    // Finals winner
+    total += 1;
+    if (_finalsWinner != null) filled++;
+
+    return total == 0 ? 0.0 : filled / total;
+  }
+
+  int get _filledCount {
+    int filled = 0;
+    for (final conf in [_east, _west]) {
+      if (conf.playIn7v8Winner != null) filled++;
+      if (conf.playIn9v10Winner != null) filled++;
+      if (conf.playInFinalWinner != null) filled++;
+      for (final w in conf.round1Winners) { if (w != null) filled++; }
+      for (final w in conf.semisWinners) { if (w != null) filled++; }
+      if (conf.confFinalsWinner != null) filled++;
+    }
+    if (_finalsWinner != null) filled++;
+    return filled;
+  }
+
+  int get _totalCount => 21; // 3+4+2+1 per conference (x2) + 1 finals
+
   @override
   void initState() {
     super.initState();
     _east = ConferenceBracket();
     _west = ConferenceBracket();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _championController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _championScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _championController, curve: Curves.elasticOut),
+    );
+
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
     _loadInitialData();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _championController.dispose();
+    _bounceController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadInitialData() async {
@@ -315,11 +407,16 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
         'finals_winner': _finalsWinner,
       };
 
-      await supabase.rpc('save_bracket', params: {
+      debugPrint('Saving bracket for league: ${_selectedLeague!['id']}');
+      debugPrint('Bracket data: $bracketData');
+
+      final result = await supabase.rpc('save_bracket', params: {
         'p_league_id': _selectedLeague!['id'],
         'p_bracket_data': bracketData,
         'p_season': _currentSeason,
       });
+
+      debugPrint('Save result: $result');
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -328,7 +425,9 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           duration: const Duration(seconds: 1),
         ),
       );
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('Error saving bracket: $e');
+      debugPrint('Stack: $stack');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
@@ -542,6 +641,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           break;
         case 'finals':
           _finalsWinner = team;
+          _championController.forward(from: 0);
           break;
       }
     });
@@ -878,6 +978,106 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
     );
   }
 
+  Widget _buildProgressBar() {
+    final progress = _progress;
+    final filled = _filledCount;
+    final total = _totalCount;
+    final percentage = (progress * 100).round();
+
+    Color progressColor;
+    String emoji;
+    if (percentage == 100) {
+      progressColor = AppColors.success;
+      emoji = '\u{1F3C6}';
+    } else if (percentage >= 75) {
+      progressColor = const Color(0xFF2383E2);
+      emoji = '\u{1F525}';
+    } else if (percentage >= 50) {
+      progressColor = AppColors.accentSecondary;
+      emoji = '\u{1F4AA}';
+    } else if (percentage >= 25) {
+      progressColor = AppColors.warning;
+      emoji = '\u{1F3C0}';
+    } else {
+      progressColor = AppColors.textTertiary;
+      emoji = '\u{1F449}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderDark),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$filled / $total picks',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                '$percentage%',
+                style: TextStyle(
+                  color: progressColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Stack(
+              children: [
+                // Background
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceHover,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                // Fill
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOutCubic,
+                  height: 8,
+                  width: (MediaQuery.of(context).size.width - 64) * progress.clamp(0.0, 1.0),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [progressColor, progressColor.withValues(alpha: 0.7)],
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                    boxShadow: [
+                      BoxShadow(
+                        color: progressColor.withValues(alpha: 0.4),
+                        blurRadius: 6,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBracketContent(AppLocalizations loc) {
     return SingleChildScrollView(
       child: Column(
@@ -893,6 +1093,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           _buildLeagueSelector(loc),
           if (_selectedLeague != null) ...[
             const SizedBox(height: 4),
+            _buildProgressBar(),
             _buildStatusBadge(loc),
             _buildActionButtons(loc),
           ],
@@ -913,48 +1114,97 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   Widget _buildChampionBanner(AppLocalizations loc) {
     final team = _finalsWinner!;
     final color = getTeamColor(team);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.8), color.withValues(alpha: 0.4)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber, width: 2),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('\u{1F3C6}', style: TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Column(
-              children: [
-                Text(
-                  loc.champion.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${getTeamEmoji(team)} ${getShortName(team)}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+
+    return ScaleTransition(
+      scale: _championScale,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.amber, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withValues(alpha: 0.3),
+              blurRadius: 16,
+              spreadRadius: 2,
             ),
+            BoxShadow(
+              color: color.withValues(alpha: 0.2),
+              blurRadius: 24,
+              spreadRadius: 4,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Stack(
+            children: [
+              // Background gradient
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      color.withValues(alpha: 0.9),
+                      color.withValues(alpha: 0.6),
+                      color.withValues(alpha: 0.9),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('\u{1F3C6}', style: TextStyle(fontSize: 32)),
+                    const SizedBox(width: 16),
+                    Flexible(
+                      child: Column(
+                        children: [
+                          Text(
+                            loc.champion.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${getTeamEmoji(team)} ${getShortName(team)}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Text('\u{1F3C6}', style: TextStyle(fontSize: 32)),
+                  ],
+                ),
+              ),
+              // Sparkle overlay
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _SparklePainter(
+                        progress: _pulseAnimation.value,
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          const Text('\u{1F3C6}', style: TextStyle(fontSize: 28)),
-        ],
+        ),
       ),
     );
   }
@@ -974,27 +1224,53 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
         children: [
           // Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: isEast ? const Color(0xFF1A3A5C) : const Color(0xFF5C1A1A),
+              gradient: LinearGradient(
+                colors: isEast
+                    ? [const Color(0xFF1A3A5C), const Color(0xFF244B6E)]
+                    : [const Color(0xFF5C1A1A), const Color(0xFF6E2424)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
-                Text(
-                  isEast ? '\u{1F7E6}' : '\u{1F7E5}',
-                  style: const TextStyle(fontSize: 18),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    isEast ? '\u{1F7E6}' : '\u{1F7E5}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   confName.toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
+                    letterSpacing: 2,
                   ),
                 ),
+                const Spacer(),
+                if (conf.confFinalsWinner != null) ...[
+                  Text(
+                    '${getTeamEmoji(conf.confFinalsWinner!)} ${getShortName(conf.confFinalsWinner!)}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('\u{1F451}', style: TextStyle(fontSize: 14)),
+                ],
               ],
             ),
           ),
@@ -1006,11 +1282,11 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildPlayInColumn(loc, conf),
-                _buildArrow(),
+                _buildConnector(),
                 _buildRound1Column(loc, conf),
-                _buildArrow(),
+                _buildConnector(),
                 _buildSemisColumn(loc, conf),
-                _buildArrow(),
+                _buildConnector(),
                 _buildConfFinalsColumn(loc, conf),
               ],
             ),
@@ -1020,28 +1296,42 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
     );
   }
 
-  Widget _buildArrow() {
+  Widget _buildConnector() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Column(
         children: [
           const SizedBox(height: 40),
-          Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
+          SizedBox(
+            width: 24,
+            height: 20,
+            child: CustomPaint(
+              painter: _BracketConnectorPainter(
+                color: AppColors.borderDark,
+                accentColor: AppColors.accentPrimary.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildStageLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHover,
+        borderRadius: BorderRadius.circular(6),
+      ),
       child: Text(
-        label,
+        label.toUpperCase(),
         style: TextStyle(
           color: AppColors.textSecondary,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
         ),
         textAlign: TextAlign.center,
       ),
@@ -1234,48 +1524,83 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
     final eastChamp = _east.confFinalsWinner;
     final westChamp = _west.confFinalsWinner;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.accentPrimary.withValues(alpha: 0.1),
-            AppColors.accentSecondary.withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.accentPrimary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '\u{1F3C6} ${loc.finals.toUpperCase()} \u{1F3C6}',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2,
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.accentPrimary.withValues(alpha: 0.06 + 0.04 * _pulseAnimation.value),
+                AppColors.accentSecondary.withValues(alpha: 0.06 + 0.04 * _pulseAnimation.value),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.accentPrimary.withValues(alpha: 0.2 + 0.15 * _pulseAnimation.value),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentPrimary.withValues(alpha: 0.05 + 0.03 * _pulseAnimation.value),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          if (eastChamp != null && westChamp != null)
-            _buildMatchupCard(
-              teamA: eastChamp,
-              teamB: westChamp,
-              winner: _finalsWinner,
-              onPickWinner: _isValidated ? null : (team) {
-                setState(() => _finalsWinner = team);
-              },
-              isFinale: true,
-            )
-          else
-            _buildEmptySlot(loc.pickYourChampion),
-        ],
-      ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('\u{1F3C6}', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Text(
+                    loc.finals.toUpperCase(),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 3,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('\u{1F3C6}', style: TextStyle(fontSize: 20)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'East vs West',
+                style: TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (eastChamp != null && westChamp != null)
+                Center(
+                  child: _buildMatchupCard(
+                    teamA: eastChamp,
+                    teamB: westChamp,
+                    winner: _finalsWinner,
+                    onPickWinner: _isValidated ? null : (team) {
+                      _onWinnerSelected(_east, 'finals', 0, team);
+                    },
+                    isFinale: true,
+                  ),
+                )
+              else
+                _buildEmptySlot(loc.pickYourChampion),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1318,36 +1643,77 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
     String? subtitle,
     bool isFinale = false,
   }) {
+    final hasWinner = winner != null;
+
     return Container(
-      width: 160,
+      width: 170,
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(10),
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isFinale
-              ? AppColors.accentPrimary.withValues(alpha: 0.4)
-              : AppColors.borderDark,
-          width: 1,
+              ? AppColors.accentPrimary.withValues(alpha: 0.5)
+              : hasWinner
+                  ? getTeamColor(winner).withValues(alpha: 0.3)
+                  : AppColors.borderDark,
+          width: isFinale ? 1.5 : 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: (hasWinner ? getTeamColor(winner) : Colors.black).withValues(alpha: hasWinner ? 0.08 : 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
+          // Team A row
           _buildTeamRow(
             team: teamA,
             seed: seedA,
             isSelected: winner != null && winner == teamA,
+            isEliminated: winner != null && winner != teamA,
             isTop: true,
+            hasSubtitle: subtitle != null,
             onTapTeam: onSelectTeamA,
             onTapWinner: (teamA != null && teamB != null && onPickWinner != null)
                 ? () => onPickWinner(teamA)
                 : null,
           ),
-          Container(height: 1, color: AppColors.borderDark),
+          // VS divider
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(height: 1, color: AppColors.borderDark),
+              if (teamA != null && teamB != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.borderDark, width: 0.5),
+                  ),
+                  child: Text(
+                    'VS',
+                    style: TextStyle(
+                      color: AppColors.textTertiary,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          // Team B row
           _buildTeamRow(
             team: teamB,
             seed: seedB,
             isSelected: winner != null && winner == teamB,
+            isEliminated: winner != null && winner != teamB,
             isTop: false,
+            hasSubtitle: subtitle != null,
             onTapTeam: onSelectTeamB,
             onTapWinner: (teamA != null && teamB != null && onPickWinner != null)
                 ? () => onPickWinner(teamB)
@@ -1356,14 +1722,14 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           if (subtitle != null)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 3),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
                 color: AppColors.surfaceHover,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(9)),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(11)),
               ),
               child: Text(
                 subtitle,
-                style: TextStyle(color: AppColors.textTertiary, fontSize: 10),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -1376,40 +1742,73 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
     String? team,
     int? seed,
     required bool isSelected,
+    bool isEliminated = false,
     required bool isTop,
+    bool hasSubtitle = false,
     VoidCallback? onTapTeam,
     VoidCallback? onTapWinner,
   }) {
     if (team == null) {
       return GestureDetector(
         onTap: onTapTeam,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(
-              top: isTop ? const Radius.circular(9) : Radius.zero,
-              bottom: !isTop ? const Radius.circular(9) : Radius.zero,
-            ),
-          ),
-          child: Row(
-            children: [
-              if (seed != null) ...[
-                _buildSeedBadge(seed),
-                const SizedBox(width: 6),
-              ],
-              Text(
-                '?',
-                style: TextStyle(
-                  color: AppColors.textTertiary,
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
+        child: AnimatedBuilder(
+          animation: _pulseAnimation,
+          builder: (context, child) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  top: isTop ? const Radius.circular(11) : Radius.zero,
+                  bottom: (!isTop && !hasSubtitle) ? const Radius.circular(11) : Radius.zero,
                 ),
+                color: onTapTeam != null
+                    ? AppColors.accentPrimary.withValues(alpha: 0.03 * _pulseAnimation.value)
+                    : Colors.transparent,
               ),
-              const Spacer(),
-              if (onTapTeam != null)
-                Icon(Icons.edit, color: AppColors.textTertiary, size: 14),
-            ],
-          ),
+              child: Row(
+                children: [
+                  if (seed != null) ...[
+                    _buildSeedBadge(seed),
+                    const SizedBox(width: 6),
+                  ],
+                  Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.textTertiary.withValues(alpha: 0.3 + 0.2 * _pulseAnimation.value),
+                        width: 1.5,
+                        strokeAlign: BorderSide.strokeAlignInside,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '?',
+                      style: TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      onTapTeam != null ? 'Tap to pick' : '...',
+                      style: TextStyle(
+                        color: AppColors.textTertiary.withValues(alpha: 0.6),
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                  if (onTapTeam != null)
+                    Icon(Icons.add_circle_outline, color: AppColors.textTertiary.withValues(alpha: 0.5), size: 16),
+                ],
+              ),
+            );
+          },
         ),
       );
     }
@@ -1422,82 +1821,145 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
       onTap: onTapWinner,
       onLongPress: onTapTeam,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.vertical(
-            top: isTop ? const Radius.circular(9) : Radius.zero,
-            bottom: !isTop ? const Radius.circular(9) : Radius.zero,
+            top: isTop ? const Radius.circular(11) : Radius.zero,
+            bottom: (!isTop && !hasSubtitle) ? const Radius.circular(11) : Radius.zero,
           ),
+          color: isSelected
+              ? color.withValues(alpha: 0.12)
+              : isEliminated
+                  ? AppColors.surfaceHover.withValues(alpha: 0.5)
+                  : Colors.transparent,
         ),
-        child: Row(
-          children: [
-            if (seed != null) ...[
-              _buildSeedBadge(seed),
-              const SizedBox(width: 4),
-            ],
-            Text(emoji, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                shortName,
-                style: TextStyle(
-                  color: isSelected ? color : AppColors.textPrimary,
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Team color accent stripe
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                width: 4,
+                decoration: BoxDecoration(
+                  color: isSelected ? color : Colors.transparent,
+                  borderRadius: BorderRadius.only(
+                    topLeft: isTop ? const Radius.circular(11) : Radius.zero,
+                    bottomLeft: (!isTop && !hasSubtitle) ? const Radius.circular(11) : Radius.zero,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            if (isSelected)
-              Icon(Icons.check_circle, color: color, size: 16),
-            if (onTapTeam != null && !isSelected)
-              Icon(Icons.swap_horiz, color: AppColors.textTertiary, size: 14),
-          ],
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: Row(
+                    children: [
+                      if (seed != null) ...[
+                        _buildSeedBadge(seed, isSelected: isSelected, color: color),
+                        const SizedBox(width: 4),
+                      ],
+                      Text(emoji, style: TextStyle(fontSize: 18, color: isEliminated ? Colors.grey : null)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          shortName,
+                          style: TextStyle(
+                            color: isSelected
+                                ? color
+                                : isEliminated
+                                    ? AppColors.textTertiary
+                                    : AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            decoration: isEliminated ? TextDecoration.lineThrough : null,
+                            decorationColor: AppColors.textTertiary.withValues(alpha: 0.5),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.check, color: color, size: 12),
+                        ),
+                      if (onTapTeam != null && !isSelected && !isEliminated)
+                        Icon(Icons.swap_horiz, color: AppColors.textTertiary.withValues(alpha: 0.4), size: 14),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSeedBadge(int seed) {
+  Widget _buildSeedBadge(int seed, {bool isSelected = false, Color? color}) {
     return Container(
       width: 20,
       height: 20,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.surfaceHover,
-        borderRadius: BorderRadius.circular(4),
+        color: isSelected && color != null
+            ? color.withValues(alpha: 0.2)
+            : AppColors.surfaceHover,
+        borderRadius: BorderRadius.circular(5),
       ),
       child: Text(
         '$seed',
         style: TextStyle(
-          color: AppColors.textTertiary,
+          color: isSelected && color != null ? color : AppColors.textTertiary,
           fontSize: 10,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 
   Widget _buildEmptySlot(String? label) {
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.borderDark, width: 1),
-      ),
-      child: Text(
-        label ?? '?',
-        style: TextStyle(
-          color: AppColors.textTertiary,
-          fontSize: 11,
-          fontStyle: FontStyle.italic,
-        ),
-        textAlign: TextAlign.center,
-      ),
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          width: 170,
+          padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 12),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceDark.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.borderDark.withValues(alpha: 0.4 + 0.3 * _pulseAnimation.value),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.sports_basketball,
+                color: AppColors.textTertiary.withValues(alpha: 0.2 + 0.15 * _pulseAnimation.value),
+                size: 20,
+              ),
+              if (label != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: AppColors.textTertiary.withValues(alpha: 0.6),
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -1726,4 +2188,75 @@ class _BracketCompareCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── Custom Painters ─────────────────────────────────────
+
+/// Draws bracket-style connector arrows between stages.
+class _BracketConnectorPainter extends CustomPainter {
+  final Color color;
+  final Color accentColor;
+
+  _BracketConnectorPainter({required this.color, required this.accentColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    final midY = size.height / 2;
+
+    // Horizontal line with arrow
+    path.moveTo(0, midY);
+    path.lineTo(size.width - 6, midY);
+
+    // Arrow head
+    path.moveTo(size.width - 10, midY - 4);
+    path.lineTo(size.width - 4, midY);
+    path.lineTo(size.width - 10, midY + 4);
+
+    canvas.drawPath(path, paint);
+
+    // Small accent dot at midpoint
+    final dotPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width / 2, midY), 1.5, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Draws sparkle/shimmer effect on champion banner.
+class _SparklePainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _SparklePainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rng = Random(42); // fixed seed for consistent sparkle positions
+    final paint = Paint()..color = color;
+
+    for (int i = 0; i < 12; i++) {
+      final x = rng.nextDouble() * size.width;
+      final y = rng.nextDouble() * size.height;
+      final sparkleProgress = ((progress + i * 0.08) % 1.0);
+      final opacity = (sin(sparkleProgress * pi) * 0.8).clamp(0.0, 1.0);
+      final radius = 1.0 + sparkleProgress * 1.5;
+
+      paint.color = color.withValues(alpha: opacity * 0.6);
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

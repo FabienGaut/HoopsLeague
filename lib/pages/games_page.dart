@@ -1024,7 +1024,11 @@ class _GamesPageState extends State<GamesPage> {
                 onTap: () {
                   MainNavigation.of(context)?.showBucketPage(
                     List<Map<String, dynamic>>.from(bets),
-                    onBetPlaced: () => _loadUpcomingGames(),
+                    onBetPlaced: () {
+                      bets.clear();
+                      betsNotifier.value = [];
+                      _loadUpcomingGames();
+                    },
                     onBetRemoved: (index) {
                       final updatedBets = [...betsNotifier.value];
                       if (index >= 0 && index < updatedBets.length) {
