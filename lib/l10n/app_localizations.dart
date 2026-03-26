@@ -1606,6 +1606,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick your champion!'**
   String get pickYourChampion;
+
+  /// No description provided for @saveBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveBracket;
+
+  /// No description provided for @bracketSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Bracket saved!'**
+  String get bracketSaved;
+
+  /// No description provided for @validateBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate bracket'**
+  String get validateBracket;
+
+  /// No description provided for @bracketValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Bracket validated! It is now locked.'**
+  String get bracketValidated;
+
+  /// No description provided for @bracketAlreadyValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'This bracket is already validated and cannot be modified.'**
+  String get bracketAlreadyValidated;
+
+  /// No description provided for @bracketIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your bracket before validating (pick a champion).'**
+  String get bracketIncomplete;
+
+  /// No description provided for @compareBrackets.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare brackets'**
+  String get compareBrackets;
+
+  /// No description provided for @leagueBrackets.
+  ///
+  /// In en, this message translates to:
+  /// **'League Brackets'**
+  String get leagueBrackets;
+
+  /// No description provided for @noBracketsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No validated brackets yet in this league.'**
+  String get noBracketsYet;
+
+  /// No description provided for @selectLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a league'**
+  String get selectLeague;
+
+  /// No description provided for @validatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated on'**
+  String get validatedOn;
+
+  /// No description provided for @bracketLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get bracketLocked;
+
+  /// No description provided for @bracketDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get bracketDraft;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

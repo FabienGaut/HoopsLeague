@@ -789,4 +789,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pickYourChampion => 'Choisissez votre champion !';
+
+  @override
+  String get saveBracket => 'Sauvegarder';
+
+  @override
+  String get bracketSaved => 'Bracket sauvegardé !';
+
+  @override
+  String get validateBracket => 'Valider le bracket';
+
+  @override
+  String get bracketValidated => 'Bracket validé ! Il est maintenant verrouillé.';
+
+  @override
+  String get bracketAlreadyValidated => 'Ce bracket est déjà validé et ne peut plus être modifié.';
+
+  @override
+  String get bracketIncomplete => 'Complétez votre bracket avant de valider (choisissez un champion).';
+
+  @override
+  String get compareBrackets => 'Comparer les brackets';
+
+  @override
+  String get leagueBrackets => 'Brackets de la ligue';
+
+  @override
+  String get noBracketsYet => 'Aucun bracket validé dans cette ligue pour le moment.';
+
+  @override
+  String get selectLeague => 'Sélectionner une ligue';
+
+  @override
+  String get validatedOn => 'Validé le';
+
+  @override
+  String get bracketLocked => 'Verrouillé';
+
+  @override
+  String get bracketDraft => 'Brouillon';
 }

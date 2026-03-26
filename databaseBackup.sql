@@ -86,3 +86,18 @@ CREATE TABLE public.usersdata (
   leagues ARRAY,
   CONSTRAINT usersdata_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.brackets (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  league_id uuid NOT NULL,
+  season text NOT NULL DEFAULT '2025-2026'::text,
+  bracket_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+  is_validated boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  validated_at timestamp with time zone,
+  CONSTRAINT brackets_pkey PRIMARY KEY (id),
+  CONSTRAINT brackets_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.usersdata(id) ON DELETE CASCADE,
+  CONSTRAINT brackets_league_id_fkey FOREIGN KEY (league_id) REFERENCES public.leagues(id) ON DELETE CASCADE,
+  CONSTRAINT brackets_unique_user_league_season UNIQUE (user_id, league_id, season)
+);

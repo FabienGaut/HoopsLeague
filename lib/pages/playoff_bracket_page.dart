@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 final supabase = Supabase.instance.client;
+const String _currentSeason = '2025-2026';
 
 /// All 30 NBA teams with their full names.
 const List<String> allNbaTeams = [
@@ -165,6 +167,26 @@ class ConferenceBracket {
   /// Teams qualified to Conf Finals = Semis winners.
   List<String> get confFinalsQualified =>
       semisWinners.where((t) => t != null).cast<String>().toList();
+
+  Map<String, dynamic> toJson() => {
+    'seeds': seeds,
+    'playIn7v8Winner': playIn7v8Winner,
+    'playIn9v10Winner': playIn9v10Winner,
+    'playInFinalWinner': playInFinalWinner,
+    'round1Winners': round1Winners,
+    'semisWinners': semisWinners,
+    'confFinalsWinner': confFinalsWinner,
+  };
+
+  void loadFromJson(Map<String, dynamic> json) {
+    seeds = List<String?>.from(json['seeds'] ?? List.filled(10, null));
+    playIn7v8Winner = json['playIn7v8Winner'] as String?;
+    playIn9v10Winner = json['playIn9v10Winner'] as String?;
+    playInFinalWinner = json['playInFinalWinner'] as String?;
+    round1Winners = List<String?>.from(json['round1Winners'] ?? List.filled(4, null));
+    semisWinners = List<String?>.from(json['semisWinners'] ?? List.filled(2, null));
+    confFinalsWinner = json['confFinalsWinner'] as String?;
+  }
 }
 
 class PlayoffBracketPage extends StatefulWidget {
@@ -178,17 +200,206 @@ class PlayoffBracketPage extends StatefulWidget {
 
 class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   bool _isLoading = true;
+  bool _isSaving = false;
 
   late ConferenceBracket _east;
   late ConferenceBracket _west;
   String? _finalsWinner;
+
+  // League & persistence state
+  List<Map<String, dynamic>> _userLeagues = [];
+  Map<String, dynamic>? _selectedLeague;
+  bool _isValidated = false;
+
+  // Default seeds from standings (used when no saved bracket)
+  final List<String?> _defaultEastSeeds = List.filled(10, null);
+  final List<String?> _defaultWestSeeds = List.filled(10, null);
 
   @override
   void initState() {
     super.initState();
     _east = ConferenceBracket();
     _west = ConferenceBracket();
-    _loadStandings();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    await _loadStandings();
+    await _loadUserLeagues();
+  }
+
+  Future<void> _loadUserLeagues() async {
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final userData = await supabase
+          .from('usersdata')
+          .select('leagues')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (userData == null || userData['leagues'] == null) return;
+
+      final leagueIds = List<String>.from(userData['leagues'] ?? []);
+      if (leagueIds.isEmpty) return;
+
+      final leagues = await supabase
+          .from('leagues')
+          .select('id, name')
+          .inFilter('id', leagueIds);
+
+      if (!mounted) return;
+      setState(() {
+        _userLeagues = List<Map<String, dynamic>>.from(leagues);
+        // Auto-select first league
+        if (_userLeagues.isNotEmpty) {
+          _selectedLeague = _userLeagues.first;
+          _loadBracketFromDb();
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading leagues: $e');
+    }
+  }
+
+  Future<void> _loadBracketFromDb() async {
+    if (_selectedLeague == null) return;
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final result = await supabase
+          .from('brackets')
+          .select()
+          .eq('user_id', userId)
+          .eq('league_id', _selectedLeague!['id'])
+          .eq('season', _currentSeason)
+          .maybeSingle();
+
+      if (!mounted) return;
+      if (result != null) {
+        final data = result['bracket_data'] as Map<String, dynamic>;
+        setState(() {
+          _east.loadFromJson(data['east'] as Map<String, dynamic>? ?? {});
+          _west.loadFromJson(data['west'] as Map<String, dynamic>? ?? {});
+          _finalsWinner = data['finals_winner'] as String?;
+          _isValidated = result['is_validated'] as bool? ?? false;
+        });
+      } else {
+        // No saved bracket: reset to default seeds
+        setState(() {
+          _east = ConferenceBracket();
+          _west = ConferenceBracket();
+          for (int i = 0; i < 10; i++) {
+            _east.seeds[i] = _defaultEastSeeds[i];
+            _west.seeds[i] = _defaultWestSeeds[i];
+          }
+          _finalsWinner = null;
+          _isValidated = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading bracket: $e');
+    }
+  }
+
+  Future<void> _saveBracket() async {
+    if (_selectedLeague == null || _isValidated || _isSaving) return;
+
+    setState(() => _isSaving = true);
+    try {
+      final bracketData = {
+        'east': _east.toJson(),
+        'west': _west.toJson(),
+        'finals_winner': _finalsWinner,
+      };
+
+      await supabase.rpc('save_bracket', params: {
+        'p_league_id': _selectedLeague!['id'],
+        'p_bracket_data': bracketData,
+        'p_season': _currentSeason,
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.bracketSaved),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _validateBracket() async {
+    if (_selectedLeague == null || _isValidated) return;
+    final loc = AppLocalizations.of(context)!;
+
+    if (_finalsWinner == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.bracketIncomplete)),
+      );
+      return;
+    }
+
+    // Save first, then validate
+    await _saveBracket();
+
+    try {
+      await supabase.rpc('validate_bracket', params: {
+        'p_league_id': _selectedLeague!['id'],
+        'p_season': _currentSeason,
+      });
+
+      if (!mounted) return;
+      setState(() => _isValidated = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.bracketValidated),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _showCompareBrackets() async {
+    if (_selectedLeague == null) return;
+
+    try {
+      final result = await supabase.rpc('get_league_brackets', params: {
+        'p_league_id': _selectedLeague!['id'],
+        'p_season': _currentSeason,
+      });
+
+      if (!mounted) return;
+      final brackets = result is List ? List<Map<String, dynamic>>.from(result) : <Map<String, dynamic>>[];
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => _LeagueBracketsPage(
+            leagueName: _selectedLeague!['name'] as String,
+            brackets: brackets,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   Future<void> _loadStandings() async {
@@ -223,11 +434,12 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
 
       if (!mounted) return;
       setState(() {
-        // Pre-fill seeds from standings
         for (int i = 0; i < eastTeams.length && i < 10; i++) {
+          _defaultEastSeeds[i] = eastTeams[i]['name'] as String;
           _east.seeds[i] = eastTeams[i]['name'] as String;
         }
         for (int i = 0; i < westTeams.length && i < 10; i++) {
+          _defaultWestSeeds[i] = westTeams[i]['name'] as String;
           _west.seeds[i] = westTeams[i]['name'] as String;
         }
         _isLoading = false;
@@ -287,6 +499,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   }
 
   void _onSeedChanged(ConferenceBracket conf, int seedIndex, String team) {
+    if (_isValidated) return;
     setState(() {
       conf.seeds[seedIndex] = team;
       _clearDownstream(conf, 'seed', seedIndex);
@@ -294,6 +507,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   }
 
   void _onWinnerSelected(ConferenceBracket conf, String stage, int index, String team) {
+    if (_isValidated) return;
     setState(() {
       switch (stage) {
         case 'playIn7v8':
@@ -334,6 +548,12 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   }
 
   void _resetBracket() {
+    if (_isValidated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.bracketAlreadyValidated)),
+      );
+      return;
+    }
     setState(() {
       // Keep seeds, reset all picks
       _east.playIn7v8Winner = null;
@@ -504,16 +724,157 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.textSecondary),
-            onPressed: _resetBracket,
-            tooltip: loc.bracketReset,
-          ),
+          if (!_isValidated)
+            IconButton(
+              icon: Icon(Icons.refresh, color: AppColors.textSecondary),
+              onPressed: _resetBracket,
+              tooltip: loc.bracketReset,
+            ),
+          if (_selectedLeague != null)
+            IconButton(
+              icon: Icon(Icons.people, color: AppColors.textSecondary),
+              onPressed: _showCompareBrackets,
+              tooltip: loc.compareBrackets,
+            ),
         ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: AppColors.accentPrimary))
           : _buildBracketContent(loc),
+    );
+  }
+
+  Widget _buildLeagueSelector(AppLocalizations loc) {
+    if (_userLeagues.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.borderDark),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedLeague?['id'] as String?,
+          isExpanded: true,
+          dropdownColor: AppColors.surfaceElevated,
+          hint: Text(loc.selectLeague, style: TextStyle(color: AppColors.textTertiary)),
+          icon: Icon(Icons.expand_more, color: AppColors.textSecondary),
+          items: _userLeagues.map((league) {
+            return DropdownMenuItem<String>(
+              value: league['id'] as String,
+              child: Text(
+                league['name'] as String,
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: (leagueId) {
+            final league = _userLeagues.firstWhere((l) => l['id'] == leagueId);
+            setState(() => _selectedLeague = league);
+            _loadBracketFromDb();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(AppLocalizations loc) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: _isValidated
+            ? Colors.green.withValues(alpha: 0.15)
+            : Colors.orange.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: _isValidated
+              ? Colors.green.withValues(alpha: 0.4)
+              : Colors.orange.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _isValidated ? Icons.lock : Icons.edit_note,
+            size: 16,
+            color: _isValidated ? Colors.green : Colors.orange,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _isValidated ? loc.bracketLocked : loc.bracketDraft,
+            style: TextStyle(
+              color: _isValidated ? Colors.green : Colors.orange,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(AppLocalizations loc) {
+    if (_selectedLeague == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Row(
+        children: [
+          if (!_isValidated) ...[
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _isSaving ? null : _saveBracket,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 16, height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.save, size: 18),
+                label: Text(loc.saveBracket),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentPrimary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _validateBracket,
+                icon: const Icon(Icons.check_circle, size: 18),
+                label: Text(loc.validateBracket, textAlign: TextAlign.center),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+          ],
+          if (_isValidated)
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _showCompareBrackets,
+                icon: const Icon(Icons.people, size: 18),
+                label: Text(loc.compareBrackets),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accentPrimary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -529,6 +890,12 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
               textAlign: TextAlign.center,
             ),
           ),
+          _buildLeagueSelector(loc),
+          if (_selectedLeague != null) ...[
+            const SizedBox(height: 4),
+            _buildStatusBadge(loc),
+            _buildActionButtons(loc),
+          ],
           if (_finalsWinner != null) _buildChampionBanner(loc),
           const SizedBox(height: 8),
           _buildConferenceSection(loc, loc.eastConference, _east, isEast: true),
@@ -854,7 +1221,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
             teamA: a,
             teamB: b,
             winner: conf.confFinalsWinner,
-            onPickWinner: (team) => _onWinnerSelected(conf, 'confFinals', 0, team),
+            onPickWinner: _isValidated ? null : (team) => _onWinnerSelected(conf, 'confFinals', 0, team),
           )
         else
           _buildEmptySlot(null),
@@ -900,7 +1267,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
               teamA: eastChamp,
               teamB: westChamp,
               winner: _finalsWinner,
-              onPickWinner: (team) {
+              onPickWinner: _isValidated ? null : (team) {
                 setState(() => _finalsWinner = team);
               },
               isFinale: true,
@@ -914,6 +1281,7 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
 
   // ─── Pick a seed (opens team picker with all 30 teams) ───
   Future<void> _pickSeed(ConferenceBracket conf, int seedIndex) async {
+    if (_isValidated) return;
     final picked = await _showTeamPicker();
     if (picked != null && mounted) {
       _onSeedChanged(conf, seedIndex, picked);
@@ -1112,6 +1480,232 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
           fontStyle: FontStyle.italic,
         ),
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+// ─── League Brackets Comparison Page ───────────────────────
+class _LeagueBracketsPage extends StatelessWidget {
+  final String leagueName;
+  final List<Map<String, dynamic>> brackets;
+
+  const _LeagueBracketsPage({
+    required this.leagueName,
+    required this.brackets,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
+      appBar: AppBar(
+        backgroundColor: AppColors.appBar,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          '${loc.leagueBrackets} - $leagueName',
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      body: brackets.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  loc.noBracketsYet,
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: brackets.length,
+              itemBuilder: (context, index) {
+                final bracket = brackets[index];
+                final userName = bracket['user_name'] as String? ?? '?';
+                final data = bracket['bracket_data'] as Map<String, dynamic>? ?? {};
+                final validatedAt = bracket['validated_at'] as String?;
+                final eastData = data['east'] as Map<String, dynamic>? ?? {};
+                final westData = data['west'] as Map<String, dynamic>? ?? {};
+                final finalsWinner = data['finals_winner'] as String?;
+
+                return _BracketCompareCard(
+                  userName: userName,
+                  eastData: eastData,
+                  westData: westData,
+                  finalsWinner: finalsWinner,
+                  validatedAt: validatedAt,
+                  loc: loc,
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _BracketCompareCard extends StatelessWidget {
+  final String userName;
+  final Map<String, dynamic> eastData;
+  final Map<String, dynamic> westData;
+  final String? finalsWinner;
+  final String? validatedAt;
+  final AppLocalizations loc;
+
+  const _BracketCompareCard({
+    required this.userName,
+    required this.eastData,
+    required this.westData,
+    required this.finalsWinner,
+    required this.validatedAt,
+    required this.loc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final eastConf = ConferenceBracket()..loadFromJson(eastData);
+    final westConf = ConferenceBracket()..loadFromJson(westData);
+
+    String formattedDate = '';
+    if (validatedAt != null) {
+      try {
+        final dt = DateTime.parse(validatedAt!).toLocal();
+        formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(dt);
+      } catch (_) {}
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: AppColors.cardDecoration(borderRadius: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // User header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.person, color: AppColors.accentPrimary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    userName,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (finalsWinner != null) ...[
+                  Text(
+                    '${getTeamEmoji(finalsWinner!)} ${getShortName(finalsWinner!)}',
+                    style: TextStyle(
+                      color: getTeamColor(finalsWinner!),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('\u{1F3C6}', style: TextStyle(fontSize: 16)),
+                ],
+              ],
+            ),
+          ),
+          // Bracket summary
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // East conference summary
+                _buildConfSummary(loc.eastConference, eastConf, true),
+                const SizedBox(height: 8),
+                // West conference summary
+                _buildConfSummary(loc.westConference, westConf, false),
+                if (formattedDate.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '${loc.validatedOn} $formattedDate',
+                    style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfSummary(String confName, ConferenceBracket conf, bool isEast) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              isEast ? '\u{1F7E6}' : '\u{1F7E5}',
+              style: const TextStyle(fontSize: 12),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              confName.toUpperCase(),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+              ),
+            ),
+            if (conf.confFinalsWinner != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                '${getTeamEmoji(conf.confFinalsWinner!)} ${getShortName(conf.confFinalsWinner!)}',
+                style: TextStyle(
+                  color: getTeamColor(conf.confFinalsWinner!),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Show round 1 winners as chips
+        Wrap(
+          spacing: 4,
+          runSpacing: 4,
+          children: [
+            for (final winner in conf.round1Winners)
+              if (winner != null) _buildTeamChip(winner),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamChip(String team) {
+    final color = getTeamColor(team);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '${getTeamEmoji(team)} ${getShortName(team)}',
+        style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w500),
       ),
     );
   }
