@@ -16,7 +16,9 @@ import 'legal_document_page.dart';
 final supabase = Supabase.instance.client;
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  final bool emailConfirmed;
+
+  const SignInPage({super.key, this.emailConfirmed = false});
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -328,7 +330,30 @@ class _SignInPageState extends State<SignInPage> {
                   'Connectez-vous pour continuer',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: logScale(context, 14)),
                 ),
-                SizedBox(height: spacing * 1.5),
+                SizedBox(height: spacing),
+
+                if (widget.emailConfirmed)
+                  Container(
+                    width: fieldWidth,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.tagGreen,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline, color: AppColors.success, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(context)!.emailConfirmationTitle,
+                            style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                SizedBox(height: spacing * 0.5),
 
                 // Form Card
                 Container(

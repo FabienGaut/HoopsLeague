@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../pages/first_connection_page.dart';
 import '../pages/password_reset_page.dart';
+import '../pages/sign_in_page.dart';
 import '../pages/main_navigation.dart';
 import '../theme/app_colors.dart';
 
@@ -27,6 +28,19 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
     final uri = Uri.base;
     final fragment = widget.initialFragment ?? uri.fragment;
 
+    // Check for error in URL params (e.g. expired or invalid token)
+    final error = uri.queryParameters['error'] ??
+        uri.queryParameters['error_description'];
+    if (error != null) {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const SignInPage(emailConfirmed: true),
+        ),
+      );
+      return;
+    }
+
     final completer = Completer<AuthChangeEvent>();
     StreamSubscription<AuthState>? subscription;
 
@@ -37,12 +51,14 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
       subscription?.cancel();
     });
 
+    bool sessionError = false;
     try {
       if (uri.queryParameters.containsKey('code') || fragment.isNotEmpty) {
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
       }
     } catch (e) {
       debugPrint('Error processing session from URL: $e');
+      sessionError = true;
     }
 
     AuthChangeEvent? event;
@@ -91,8 +107,12 @@ class _AuthRedirectPageState extends State<AuthRedirectPage> {
         );
       }
     } else {
+      // No session — likely opened on a different device.
+      // Email was confirmed server-side, redirect to sign-in.
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const FirstConnectionPage()),
+        MaterialPageRoute(
+          builder: (_) => SignInPage(emailConfirmed: sessionError),
+        ),
       );
     }
   }

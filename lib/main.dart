@@ -36,7 +36,13 @@ Future<void> main() async {
     throw Exception("Supabase URL ou PUBLISHABLE_KEY manquante (--dart-define)");
   }
 
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.implicit,
+    ),
+  );
 
   await appState.loadDarkMode();
 
