@@ -1282,7 +1282,24 @@ class _PlayoffBracketPageState extends State<PlayoffBracketPage> {
   // ─── Pick a seed (opens team picker with all 30 teams) ───
   Future<void> _pickSeed(ConferenceBracket conf, int seedIndex) async {
     if (_isValidated) return;
-    final picked = await _showTeamPicker();
+
+    // Collect teams already used in both conferences (except current slot)
+    final usedTeams = <String>{};
+    for (int i = 0; i < 10; i++) {
+      if (i != seedIndex && conf.seeds[i] != null) {
+        usedTeams.add(conf.seeds[i]!);
+      }
+    }
+    // Also exclude teams from the other conference
+    final otherConf = (conf == _east) ? _west : _east;
+    for (int i = 0; i < 10; i++) {
+      if (otherConf.seeds[i] != null) {
+        usedTeams.add(otherConf.seeds[i]!);
+      }
+    }
+
+    final available = allNbaTeams.where((t) => !usedTeams.contains(t)).toList();
+    final picked = await _showTeamPicker(allowedTeams: available);
     if (picked != null && mounted) {
       _onSeedChanged(conf, seedIndex, picked);
     }
