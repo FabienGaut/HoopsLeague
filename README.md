@@ -33,6 +33,8 @@ A mobile NBA betting application built with Flutter. Users can create accounts, 
 
 ### Backend Overview
 
+https://github.com/FabienGaut/Backend_hoopsleague
+
 The backend is built in Python and runs on a server that:
 
 - Collects data from multiple APIs and pushes it to Supabase
